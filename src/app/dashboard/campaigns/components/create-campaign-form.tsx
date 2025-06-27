@@ -1,3 +1,4 @@
+
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -5,6 +6,8 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import React from "react";
 import Image from "next/image";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +24,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Calendar, Send, X } from "lucide-react";
+import { Upload, Calendar as CalendarIcon, Send, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 const formSchema = z.object({
   campaignName: z.string().min(5, { message: "Nama kampanye minimal 5 karakter." }),
@@ -30,7 +35,17 @@ const formSchema = z.object({
   sendTime: z.enum(["now", "scheduled"], {
     required_error: "Anda perlu memilih waktu pengiriman.",
   }),
+  scheduledDate: z.date().optional(),
+}).refine(data => {
+    if (data.sendTime === 'scheduled' && !data.scheduledDate) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Silakan pilih tanggal penjadwalan.",
+    path: ["scheduledDate"],
 });
+
 
 export function CreateCampaignForm() {
     const [isSending, setIsSending] = React.useState(false);
@@ -45,8 +60,11 @@ export function CreateCampaignForm() {
             campaignName: "",
             message: "",
             sendTime: "now",
+            scheduledDate: undefined,
         },
     });
+
+    const watchSendTime = form.watch("sendTime");
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -89,7 +107,7 @@ export function CreateCampaignForm() {
                 setIsSending(false);
                 toast({
                     title: "Kampanye Terkirim!",
-                    description: `Kampanye "${values.campaignName}" telah berhasil dikirim.`,
+                    description: `Kampanye "${values.campaignName}" telah berhasil ${values.sendTime === 'scheduled' ? `dijadwalkan pada ${format(values.scheduledDate!, 'PPP')}` : 'dikirim'}.`,
                 });
                 form.reset();
                 handleRemoveImage();
@@ -204,7 +222,7 @@ export function CreateCampaignForm() {
                                             <RadioGroupItem value="scheduled" />
                                         </FormControl>
                                         <FormLabel className="font-normal flex items-center gap-2">
-                                            <Calendar className="w-4 h-4" /> Jadwalkan untuk Nanti (Fitur segera hadir)
+                                            <CalendarIcon className="w-4 h-4" /> Jadwalkan Kampanye
                                         </FormLabel>
                                     </FormItem>
                                 </RadioGroup>
@@ -213,6 +231,53 @@ export function CreateCampaignForm() {
                         </FormItem>
                     )}
                 />
+
+                {watchSendTime === "scheduled" && (
+                     <FormField
+                        control={form.control}
+                        name="scheduledDate"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                                <FormLabel>Tanggal Penjadwalan</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-[240px] pl-3 text-left font-normal",
+                                                    !field.value && "text-muted-foreground"
+                                                )}
+                                            >
+                                                {field.value ? (
+                                                    format(field.value, "PPP")
+                                                ) : (
+                                                    <span>Pilih tanggal</span>
+                                                )}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value}
+                                            onSelect={field.onChange}
+                                            disabled={(date) =>
+                                                date < new Date(new Date().setHours(0, 0, 0, 0))
+                                            }
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                                <FormDescription>
+                                    Kampanye Anda akan dikirim pada tanggal yang dipilih.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
 
                 {isSending && (
                     <div className="space-y-2">
