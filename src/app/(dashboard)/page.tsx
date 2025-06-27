@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowUpRight, Megaphone, Users, BarChart2 } from "lucide-react";
+import { Megaphone, Users, BarChart2, Calendar } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
