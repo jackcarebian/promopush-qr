@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import jsQR from "jsqr";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,58 +41,75 @@ export default function CashierPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const getCameraPermission = async () => {
+    if (!isScanning) {
+      return;
+    }
+
+    let animationFrameId: number;
+    let stream: MediaStream;
+
+    const tick = () => {
+      if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA && canvasRef.current) {
+        const canvas = canvasRef.current;
+        const video = videoRef.current;
+        const context = canvas.getContext("2d");
+
+        if (context) {
+          canvas.height = video.videoHeight;
+          canvas.width = video.videoWidth;
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          const qrCode = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+          });
+
+          if (qrCode) {
+            setCode(qrCode.data.toUpperCase());
+            setIsScanning(false);
+            toast({
+              title: "Kode QR Terdeteksi",
+              description: `Kode: ${qrCode.data}`,
+            });
+            return; // Stop the loop
+          }
+        }
+      }
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    const startCameraAndScan = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
         setHasCameraPermission(true);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
+        animationFrameId = requestAnimationFrame(tick);
       } catch (error) {
         console.error('Error accessing camera:', error);
         setHasCameraPermission(false);
+        toast({
+          variant: "destructive",
+          title: "Akses Kamera Gagal",
+          description: "Mohon izinkan akses kamera di pengaturan browser Anda.",
+        });
+        setIsScanning(false);
       }
     };
-    getCameraPermission();
-  }, []);
-  
-  const scanQRCode = useCallback(() => {
-    if (videoRef.current && videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      const context = canvas.getContext("2d");
 
-      if (context) {
-        canvas.height = video.videoHeight;
-        canvas.width = video.videoWidth;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        const qrCode = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: "dontInvert",
-        });
+    startCameraAndScan();
 
-        if (qrCode) {
-          setCode(qrCode.data.toUpperCase());
-          setIsScanning(false);
-          toast({
-              title: "Kode QR Terdeteksi",
-              description: `Kode: ${qrCode.data}`,
-          });
-        }
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
       }
-    }
-    if (isScanning) {
-        requestAnimationFrame(scanQRCode);
-    }
+      if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject = null;
+      }
+    };
   }, [isScanning, toast]);
 
-  useEffect(() => {
-    if (isScanning && hasCameraPermission) {
-      requestAnimationFrame(scanQRCode);
-    }
-  }, [isScanning, hasCameraPermission, scanQRCode]);
 
   const handleRedeem = () => {
     if (!code) {
@@ -185,7 +202,7 @@ export default function CashierPage() {
               />
               <Dialog open={isScanning} onOpenChange={setIsScanning}>
                 <DialogTrigger asChild>
-                   <Button variant="outline" size="icon" disabled={hasCameraPermission === false}>
+                   <Button variant="outline" size="icon">
                     <Camera className="w-4 h-4" />
                     <span className="sr-only">Pindai Kode QR</span>
                   </Button>
@@ -194,16 +211,14 @@ export default function CashierPage() {
                   <DialogHeader>
                     <DialogTitle>Pindai Kode QR</DialogTitle>
                   </DialogHeader>
-                  {hasCameraPermission === null && <p>Meminta izin kamera...</p>}
-                  {hasCameraPermission === false && (
+                  {hasCameraPermission === false ? (
                     <Alert variant="destructive">
                       <AlertTitle>Akses Kamera Diperlukan</AlertTitle>
                       <AlertDescription>
                         Silakan izinkan akses kamera di pengaturan browser Anda untuk menggunakan fitur ini.
                       </AlertDescription>
                     </Alert>
-                  )}
-                  {hasCameraPermission === true && (
+                  ) : (
                      <div className="relative">
                         <video ref={videoRef} className="w-full aspect-video rounded-md" autoPlay muted playsInline />
                         <canvas ref={canvasRef} className="hidden" />
