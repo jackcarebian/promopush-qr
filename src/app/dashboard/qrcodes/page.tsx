@@ -4,7 +4,7 @@ import { Check, QrCode, Store, ConciergeBell } from "lucide-react";
 
 const features = [
     { name: "Kode QR Outlet Unik", description: "Setiap outlet mendapatkan kode QR unik untuk pelacakan yang mudah." },
-    { name: "Kode QR Kasir", description: "Hasilkan kode QR spesifik untuk setiap kasir untuk pencatatan penebusan." },
+    { name: "Kode QR Kasir", description: "Hasilkan kode QR spesifik untuk setiap kasir untuk pencatatan redem." },
     { name: "Analitik Pendaftaran", description: "Lacak berapa banyak pendaftaran yang dihasilkan oleh setiap kode QR." },
     { name: "Manajemen Terpusat", description: "Kelola semua kode QR Anda dari satu dasbor yang mudah digunakan." },
     { name: "Tidak Terbatas", description: "Hasilkan kode QR sebanyak yang Anda butuhkan untuk outlet dan kasir Anda." },

@@ -32,7 +32,7 @@ const features = [
   },
   {
     icon: <ShoppingCart className="w-8 h-8 text-primary" />,
-    title: 'Pencatatan Penebusan',
+    title: 'Pencatatan Redem',
     description: 'Catat setiap kali promosi digunakan oleh pelanggan di titik penjualan.',
   },
 ];
