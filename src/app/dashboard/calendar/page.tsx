@@ -1,7 +1,12 @@
+
+"use client";
+
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Users } from "lucide-react";
 import Image from "next/image";
+import { Calendar } from "@/components/ui/calendar";
 
 const campaigns = [
   {
@@ -58,11 +63,29 @@ const campaigns = [
 
 
 export default function CalendarPage() {
+    const [date, setDate] = useState<Date | undefined>(new Date());
+
     return (
         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-headline font-bold">Kalender Kampanye</h1>
                 <p className="text-muted-foreground">Lihat jadwal kampanye yang akan datang dan yang sudah berakhir.</p>
+            </div>
+
+            <Card>
+                <CardContent className="p-2 md:p-4">
+                     <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={setDate}
+                        className="rounded-md w-full"
+                    />
+                </CardContent>
+            </Card>
+
+            <div>
+                <h2 className="text-2xl font-headline font-bold">Daftar Kampanye</h2>
+                 <p className="text-muted-foreground">Rincian kampanye yang akan datang dan yang sudah berakhir.</p>
             </div>
 
             <div className="grid gap-6">
