@@ -1,0 +1,112 @@
+"use client";
+
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Store, Download, X } from "lucide-react";
+import Image from "next/image";
+import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
+import { PrintableQrCard } from "./components/printable-qr-card";
+
+const outlets = [
+  {
+    id: "outlet-001",
+    name: "Toko Kopi Kenangan - Grand Indonesia",
+    location: "Jakarta Pusat",
+    qrData: "https://promopush.com/register?outlet=001",
+  },
+  {
+    id: "outlet-002",
+    name: "Salon Cantika - Mall Kelapa Gading",
+    location: "Jakarta Utara",
+    qrData: "https://promopush.com/register?outlet=002",
+  },
+  {
+    id: "outlet-003",
+    name: "Resto Padang Sederhana - Benhil",
+    location: "Jakarta Pusat",
+    qrData: "https://promopush.com/register?outlet=003",
+  },
+];
+
+type Outlet = typeof outlets[0];
+
+export default function QrOutletPage() {
+    const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
+
+    const handleDownloadClick = (outlet: Outlet) => {
+        setSelectedOutlet(outlet);
+    };
+
+    const handleCloseDialog = () => {
+        setSelectedOutlet(null);
+    };
+
+    return (
+        <div className="space-y-8">
+            <div>
+                <h1 className="text-3xl font-headline font-bold flex items-center gap-2">
+                    <Store className="w-8 h-8" />
+                    QR Outlet
+                </h1>
+                <p className="text-muted-foreground">Kelola dan unduh kode QR unik untuk setiap outlet terdaftar Anda.</p>
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Kode QR Outlet Terdaftar</CardTitle>
+                    <CardDescription>
+                        Berikut adalah daftar kode QR yang telah dibuat untuk masing-masing outlet. Unduh dan pasang di lokasi yang strategis.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {outlets.map((outlet) => (
+                        <Card key={outlet.id}>
+                            <CardHeader>
+                                <CardTitle className="text-lg">{outlet.name}</CardTitle>
+                                <CardDescription>{outlet.location}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex justify-center items-center p-4">
+                                <Image
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(outlet.qrData)}`}
+                                    alt={`QR Code for ${outlet.name}`}
+                                    width={200}
+                                    height={200}
+                                    data-ai-hint="qr code"
+                                    className="rounded-lg"
+                                />
+                            </CardContent>
+                            <CardFooter>
+                                <Button className="w-full" onClick={() => handleDownloadClick(outlet)}>
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Unduh QR
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    ))}
+                </CardContent>
+            </Card>
+
+            <Dialog open={!!selectedOutlet} onOpenChange={(isOpen) => !isOpen && handleCloseDialog()}>
+                <DialogContent className="max-w-md p-0 bg-transparent border-none shadow-none">
+                     {selectedOutlet && (
+                        <div className="relative group">
+                            <PrintableQrCard outlet={selectedOutlet} />
+                             <DialogClose asChild>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  className="absolute -top-3 -right-3 h-8 w-8 rounded-full z-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    <X className="h-4 w-4" />
+                                    <span className="sr-only">Tutup</span>
+                                </Button>
+                            </DialogClose>
+                        </div>
+                     )}
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+}

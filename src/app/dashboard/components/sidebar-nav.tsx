@@ -2,7 +2,7 @@
 
 import { SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
 import { Logo } from "@/components/logo";
-import { LayoutDashboard, Megaphone, Calendar, Users, Bot, ScanLine, QrCode, LogOut } from "lucide-react";
+import { LayoutDashboard, Megaphone, Calendar, Users, Bot, ScanLine, QrCode, LogOut, Store } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ const navItems = [
     { href: "/dashboard/customers", icon: Users, label: "Database Pelanggan" },
     { href: "/dashboard/marketing-ai", icon: Bot, label: "Tool Pemasaran AI" },
     { href: "/dashboard/cashier", icon: ScanLine, label: "Kasir" },
+    { href: "/dashboard/qr-outlet", icon: Store, label: "QR Outlet" },
     { href: "/dashboard/qrcodes", icon: QrCode, label: "Langganan QR" },
 ];
 
@@ -29,7 +30,7 @@ export function SidebarNav() {
                 <SidebarMenu>
                     {navItems.map((item) => (
                         <SidebarMenuItem key={item.href}>
-                            <SidebarMenuButton asChild isActive={pathname === item.href}>
+                            <SidebarMenuButton asChild isActive={pathname.startsWith(item.href)}>
                                 <Link href={item.href}>
                                     <item.icon className="h-4 w-4" />
                                     <span>{item.label}</span>
