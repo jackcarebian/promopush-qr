@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Store, Download, X } from "lucide-react";
+import { Store, Download, X, Printer } from "lucide-react";
 import Image from "next/image";
 import { Dialog, DialogContent, DialogClose, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PrintableQrCard } from "./components/printable-qr-card";
@@ -88,28 +89,42 @@ export default function QrOutletPage() {
             </Card>
 
             <Dialog open={!!selectedOutlet} onOpenChange={(isOpen) => !isOpen && handleCloseDialog()}>
-                <DialogContent className="max-w-md p-0 bg-transparent border-none shadow-none">
+                <DialogContent className="max-w-md p-0 bg-transparent border-none shadow-none printable-dialog">
                     <DialogHeader className="sr-only">
                       <DialogTitle>Tampilan Cetak Kode QR</DialogTitle>
                       <DialogDescription>
                           Tampilan siap cetak untuk kode QR outlet {selectedOutlet?.name}.
                       </DialogDescription>
                     </DialogHeader>
+
+                     <div className="absolute top-2 right-2 z-50 flex gap-2 no-print">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8 rounded-full bg-background"
+                            onClick={() => window.print()}
+                            title="Cetak atau Unduh sebagai PDF"
+                        >
+                            <Printer className="h-4 w-4" />
+                            <span className="sr-only">Cetak atau Unduh</span>
+                        </Button>
+                         <DialogClose asChild>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8 rounded-full"
+                              title="Tutup"
+                            >
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Tutup</span>
+                            </Button>
+                        </DialogClose>
+                    </div>
+
                      {selectedOutlet && (
-                        <div className="relative group">
-                            <PrintableQrCard outlet={selectedOutlet} />
-                             <DialogClose asChild>
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="icon"
-                                  className="absolute -top-3 -right-3 h-8 w-8 rounded-full z-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                    <X className="h-4 w-4" />
-                                    <span className="sr-only">Tutup</span>
-                                </Button>
-                            </DialogClose>
-                        </div>
+                        <PrintableQrCard outlet={selectedOutlet} />
                      )}
                 </DialogContent>
             </Dialog>

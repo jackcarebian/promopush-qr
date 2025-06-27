@@ -109,3 +109,23 @@
     content: '';
     @apply absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .printable-dialog {
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background-color: white !important;
+  }
+  .printable-card {
+    margin: auto;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
