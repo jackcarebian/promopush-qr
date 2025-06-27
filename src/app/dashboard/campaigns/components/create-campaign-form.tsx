@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import React from "react";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +21,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Calendar, Send } from "lucide-react";
+import { Upload, Calendar, Send, X } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   campaignName: z.string().min(5, { message: "Nama kampanye minimal 5 karakter." }),
@@ -33,6 +35,8 @@ const formSchema = z.object({
 export function CreateCampaignForm() {
     const [isSending, setIsSending] = React.useState(false);
     const [progress, setProgress] = React.useState(0);
+    const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
     const { toast } = useToast();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -43,6 +47,26 @@ export function CreateCampaignForm() {
             sendTime: "now",
         },
     });
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file && file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setImagePreview(null);
+        }
+    };
+    
+    const handleRemoveImage = () => {
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log("Starting campaign:", values);
@@ -68,6 +92,7 @@ export function CreateCampaignForm() {
                     description: `Kampanye "${values.campaignName}" telah berhasil dikirim.`,
                 });
                 form.reset();
+                handleRemoveImage();
             }, 500);
         }, 3000);
     }
@@ -92,16 +117,44 @@ export function CreateCampaignForm() {
                 <FormItem>
                     <FormLabel>Gambar Kampanye</FormLabel>
                     <FormControl>
-                        <div className="flex items-center justify-center w-full">
-                            <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-secondary hover:bg-muted">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                                    <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Klik untuk mengunggah</span> atau seret dan lepas</p>
-                                    <p className="text-xs text-muted-foreground">PNG, JPG atau GIF (MAX. 800x400px)</p>
-                                </div>
-                                <input id="dropzone-file" type="file" className="hidden" />
-                            </label>
-                        </div> 
+                        {imagePreview ? (
+                            <div className="relative w-full h-48 rounded-lg border overflow-hidden">
+                                <Image
+                                    src={imagePreview}
+                                    alt="Pratinjau gambar kampanye"
+                                    fill
+                                    style={{ objectFit: 'contain' }}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute top-2 right-2 h-7 w-7"
+                                    onClick={handleRemoveImage}
+                                >
+                                    <X className="h-4 w-4" />
+                                    <span className="sr-only">Hapus gambar</span>
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-center w-full">
+                                <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-secondary hover:bg-muted">
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Klik untuk mengunggah</span> atau seret dan lepas</p>
+                                        <p className="text-xs text-muted-foreground">PNG, JPG atau GIF (MAX. 800x400px)</p>
+                                    </div>
+                                    <input
+                                      id="dropzone-file"
+                                      type="file"
+                                      className="hidden"
+                                      ref={fileInputRef}
+                                      onChange={handleFileChange}
+                                      accept="image/png, image/jpeg, image/gif"
+                                    />
+                                </label>
+                            </div>
+                        )}
                     </FormControl>
                     <FormDescription>
                         Gambar yang menarik dapat meningkatkan keterlibatan.
