@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -17,13 +18,14 @@ interface CustomerData {
   name: string;
   email: string;
   interests: string[];
+  promoDate: string; // YYYY-MM-DD format
 }
 
 // Mock database of customers
 const customerDatabase: { [key: string]: CustomerData } = {
-  "PROMO123XYZ": { name: "Budi Santoso", email: "budi.s@example.com", interests: ["Elektronik", "Fashion"] },
-  "DISKON777": { name: "Siti Aminah", email: "siti.a@example.com", interests: ["Makanan & Minuman", "Kecantikan"] },
-  "SALE555": { name: "Agus Wijaya", email: "agus.w@example.com", interests: ["Perjalanan"] },
+  "PROMO123XYZ": { name: "Budi Santoso", email: "budi.s@example.com", interests: ["Elektronik", "Fashion"], promoDate: "2024-07-26" },
+  "DISKON777": { name: "Siti Aminah", email: "siti.a@example.com", interests: ["Makanan & Minuman", "Kecantikan"], promoDate: "TODAY" },
+  "SALE555": { name: "Agus Wijaya", email: "agus.w@example.com", interests: ["Perjalanan"], promoDate: "2025-01-01" },
 };
 
 export default function CashierPage() {
@@ -114,25 +116,46 @@ export default function CashierPage() {
 
     setIsLoading(true);
     setCustomerData(null);
+
     setTimeout(() => {
-      const customer = customerDatabase[code];
-      if (customer) {
-        toast({
-          title: "Berhasil Ditebus",
-          description: `Kode "${code}" telah berhasil ditebus.`,
-          action: <CheckCircle className="text-green-500" />
-        });
-        setCustomerData(customer);
-        setRedeemedCodes(prev => [...prev, code]);
-      } else {
+      const promoData = customerDatabase[code];
+
+      if (!promoData) {
         toast({
           variant: "destructive",
           title: "Gagal Menebus",
-          description: `Kode "${code}" tidak valid atau sudah digunakan.`,
+          description: `Kode "${code}" tidak valid.`,
           action: <XCircle className="text-white" />
         });
         setCustomerData(null);
+        setCode("");
+        setIsLoading(false);
+        return;
       }
+
+      const todayString = new Date().toLocaleDateString('en-CA');
+      const effectivePromoDate = promoData.promoDate === 'TODAY' ? todayString : promoData.promoDate;
+
+      if (effectivePromoDate !== todayString) {
+        toast({
+          variant: "destructive",
+          title: "Promo Tidak Berlaku",
+          description: `Promo dengan kode "${code}" tidak dapat digunakan hari ini.`,
+          action: <XCircle className="text-white" />
+        });
+        setCustomerData(null);
+        setCode("");
+        setIsLoading(false);
+        return;
+      }
+
+      toast({
+        title: "Berhasil Ditebus",
+        description: `Kode "${code}" telah berhasil ditebus.`,
+        action: <CheckCircle className="text-green-500" />
+      });
+      setCustomerData(promoData);
+      setRedeemedCodes(prev => [...prev, code]);
       setCode("");
       setIsLoading(false);
     }, 1500);
