@@ -32,6 +32,7 @@ export default function CashierPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [customerData, setCustomerData] = useState<CustomerData | null>(null);
+  const [redeemedCodes, setRedeemedCodes] = useState<string[]>([]);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -101,6 +102,16 @@ export default function CashierPage() {
       return;
     }
 
+    if (redeemedCodes.includes(code)) {
+      toast({
+        variant: "destructive",
+        title: "Kode Sudah Digunakan",
+        description: `Kode "${code}" sudah pernah ditebus.`,
+        action: <XCircle className="text-white" />
+      });
+      return;
+    }
+
     setIsLoading(true);
     setCustomerData(null);
     setTimeout(() => {
@@ -112,6 +123,7 @@ export default function CashierPage() {
           action: <CheckCircle className="text-green-500" />
         });
         setCustomerData(customer);
+        setRedeemedCodes(prev => [...prev, code]);
       } else {
         toast({
           variant: "destructive",
