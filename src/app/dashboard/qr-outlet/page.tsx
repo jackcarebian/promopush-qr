@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Store, Download, X } from "lucide-react";
 import Image from "next/image";
-import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogClose, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PrintableQrCard } from "./components/printable-qr-card";
 
 const outlets = [
@@ -89,6 +89,12 @@ export default function QrOutletPage() {
 
             <Dialog open={!!selectedOutlet} onOpenChange={(isOpen) => !isOpen && handleCloseDialog()}>
                 <DialogContent className="max-w-md p-0 bg-transparent border-none shadow-none">
+                    <DialogHeader className="sr-only">
+                      <DialogTitle>Tampilan Cetak Kode QR</DialogTitle>
+                      <DialogDescription>
+                          Tampilan siap cetak untuk kode QR outlet {selectedOutlet?.name}.
+                      </DialogDescription>
+                    </DialogHeader>
                      {selectedOutlet && (
                         <div className="relative group">
                             <PrintableQrCard outlet={selectedOutlet} />
