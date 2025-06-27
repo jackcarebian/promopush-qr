@@ -16,34 +16,34 @@ interface PrintableQrCardProps {
 export function PrintableQrCard({ outlet }: PrintableQrCardProps) {
     return (
         <Card className="w-full max-w-md mx-auto font-body text-center shadow-2xl printable-card" id="printable-area">
-            <CardContent className="p-8 space-y-6">
+            <CardContent className="p-8 space-y-8">
                 <div className="flex justify-center">
                     <Logo />
                 </div>
                 
-                <div className="space-y-2">
-                    <h2 className="text-2xl font-headline font-bold text-primary">
+                <div className="space-y-4">
+                    <h2 className="text-4xl font-headline font-bold text-primary">
                         Scan & Dapatkan Promo Spesial!
                     </h2>
-                    <p className="text-muted-foreground">
+                    <p className="text-lg text-muted-foreground">
                         Arahkan kamera Anda ke kode QR di bawah ini untuk mendaftar.
                     </p>
                 </div>
                 
                 <div className="flex justify-center p-4 bg-secondary rounded-lg">
                     <Image
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(outlet.qrData)}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(outlet.qrData)}`}
                         alt={`QR Code for ${outlet.name}`}
-                        width={250}
-                        height={250}
+                        width={300}
+                        height={300}
                         data-ai-hint="qr code"
                         className="rounded-md"
                     />
                 </div>
 
                 <div className="text-center">
-                    <p className="font-semibold text-lg">{outlet.name}</p>
-                    <p className="text-muted-foreground">{outlet.location}</p>
+                    <p className="font-semibold text-2xl">{outlet.name}</p>
+                    <p className="text-base text-muted-foreground">{outlet.location}</p>
                 </div>
 
                 <Alert>
