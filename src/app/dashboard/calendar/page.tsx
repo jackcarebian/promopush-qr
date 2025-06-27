@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Users } from "lucide-react";
@@ -61,9 +61,35 @@ const campaigns = [
   },
 ];
 
+// Helper to parse Indonesian dates like "1 Juli 2024"
+const parseDate = (dateStr: string): Date | null => {
+    const monthMap: { [key: string]: number } = {
+      "Januari": 0, "Februari": 1, "Maret": 2, "April": 3, "Mei": 4, "Juni": 5,
+      "Juli": 6, "Agustus": 7, "September": 8, "Oktober": 9, "November": 10, "Desember": 11
+    };
+    const parts = dateStr.split(" ");
+    if (parts.length !== 3) return null;
+    const day = parseInt(parts[0], 10);
+    const monthName = parts[1];
+    const year = parseInt(parts[2], 10);
+    const month = monthMap[monthName];
+
+    if (!isNaN(day) && month !== undefined && !isNaN(year)) {
+        return new Date(Date.UTC(year, month, day));
+    }
+    return null;
+}
+
 
 export default function CalendarPage() {
     const [date, setDate] = useState<Date | undefined>(new Date());
+
+    const upcomingCampaignDates = useMemo(() => {
+        return campaigns
+            .filter(campaign => campaign.status === 'Akan Datang')
+            .map(campaign => parseDate(campaign.date))
+            .filter((d): d is Date => d !== null);
+    }, []);
 
     return (
         <div className="space-y-8">
@@ -73,12 +99,16 @@ export default function CalendarPage() {
             </div>
 
             <Card>
-                <CardContent className="p-2 md:p-4">
+                <CardContent className="p-2 md:p-4 flex justify-center">
                      <Calendar
                         mode="single"
                         selected={date}
                         onSelect={setDate}
-                        className="rounded-md w-full"
+                        className="rounded-md"
+                        modifiers={{ campaign: upcomingCampaignDates }}
+                        modifiersClassNames={{
+                            campaign: 'day-campaign'
+                        }}
                     />
                 </CardContent>
             </Card>
