@@ -11,7 +11,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import idLocale from '@fullcalendar/core/locales/id';
-import { parse } from 'date-fns';
+import { parse, format } from 'date-fns';
 import { id as idLocaleDateFns } from 'date-fns/locale';
 
 
@@ -121,40 +121,29 @@ const campaigns = [
   }
 ];
 
-// Helper to parse Indonesian dates like "1 Juli 2024" using date-fns for reliability
-const parseDate = (dateStr: string): Date | null => {
-    try {
-        const parsedDate = parse(dateStr, 'd MMMM yyyy', new Date(), { locale: idLocaleDateFns });
-        if (isNaN(parsedDate.getTime())) {
-            console.error(`Gagal mem-parsing tanggal: ${dateStr}`);
-            return null;
-        }
-        // Use UTC date to avoid timezone issues with FullCalendar
-        return new Date(Date.UTC(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate()));
-    } catch (e) {
-        console.error(`Error saat mem-parsing tanggal: ${dateStr}`, e);
-        return null;
-    }
-}
-
-const formatDateForFullCalendar = (date: Date): string => {
-    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
-}
-
-
 export default function CalendarPage() {
 
     const calendarEvents = campaigns.map(campaign => {
-        const date = parseDate(campaign.date);
-        if (date) {
+        try {
+            const parsedDate = parse(campaign.date, 'd MMMM yyyy', new Date(), { locale: idLocaleDateFns });
+
+            if (isNaN(parsedDate.getTime())) {
+                console.error(`Gagal mem-parsing tanggal: ${campaign.date}`);
+                return null;
+            }
+            
+            const formattedDate = format(parsedDate, 'yyyy-MM-dd');
+
             return {
                 title: campaign.title,
-                start: formatDateForFullCalendar(date),
+                start: formattedDate,
                 allDay: true,
                 className: campaign.status === 'Berakhir' ? 'fc-event-past' : 'fc-event-upcoming'
             };
+        } catch (e) {
+             console.error(`Error saat mem-parsing tanggal: ${campaign.date}`, e);
+             return null;
         }
-        return null;
     }).filter((event): event is NonNullable<typeof event> => event !== null);
 
 
