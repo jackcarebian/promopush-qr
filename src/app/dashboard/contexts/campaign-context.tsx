@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
 // Define the shape of a single campaign
 export interface Campaign {
@@ -160,23 +160,34 @@ export const CampaignsProvider = ({ children }: { children: ReactNode }) => {
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
 
   const addCampaign = (campaign: Campaign) => {
-    setCampaigns((prevCampaigns) => 
-      [...prevCampaigns, campaign].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    );
+    setCampaigns((prevCampaigns) => [...prevCampaigns, campaign]);
   };
   
   const updateCampaign = (id: string, updatedCampaignData: Omit<Campaign, 'id'>) => {
-    setCampaigns(prev => prev.map(c => c.id === id ? { id, ...updatedCampaignData } : c)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    );
+    setCampaigns(prev => prev.map(c => (c.id === id ? { id, ...updatedCampaignData } : c)));
   };
 
   const deleteCampaign = (id: string) => {
     setCampaigns(prev => prev.filter(c => c.id !== id));
   };
+  
+  const processedCampaigns = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+
+    return campaigns
+      .map(campaign => {
+        // Dates in context are YYYY-MM-DD.
+        // Parsing with T00:00:00 avoids timezone issues and treats the date as local.
+        const campaignDate = new Date(`${campaign.date}T00:00:00`);
+        const status: "Akan Datang" | "Berakhir" = campaignDate < today ? "Berakhir" : "Akan Datang";
+        return { ...campaign, status };
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [campaigns]);
 
   return (
-    <CampaignContext.Provider value={{ campaigns, addCampaign, updateCampaign, deleteCampaign }}>
+    <CampaignContext.Provider value={{ campaigns: processedCampaigns, addCampaign, updateCampaign, deleteCampaign }}>
       {children}
     </CampaignContext.Provider>
   );
