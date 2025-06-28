@@ -40,6 +40,12 @@ const outlets = [
     location: "Online - Pusat di Magelang",
     qrData: "https://promopush.com/register?outlet=005",
   },
+  {
+    id: "outlet-006",
+    name: "Warung Mendoan Mbah Kakung",
+    location: "Banyumas, Jawa Tengah",
+    qrData: "https://promopush.com/register?outlet=006",
+  },
 ];
 
 type Outlet = typeof outlets[0];
