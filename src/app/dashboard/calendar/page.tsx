@@ -1,12 +1,16 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Users } from "lucide-react";
 import Image from "next/image";
-import { Calendar } from "@/components/ui/calendar";
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
+import interactionPlugin from '@fullcalendar/interaction';
+import idLocale from '@fullcalendar/core/locales/id';
 
 const campaigns = [
   {
@@ -75,22 +79,32 @@ const parseDate = (dateStr: string): Date | null => {
     const month = monthMap[monthName];
 
     if (!isNaN(day) && month !== undefined && !isNaN(year)) {
-        // Use local date for consistency with the calendar component
-        return new Date(year, month, day);
+        // Use UTC date to avoid timezone issues
+        return new Date(Date.UTC(year, month, day));
     }
     return null;
 }
 
+const formatDateForFullCalendar = (date: Date): string => {
+    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+}
+
 
 export default function CalendarPage() {
-    const [date, setDate] = useState<Date | undefined>(new Date());
 
-    const upcomingCampaignDates = useMemo(() => {
-        return campaigns
-            .filter(campaign => campaign.status === 'Akan Datang')
-            .map(campaign => parseDate(campaign.date))
-            .filter((d): d is Date => d !== null);
-    }, []);
+    const calendarEvents = campaigns.map(campaign => {
+        const date = parseDate(campaign.date);
+        if (date) {
+            return {
+                title: campaign.title,
+                start: formatDateForFullCalendar(date),
+                allDay: true,
+                className: campaign.status === 'Berakhir' ? 'fc-event-past' : 'fc-event-upcoming'
+            };
+        }
+        return null;
+    }).filter((event): event is NonNullable<typeof event> => event !== null);
+
 
     return (
         <div className="space-y-8">
@@ -100,16 +114,29 @@ export default function CalendarPage() {
             </div>
 
             <Card>
-                <CardContent className="p-0 flex justify-center">
-                     <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={setDate}
-                        className="rounded-md"
-                        modifiers={{ campaign: upcomingCampaignDates }}
-                        modifiersClassNames={{
-                            campaign: 'day-campaign'
+                <CardContent className="p-4">
+                     <FullCalendar
+                        plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+                        headerToolbar={{
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
                         }}
+                        buttonText={{
+                            today:    'hari ini',
+                            month:    'bulan',
+                            week:     'minggu',
+                            day:      'hari',
+                            list:     'daftar'
+                        }}
+                        initialView="dayGridMonth"
+                        events={calendarEvents}
+                        locale={idLocale}
+                        height="auto"
+                        contentHeight="auto"
+                        editable={true}
+                        selectable={true}
+                        dayMaxEvents={true}
                     />
                 </CardContent>
             </Card>
