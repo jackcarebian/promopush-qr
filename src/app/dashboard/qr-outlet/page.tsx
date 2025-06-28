@@ -12,7 +12,7 @@ import { PrintableQrCard } from "./components/printable-qr-card";
 const outlets = [
   {
     id: "outlet-001",
-    name: "Kedai Kopi Lereng Merapi",
+    name: "Kedai Kopi Anyar",
     location: "Boyolali, Jawa Tengah",
     qrData: "https://promopush.com/register?outlet=001",
   },
