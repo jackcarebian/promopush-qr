@@ -11,18 +11,18 @@ export default function QrCodesPage() {
                     <QrCode className="w-8 h-8" />
                     Langganan Kode QR
                 </h1>
-                <p className="text-muted-foreground">Pilih paket langganan yang paling sesuai untuk skala dan kebutuhan bisnis Anda.</p>
+                <p className="text-muted-foreground">Pilih paket yang paling sesuai untuk bisnis Anda.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch pt-8">
                 
-                {/* Paket Starter */}
+                {/* Paket Per Outlet */}
                 <Card className="flex flex-col">
                     <CardHeader className="items-center text-center">
                         <div className="p-4 bg-secondary rounded-full inline-block mb-4">
                            <Store className="w-10 h-10 text-primary" />
                         </div>
-                        <CardTitle className="font-headline">Starter</CardTitle>
+                        <CardTitle className="font-headline">Per Outlet</CardTitle>
                         <CardDescription>Ideal untuk bisnis dengan satu lokasi.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
@@ -47,18 +47,18 @@ export default function QrCodesPage() {
                         </ul>
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full" variant="outline">Pilih Paket Starter</Button>
+                        <Button className="w-full" variant="outline">Pilih Paket</Button>
                     </CardFooter>
                 </Card>
 
-                {/* Paket Bisnis (Paling Populer) */}
+                {/* Paket Multi Cabang (Paling Populer) */}
                 <Card className="border-2 border-primary shadow-lg relative flex flex-col">
                      <Badge variant="default" className="absolute -top-4 left-1/2 -translate-x-1/2">Paling Populer</Badge>
                     <CardHeader className="items-center text-center">
                         <div className="p-4 bg-secondary rounded-full inline-block mb-4">
                            <Building className="w-10 h-10 text-primary" />
                         </div>
-                        <CardTitle className="font-headline">Bisnis</CardTitle>
+                        <CardTitle className="font-headline">Multi Cabang Outlet</CardTitle>
                         <CardDescription>Sempurna untuk bisnis dengan beberapa cabang.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
@@ -87,7 +87,7 @@ export default function QrCodesPage() {
                         </ul>
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full">Pilih Paket Bisnis</Button>
+                        <Button className="w-full">Pilih Paket</Button>
                     </CardFooter>
                 </Card>
 
@@ -98,14 +98,14 @@ export default function QrCodesPage() {
                            <Globe className="w-10 h-10 text-primary" />
                         </div>
                         <CardTitle className="font-headline">Enterprise</CardTitle>
-                        <CardDescription>Solusi kustom untuk multi-bisnis dan skala besar.</CardDescription>
+                        <CardDescription>Multi-cabang & multi-bisnis.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
                         <div className="text-4xl font-bold text-center">Kustom</div>
                         <ul className="space-y-3 text-sm">
                             <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                                <span>Semua di paket <strong>Bisnis</strong></span>
+                                <span>Semua di paket <strong>Multi Cabang</strong></span>
                             </li>
                              <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
