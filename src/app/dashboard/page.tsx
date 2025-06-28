@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,8 +10,31 @@ import {
 } from "@/components/ui/card";
 import { Megaphone, Users, BarChart2, Calendar } from "lucide-react";
 import Link from "next/link";
+import { useCustomers } from "./contexts/customer-context";
+import { useCampaigns } from "./contexts/campaign-context";
+import { CustomerLoyaltyChart } from "./components/customer-loyalty-chart";
+import { InterestDistributionChart } from "./components/interest-distribution-chart";
+import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
+  const { customers } = useCustomers();
+  const { campaigns } = useCampaigns();
+  const [conversionRate, setConversionRate] = useState("0.0%");
+
+  const totalCustomers = customers.length;
+  const totalCampaigns = campaigns.length;
+  
+  useEffect(() => {
+    // Mock conversion rate calculation to avoid hydration errors
+    if (totalCampaigns > 0) {
+      const baseRate = 8.5;
+      const randomFactor = (Math.random() - 0.5) * 2; // -1 to 1
+      const finalRate = baseRate + randomFactor;
+      setConversionRate(`${finalRate.toFixed(1)}%`);
+    }
+  }, [totalCampaigns, totalCustomers]);
+
+
   return (
     <div className="space-y-8">
       <div>
@@ -26,38 +51,47 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
+            <div className="text-2xl font-bold">{totalCustomers.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              +5.2% dari bulan lalu
+              Total pelanggan terdaftar
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Kampanye Terkirim
+              Total Kampanye
             </CardTitle>
             <Megaphone className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">57</div>
-            <p className="text-xs text-muted-foreground">
-              +3 kampanye bulan ini
+            <div className="text-2xl font-bold">{totalCampaigns}</div>
+             <p className="text-xs text-muted-foreground">
+              {campaigns.filter(c => c.status === "Akan Datang").length} kampanye akan datang
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tingkat Konversi</CardTitle>
+            <CardTitle className="text-sm font-medium">Tingkat Konversi (Mock)</CardTitle>
             <BarChart2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12.5%</div>
+            <div className="text-2xl font-bold">{conversionRate}</div>
             <p className="text-xs text-muted-foreground">
-              +1.1% dari kampanye terakhir
+              Berdasarkan kampanye terakhir
             </p>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-7">
+        <div className="lg:col-span-4">
+            <CustomerLoyaltyChart />
+        </div>
+        <div className="lg:col-span-3">
+            <InterestDistributionChart />
+        </div>
       </div>
 
       <Card>
