@@ -21,7 +21,7 @@ interface CampaignContextType {
   addCampaign: (campaign: Campaign) => void;
 }
 
-// Initial data for campaigns
+// Initial data for campaigns, ensuring dates are in YYYY-MM-DD format
 const initialCampaigns: Campaign[] = [
     // 3 Past Campaigns
   {
