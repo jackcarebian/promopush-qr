@@ -1,14 +1,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, QrCode, Store, ConciergeBell } from "lucide-react";
-
-const features = [
-    { name: "Kode QR Outlet Unik", description: "Setiap outlet mendapatkan kode QR unik untuk pelacakan yang mudah." },
-    { name: "Kode QR Kasir", description: "Hasilkan kode QR spesifik untuk setiap kasir untuk pencatatan redem." },
-    { name: "Analitik Pendaftaran", description: "Lacak berapa banyak pendaftaran yang dihasilkan oleh setiap kode QR." },
-    { name: "Manajemen Terpusat", description: "Kelola semua kode QR Anda dari satu dasbor yang mudah digunakan." },
-    { name: "Tidak Terbatas", description: "Hasilkan kode QR sebanyak yang Anda butuhkan untuk outlet dan kasir Anda." },
-]
+import { Badge } from "@/components/ui/badge";
+import { Check, QrCode, Store, Building, Globe } from "lucide-react";
 
 export default function QrCodesPage() {
     return (
@@ -18,62 +11,125 @@ export default function QrCodesPage() {
                     <QrCode className="w-8 h-8" />
                     Langganan Kode QR
                 </h1>
-                <p className="text-muted-foreground">Perluas jangkauan Anda dengan kode QR yang dapat disesuaikan untuk outlet dan kasir Anda.</p>
+                <p className="text-muted-foreground">Pilih paket langganan yang paling sesuai untuk skala dan kebutuhan bisnis Anda.</p>
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-8">
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle className="font-headline">Tingkatkan Akuisisi Pelanggan Anda</CardTitle>
-                        <CardDescription>Layanan langganan kode QR kami dirancang untuk membantu Anda mengubah pengunjung fisik menjadi pelanggan digital dengan mudah. Tempatkan kode QR di outlet Anda, di meja kasir, atau bahkan pada materi pemasaran untuk mendorong pendaftaran instan ke program loyalitas dan promosi Anda.</CardDescription>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch pt-8">
+                
+                {/* Paket Starter */}
+                <Card className="flex flex-col">
+                    <CardHeader className="items-center text-center">
+                        <div className="p-4 bg-secondary rounded-full inline-block mb-4">
+                           <Store className="w-10 h-10 text-primary" />
+                        </div>
+                        <CardTitle className="font-headline">Starter</CardTitle>
+                        <CardDescription>Ideal untuk bisnis dengan satu lokasi.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <h3 className="font-semibold font-headline">Fitur Utama:</h3>
-                        <ul className="space-y-3">
-                            {features.map((feature, index) => (
-                                <li key={index} className="flex items-start gap-3">
-                                    <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                                    <div>
-                                        <p className="font-medium">{feature.name}</p>
-                                        <p className="text-sm text-muted-foreground">{feature.description}</p>
-                                    </div>
-                                </li>
-                            ))}
+                    <CardContent className="flex-grow space-y-4">
+                        <div className="text-4xl font-bold text-center">Rp 99.000<span className="text-base font-normal text-muted-foreground">/bln</span></div>
+                         <ul className="space-y-3 text-sm">
+                            <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span><strong>1</strong> Kode QR Outlet Unik</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span><strong>5</strong> Kode QR Kasir</span>
+                            </li>
+                             <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Analitik Pendaftaran Dasar</span>
+                            </li>
+                             <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Manajemen Terpusat</span>
+                            </li>
                         </ul>
                     </CardContent>
+                    <CardFooter>
+                        <Button className="w-full" variant="outline">Pilih Paket Starter</Button>
+                    </CardFooter>
                 </Card>
 
-                <div className="space-y-8">
-                    <Card className="bg-primary text-primary-foreground">
-                        <CardHeader>
-                            <CardTitle className="font-headline">Siap untuk Memulai?</CardTitle>
-                            <CardDescription className="text-primary-foreground/80">Pilih paket yang paling sesuai untuk bisnis Anda.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-4xl font-bold">Mulai dari Rp 99.000/bln</div>
-                            <p className="text-sm text-primary-foreground/80 mt-1">per outlet</p>
-                        </CardContent>
-                        <CardFooter>
-                            <Button variant="secondary" className="w-full">Hubungi Penjualan</Button>
-                        </CardFooter>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline text-lg">Contoh Penggunaan</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 text-sm">
-                            <div className="flex items-center gap-3">
-                                <Store className="w-5 h-5 text-muted-foreground" />
-                                <p>Tempatkan QR di pintu masuk <span className="font-semibold">Outlet</span> untuk menangkap pelanggan baru.</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <ConciergeBell className="w-5 h-5 text-muted-foreground" />
-                                <p>Letakkan QR <span className="font-semibold">Kasir</span> di meja untuk promo saat pembayaran.</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                {/* Paket Bisnis (Paling Populer) */}
+                <Card className="border-2 border-primary shadow-lg relative flex flex-col">
+                     <Badge variant="default" className="absolute -top-4 left-1/2 -translate-x-1/2">Paling Populer</Badge>
+                    <CardHeader className="items-center text-center">
+                        <div className="p-4 bg-secondary rounded-full inline-block mb-4">
+                           <Building className="w-10 h-10 text-primary" />
+                        </div>
+                        <CardTitle className="font-headline">Bisnis</CardTitle>
+                        <CardDescription>Sempurna untuk bisnis dengan beberapa cabang.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow space-y-4">
+                       <div className="text-4xl font-bold text-center">Rp 499.000<span className="text-base font-normal text-muted-foreground">/bln</span></div>
+                        <ul className="space-y-3 text-sm">
+                            <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Hingga <strong>10</strong> Kode QR Outlet</span>
+                            </li>
+                             <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Kode QR Kasir <strong>Tak Terbatas</strong></span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Analitik Lanjutan per Outlet</span>
+                            </li>
+                             <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Manajemen Terpusat</span>
+                            </li>
+                             <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Dukungan Prioritas</span>
+                            </li>
+                        </ul>
+                    </CardContent>
+                    <CardFooter>
+                        <Button className="w-full">Pilih Paket Bisnis</Button>
+                    </CardFooter>
+                </Card>
+
+                {/* Paket Enterprise */}
+                <Card className="flex flex-col">
+                    <CardHeader className="items-center text-center">
+                        <div className="p-4 bg-secondary rounded-full inline-block mb-4">
+                           <Globe className="w-10 h-10 text-primary" />
+                        </div>
+                        <CardTitle className="font-headline">Enterprise</CardTitle>
+                        <CardDescription>Solusi kustom untuk multi-bisnis dan skala besar.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow space-y-4">
+                        <div className="text-4xl font-bold text-center">Kustom</div>
+                        <ul className="space-y-3 text-sm">
+                            <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Semua di paket <strong>Bisnis</strong></span>
+                            </li>
+                             <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Outlet & Bisnis Tak Terbatas</span>
+                            </li>
+                             <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Single Sign-On (SSO)</span>
+                            </li>
+                             <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Manajer Akun Khusus</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                                <span>Integrasi API</span>
+                            </li>
+                        </ul>
+                    </CardContent>
+                    <CardFooter>
+                        <Button variant="outline" className="w-full">Hubungi Penjualan</Button>
+                    </CardFooter>
+                </Card>
             </div>
         </div>
-    )
+    );
 }
