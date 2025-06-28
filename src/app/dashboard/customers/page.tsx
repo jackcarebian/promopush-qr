@@ -1,3 +1,7 @@
+
+"use client";
+
+import React from "react";
 import {
     Table,
     TableBody,
@@ -9,56 +13,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, PlusCircle } from "lucide-react";
+import { Download } from "lucide-react";
+import { useCustomers } from "../contexts/customer-context";
+import { interestCategories } from "../campaigns/data/categories";
   
-const customers = [
-    {
-      name: "Budi Santoso",
-      email: "budi.s@example.com",
-      whatsapp: "081234567890",
-      interests: ["Elektronik", "Fashion"],
-      registeredAt: "2024-07-10 09:15",
-    },
-    {
-      name: "Siti Aminah",
-      email: "siti.a@example.com",
-      whatsapp: "082345678901",
-      interests: ["Makanan & Minuman", "Kecantikan"],
-      registeredAt: "2024-07-09 14:30",
-    },
-    {
-      name: "Agus Wijaya",
-      email: "agus.w@example.com",
-      whatsapp: "083456789012",
-      interests: ["Perjalanan"],
-      registeredAt: "2024-07-09 11:05",
-    },
-    {
-      name: "Dewi Lestari",
-      email: "dewi.l@example.com",
-      whatsapp: "084567890123",
-      interests: ["Fashion", "Kecantikan"],
-      registeredAt: "2024-07-08 20:00",
-    },
-    {
-      name: "Eko Prasetyo",
-      email: "eko.p@example.com",
-      whatsapp: "085678901234",
-      interests: ["Elektronik"],
-      registeredAt: "2024-07-08 16:45",
-    },
-    {
-      name: "Fitri Handayani",
-      email: "fitri.h@example.com",
-      whatsapp: "086789012345",
-      interests: ["Makanan & Minuman"],
-      registeredAt: "2024-07-07 18:22",
-    },
-];
-
-type Customer = typeof customers[0];
+// Helper to create a flat map of all possible interests for easy lookup
+const allInterests = Object.values(interestCategories).flatMap(category => category.interests);
+const interestLabelMap = new Map(allInterests.map(interest => [interest.id, interest.label]));
 
 export default function CustomersPage() {
+    const { customers } = useCustomers();
+
     return (
         <div className="space-y-8">
             <div>
@@ -92,14 +57,16 @@ export default function CustomersPage() {
                         </TableHeader>
                         <TableBody>
                             {customers.map((customer) => (
-                            <TableRow key={customer.email}>
+                            <TableRow key={customer.id}>
                                 <TableCell className="font-medium">{customer.name}</TableCell>
                                 <TableCell>{customer.email}</TableCell>
                                 <TableCell>{customer.whatsapp}</TableCell>
                                 <TableCell>
                                     <div className="flex flex-wrap gap-1">
-                                        {customer.interests.map((interest) => (
-                                            <Badge key={interest} variant="secondary">{interest}</Badge>
+                                        {customer.interests.map((interestId) => (
+                                            <Badge key={interestId} variant="secondary">
+                                                {interestLabelMap.get(interestId) || interestId}
+                                            </Badge>
                                         ))}
                                     </div>
                                 </TableCell>

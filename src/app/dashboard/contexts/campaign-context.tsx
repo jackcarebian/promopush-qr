@@ -27,7 +27,7 @@ interface CampaignContextType {
 
 // Initial data for campaigns, ensuring dates are in YYYY-MM-DD format
 const initialCampaigns: Campaign[] = [
-    // 3 Past Campaigns
+  // 3 Past Campaigns
   {
     id: 'campaign-1',
     title: "Diskon Kilat Ramadhan",
