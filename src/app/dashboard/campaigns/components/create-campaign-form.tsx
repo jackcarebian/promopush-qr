@@ -120,6 +120,7 @@ export function CreateCampaignForm() {
             
             // This is the new campaign that will be added to the shared state
             const newCampaign: Campaign = {
+                id: `campaign-${new Date().getTime()}`, // Generate unique ID
                 title: values.campaignName,
                 date: format(targetDate, "yyyy-MM-dd"), // Standard format
                 status: "Akan Datang",
@@ -135,14 +136,13 @@ export function CreateCampaignForm() {
 
             toast({
                 title: "Kampanye Berhasil Dibuat!",
-                description: `Kampanye "${values.campaignName}" telah berhasil dibuat dan dijadwalkan.`,
+                description: `Kampanye "${values.campaignName}" telah berhasil dibuat dan ditambahkan ke daftar.`,
             });
             
-            // Reset form and navigate to calendar page to see the result
+            // Reset form and state
             form.reset();
             handleRemoveImage();
             setIsSubmitting(false);
-            router.push('/dashboard/calendar'); 
         }, 1500);
     }
 

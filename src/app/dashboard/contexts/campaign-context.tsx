@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 // Define the shape of a single campaign
 export interface Campaign {
+  id: string; // Added for unique identification
   title: string;
   date: string; // YYYY-MM-DD format
   status: "Akan Datang" | "Berakhir";
@@ -19,12 +20,15 @@ export interface Campaign {
 interface CampaignContextType {
   campaigns: Campaign[];
   addCampaign: (campaign: Campaign) => void;
+  updateCampaign: (id: string, updatedCampaign: Omit<Campaign, 'id'>) => void;
+  deleteCampaign: (id: string) => void;
 }
 
 // Initial data for campaigns, ensuring dates are in YYYY-MM-DD format
 const initialCampaigns: Campaign[] = [
     // 3 Past Campaigns
   {
+    id: 'campaign-1',
     title: "Diskon Kilat Ramadhan",
     date: "2024-04-05",
     status: "Berakhir",
@@ -35,6 +39,7 @@ const initialCampaigns: Campaign[] = [
     variant: "secondary",
   },
   {
+    id: 'campaign-2',
     title: "Promo Hari Pendidikan",
     date: "2024-05-02",
     status: "Berakhir",
@@ -45,6 +50,7 @@ const initialCampaigns: Campaign[] = [
     variant: "secondary",
   },
   {
+    id: 'campaign-3',
     title: "Gebyar Diskon Akhir Pekan",
     date: "2024-05-24",
     status: "Berakhir",
@@ -56,6 +62,7 @@ const initialCampaigns: Campaign[] = [
   },
   // 7 Upcoming Campaigns
   {
+    id: 'campaign-4',
     title: "Promo Nonton Bola Bareng",
     date: "2024-06-15",
     status: "Akan Datang",
@@ -66,6 +73,7 @@ const initialCampaigns: Campaign[] = [
     variant: "default",
   },
   {
+    id: 'campaign-5',
     title: "Diskon Liburan Sekolah Ceria",
     date: "2024-06-22",
     status: "Akan Datang",
@@ -76,6 +84,7 @@ const initialCampaigns: Campaign[] = [
     variant: "default",
   },
   {
+    id: 'campaign-6',
     title: "Pesta Gajian Juni",
     date: "2024-06-28",
     status: "Akan Datang",
@@ -86,6 +95,7 @@ const initialCampaigns: Campaign[] = [
     variant: "default",
   },
   {
+    id: 'campaign-7',
     title: "Flash Sale 7.7",
     date: "2024-07-07",
     status: "Akan Datang",
@@ -96,6 +106,7 @@ const initialCampaigns: Campaign[] = [
     variant: "default",
   },
   {
+    id: 'campaign-8',
     title: "Promo Kembali ke Kantor",
     date: "2024-07-15",
     status: "Akan Datang",
@@ -106,6 +117,7 @@ const initialCampaigns: Campaign[] = [
     variant: "default",
   },
   {
+    id: 'campaign-9',
     title: "Spesial Hari Anak Nasional",
     date: "2024-07-23",
     status: "Akan Datang",
@@ -116,6 +128,7 @@ const initialCampaigns: Campaign[] = [
     variant: "default",
   },
   {
+    id: 'campaign-10',
     title: "Promo Merdeka",
     date: "2024-08-17",
     status: "Akan Datang",
@@ -127,6 +140,7 @@ const initialCampaigns: Campaign[] = [
   }
 ];
 
+
 // Create the context with a default value
 const CampaignContext = createContext<CampaignContextType | undefined>(undefined);
 
@@ -135,14 +149,23 @@ export const CampaignsProvider = ({ children }: { children: ReactNode }) => {
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
 
   const addCampaign = (campaign: Campaign) => {
-    // Add the new campaign and sort the entire array by date
     setCampaigns((prevCampaigns) => 
       [...prevCampaigns, campaign].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     );
   };
+  
+  const updateCampaign = (id: string, updatedCampaignData: Omit<Campaign, 'id'>) => {
+    setCampaigns(prev => prev.map(c => c.id === id ? { id, ...updatedCampaignData } : c)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    );
+  };
+
+  const deleteCampaign = (id: string) => {
+    setCampaigns(prev => prev.filter(c => c.id !== id));
+  };
 
   return (
-    <CampaignContext.Provider value={{ campaigns, addCampaign }}>
+    <CampaignContext.Provider value={{ campaigns, addCampaign, updateCampaign, deleteCampaign }}>
       {children}
     </CampaignContext.Provider>
   );
