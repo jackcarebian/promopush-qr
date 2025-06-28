@@ -11,6 +11,9 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import idLocale from '@fullcalendar/core/locales/id';
+import { parse } from 'date-fns';
+import { id as idLocaleDateFns } from 'date-fns/locale';
+
 
 const campaigns = [
   // 3 Past Campaigns
@@ -118,24 +121,20 @@ const campaigns = [
   }
 ];
 
-// Helper to parse Indonesian dates like "1 Juli 2024"
+// Helper to parse Indonesian dates like "1 Juli 2024" using date-fns for reliability
 const parseDate = (dateStr: string): Date | null => {
-    const monthMap: { [key: string]: number } = {
-      "Januari": 0, "Februari": 1, "Maret": 2, "April": 3, "Mei": 4, "Juni": 5,
-      "Juli": 6, "Agustus": 7, "September": 8, "Oktober": 9, "November": 10, "Desember": 11
-    };
-    const parts = dateStr.split(" ");
-    if (parts.length !== 3) return null;
-    const day = parseInt(parts[0], 10);
-    const monthName = parts[1];
-    const year = parseInt(parts[2], 10);
-    const month = monthMap[monthName];
-
-    if (!isNaN(day) && month !== undefined && !isNaN(year)) {
-        // Use UTC date to avoid timezone issues
-        return new Date(Date.UTC(year, month, day));
+    try {
+        const parsedDate = parse(dateStr, 'd MMMM yyyy', new Date(), { locale: idLocaleDateFns });
+        if (isNaN(parsedDate.getTime())) {
+            console.error(`Gagal mem-parsing tanggal: ${dateStr}`);
+            return null;
+        }
+        // Use UTC date to avoid timezone issues with FullCalendar
+        return new Date(Date.UTC(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate()));
+    } catch (e) {
+        console.error(`Error saat mem-parsing tanggal: ${dateStr}`, e);
+        return null;
     }
-    return null;
 }
 
 const formatDateForFullCalendar = (date: Date): string => {
