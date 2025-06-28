@@ -19,7 +19,7 @@ const campaigns = [
   // 3 Past Campaigns
   {
     title: "Diskon Hari Valentine",
-    date: "14 Februari 2024",
+    date: "2024-02-14",
     status: "Berakhir",
     description: "Rayakan cinta dengan diskon spesial 20% untuk semua item cokelat dan bunga.",
     image: "https://placehold.co/600x400",
@@ -29,7 +29,7 @@ const campaigns = [
   },
   {
     title: "Promo Lebaran Sale",
-    date: "10 April 2024",
+    date: "2024-04-10",
     status: "Berakhir",
     description: "Lengkapi kebutuhan Lebaran Anda dengan diskon hingga 50% untuk baju koko dan gamis.",
     image: "https://placehold.co/600x400",
@@ -39,7 +39,7 @@ const campaigns = [
   },
   {
     title: "Promo Akhir Pekan Mei",
-    date: "24 Mei 2024",
+    date: "2024-05-24",
     status: "Berakhir",
     description: "Promo spesial untuk menemani akhir pekan Anda. Diskon 20% untuk makanan & minuman.",
     image: "https://placehold.co/600x400",
@@ -51,7 +51,7 @@ const campaigns = [
   // 7 Upcoming Campaigns (June & July)
   {
     title: "Diskon Liburan Sekolah",
-    date: "25 Juni 2024",
+    date: "2024-06-25",
     status: "Akan Datang",
     description: "Isi liburan anak dengan produk mainan edukatif, diskon spesial 30%.",
     image: "https://placehold.co/600x400",
@@ -61,7 +61,7 @@ const campaigns = [
   },
   {
     title: "Promo Gajian Juni",
-    date: "28 Juni 2024",
+    date: "2024-06-28",
     status: "Akan Datang",
     description: "Nikmati diskon gajian 25% untuk semua produk elektronik. Waktunya upgrade!",
     image: "https://placehold.co/600x400",
@@ -71,7 +71,7 @@ const campaigns = [
   },
   {
     title: "Flash Sale 7.7",
-    date: "7 Juli 2024",
+    date: "2024-07-07",
     status: "Akan Datang",
     description: "Jangan lewatkan flash sale terbesar kami! Diskon hingga 77% hanya selama 24 jam.",
     image: "https://placehold.co/600x400",
@@ -81,7 +81,7 @@ const campaigns = [
   },
   {
     title: "Promo Kopi Tengah Bulan",
-    date: "15 Juli 2024",
+    date: "2024-07-15",
     status: "Akan Datang",
     description: "Semangat lagi di tengah bulan! Beli 2 gratis 1 untuk semua varian es kopi susu.",
     image: "https://placehold.co/600x400",
@@ -91,7 +91,7 @@ const campaigns = [
   },
   {
     title: "Spesial Hari Anak Nasional",
-    date: "23 Juli 2024",
+    date: "2024-07-23",
     status: "Akan Datang",
     description: "Hadiahkan yang terbaik untuk si kecil. Diskon 40% untuk semua pakaian anak.",
     image: "https://placehold.co/600x400",
@@ -101,7 +101,7 @@ const campaigns = [
   },
   {
     title: "Payday Sale Juli",
-    date: "26 Juli 2024",
+    date: "2024-07-26",
     status: "Akan Datang",
     description: "Waktunya belanja! Dapatkan cashback hingga Rp 100.000 untuk semua kategori.",
     image: "https://placehold.co/600x400",
@@ -111,7 +111,7 @@ const campaigns = [
   },
   {
     title: "Promo Back to Campus",
-    date: "29 Juli 2024",
+    date: "2024-07-29",
     status: "Akan Datang",
     description: "Siap kembali ke kampus? Dapatkan diskon 20% untuk laptop dan aksesorisnya.",
     image: "https://placehold.co/600x400",
@@ -123,28 +123,21 @@ const campaigns = [
 
 export default function CalendarPage() {
 
-    const calendarEvents = campaigns.map(campaign => {
+    const calendarEvents = campaigns.map(campaign => ({
+        title: campaign.title,
+        start: campaign.date,
+        allDay: true,
+        className: campaign.status === 'Berakhir' ? 'fc-event-past' : 'fc-event-upcoming'
+    }));
+
+    const formatDisplayDate = (dateString: string) => {
         try {
-            const parsedDate = parse(campaign.date, 'd MMMM yyyy', new Date(), { locale: idLocaleDateFns });
-
-            if (isNaN(parsedDate.getTime())) {
-                console.error(`Gagal mem-parsing tanggal: ${campaign.date}`);
-                return null;
-            }
-            
-            const formattedDate = format(parsedDate, 'yyyy-MM-dd');
-
-            return {
-                title: campaign.title,
-                start: formattedDate,
-                allDay: true,
-                className: campaign.status === 'Berakhir' ? 'fc-event-past' : 'fc-event-upcoming'
-            };
-        } catch (e) {
-             console.error(`Error saat mem-parsing tanggal: ${campaign.date}`, e);
-             return null;
+            const parsedDate = parse(dateString, 'yyyy-MM-dd', new Date());
+            return format(parsedDate, 'd MMMM yyyy', { locale: idLocaleDateFns });
+        } catch {
+            return dateString;
         }
-    }).filter((event): event is NonNullable<typeof event> => event !== null);
+    };
 
 
     return (
@@ -210,7 +203,7 @@ export default function CalendarPage() {
                                 </div>
                                 <CardDescription className="flex items-center gap-2 pt-1">
                                     <CalendarIcon className="w-4 h-4" />
-                                    <span>{campaign.date}</span>
+                                    <span>{formatDisplayDate(campaign.date)}</span>
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow">
