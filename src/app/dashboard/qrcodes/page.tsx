@@ -18,7 +18,7 @@ export default function QrCodesPage() {
                 <h2 className="text-2xl font-bold font-headline text-primary">Buka Potensi Penuh Bisnis Anda</h2>
                 <div className="text-muted-foreground mt-2 space-y-3">
                     <p>
-                        Dengan Kode QR kami, Anda tidak hanya mendapatkan pelanggan, tetapi membangun komunitas setia.
+                        Bersama Notiflayer, Anda tidak hanya mendapatkan pelanggan, tetapi membangun komunitas setia.
                     </p>
                     <p>
                         Ubah pengunjung biasa menjadi pelanggan tetap dengan memberikan mereka akses mudah ke promo eksklusif dan penawaran yang dipersonalisasi.
