@@ -1,57 +1,60 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Store, Download, X, Printer } from "lucide-react";
 import Image from "next/image";
 import { Dialog, DialogContent, DialogClose, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PrintableQrCard } from "./components/printable-qr-card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const outlets = [
+const outletsData = [
   {
     id: "outlet-001",
     name: "Kedai Kopi Anyar",
     location: "Boyolali, Jawa Tengah",
-    qrData: "https://promopush.com/register?outlet=001",
   },
   {
     id: "outlet-002",
     name: "Griya Batik Kencana",
     location: "Solo, Jawa Tengah",
-    qrData: "https://promopush.com/register?outlet=002",
   },
   {
     id: "outlet-003",
     name: "Omah Cantik Raras",
     location: "Semarang, Jawa Tengah",
-    qrData: "https://promopush.com/register?outlet=003",
   },
    {
     id: "outlet-004",
     name: "Toko Roti & Jajan Pasar Bu Warni",
     location: "Kudus, Jawa Tengah",
-    qrData: "https://promopush.com/register?outlet=004",
   },
   {
     id: "outlet-005",
     name: "UMKM Digital 'Guyub Rukun'",
     location: "Online - Pusat di Magelang",
-    qrData: "https://promopush.com/register?outlet=005",
   },
   {
     id: "outlet-006",
     name: "Warung Mendoan Mbah Kakung",
     location: "Banyumas, Jawa Tengah",
-    qrData: "https://promopush.com/register?outlet=006",
   },
 ];
 
-type Outlet = typeof outlets[0];
+type Outlet = typeof outletsData[0];
 
 export default function QrOutletPage() {
     const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
+    const [origin, setOrigin] = useState('');
+
+    useEffect(() => {
+        // This ensures the code runs only on the client side, after the window object is available.
+        if (typeof window !== 'undefined') {
+            setOrigin(window.location.origin);
+        }
+    }, []);
 
     const handleDownloadClick = (outlet: Outlet) => {
         setSelectedOutlet(outlet);
@@ -59,6 +62,11 @@ export default function QrOutletPage() {
 
     const handleCloseDialog = () => {
         setSelectedOutlet(null);
+    };
+    
+    const getQrDataUrl = (outletId: string) => {
+        // Construct the full, dynamic URL for the QR code
+        return origin ? `${origin}/register?outlet=${outletId}` : "";
     };
 
     return (
@@ -79,30 +87,37 @@ export default function QrOutletPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {outlets.map((outlet) => (
-                        <Card key={outlet.id}>
-                            <CardHeader>
-                                <CardTitle className="text-lg">{outlet.name}</CardTitle>
-                                <CardDescription>{outlet.location}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex justify-center items-center p-4">
-                                <Image
-                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(outlet.qrData)}`}
-                                    alt={`QR Code for ${outlet.name}`}
-                                    width={200}
-                                    height={200}
-                                    data-ai-hint="qr code"
-                                    className="rounded-lg"
-                                />
-                            </CardContent>
-                            <CardFooter>
-                                <Button className="w-full" onClick={() => handleDownloadClick(outlet)}>
-                                    <Download className="mr-2 h-4 w-4" />
-                                    Unduh QR
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    ))}
+                    {outletsData.map((outlet) => {
+                        const qrData = getQrDataUrl(outlet.id);
+                        return (
+                            <Card key={outlet.id}>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">{outlet.name}</CardTitle>
+                                    <CardDescription>{outlet.location}</CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex justify-center items-center p-4">
+                                    {origin ? (
+                                        <Image
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`}
+                                            alt={`QR Code for ${outlet.name}`}
+                                            width={200}
+                                            height={200}
+                                            data-ai-hint="qr code"
+                                            className="rounded-lg"
+                                        />
+                                    ) : (
+                                        <Skeleton className="h-[200px] w-[200px] rounded-lg" />
+                                    )}
+                                </CardContent>
+                                <CardFooter>
+                                    <Button className="w-full" onClick={() => handleDownloadClick(outlet)} disabled={!origin}>
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Unduh QR
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        );
+                    })}
                 </CardContent>
             </Card>
 
@@ -142,7 +157,10 @@ export default function QrOutletPage() {
                     </div>
 
                      {selectedOutlet && (
-                        <PrintableQrCard outlet={selectedOutlet} />
+                        <PrintableQrCard outlet={{
+                            ...selectedOutlet,
+                            qrData: getQrDataUrl(selectedOutlet.id)
+                        }} />
                      )}
                 </DialogContent>
             </Dialog>
