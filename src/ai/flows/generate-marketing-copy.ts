@@ -62,6 +62,8 @@ Setiap alternatif harus memiliki:
 1.  **Headline:** Judul yang singkat, nge-hook, dan bikin penasaran. Maksimal 6 kata.
 2.  **Body:** Isi pesan yang persuasif, jelas, dan punya call-to-action yang kuat.
 
+Sertakan juga emoji atau simbol yang relevan (contoh: ✨, 📱, 💡, ☕, 🛍️) untuk membuat copy lebih menarik secara visual.
+
 Pastikan hasil akhir sesuai dengan format output JSON yang diminta. Buatlah copy yang benar-benar terasa natural, menjual, dan tidak kaku!`,
 });
 
