@@ -17,7 +17,7 @@ export default function QrCodesPage() {
             <div className="text-center max-w-3xl mx-auto">
                 <h2 className="text-2xl font-bold font-headline text-primary">Buka Potensi Penuh Bisnis Anda</h2>
                 <p className="text-muted-foreground mt-2">
-                    Dengan Kode QR kami, Anda tidak hanya mendapatkan pelanggan, tetapi membangun komunitas setia. Ubah pengunjung biasa menjadi pelanggan tetap dengan memberikan mereka akses mudah ke promo eksklusif dan penawaran yang dipersonalisasi. Setiap pemindaian adalah awal dari hubungan yang lebih erat.
+                    Dengan Kode QR kami, Anda tidak hanya mendapatkan pelanggan, tetapi membangun komunitas setia. Ubah pengunjung biasa menjadi pelanggan tetap dengan memberikan mereka akses mudah ke promo eksklusif dan penawaran yang dipersonalisasi. Setiap pemindaian adalah awal dari hubungan yang lebih erat. Pilih paket Anda di bawah ini dan mulailah membangun hubungan yang lebih kuat dengan pelanggan Anda hari ini!
                 </p>
             </div>
 
