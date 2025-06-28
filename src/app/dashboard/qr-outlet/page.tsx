@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,41 +8,9 @@ import Image from "next/image";
 import { Dialog, DialogContent, DialogClose, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PrintableQrCard } from "./components/printable-qr-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { outlets as outletsData, type OutletData } from "@/data/outlets";
 
-const outletsData = [
-  {
-    id: "outlet-001",
-    name: "Kedai Kopi Anyar",
-    location: "Boyolali, Jawa Tengah",
-  },
-  {
-    id: "outlet-002",
-    name: "Griya Batik Kencana",
-    location: "Solo, Jawa Tengah",
-  },
-  {
-    id: "outlet-003",
-    name: "Omah Cantik Raras",
-    location: "Semarang, Jawa Tengah",
-  },
-   {
-    id: "outlet-004",
-    name: "Toko Roti & Jajan Pasar Bu Warni",
-    location: "Kudus, Jawa Tengah",
-  },
-  {
-    id: "outlet-005",
-    name: "UMKM Digital 'Guyub Rukun'",
-    location: "Online - Pusat di Magelang",
-  },
-  {
-    id: "outlet-006",
-    name: "Warung Mendoan Mbah Kakung",
-    location: "Banyumas, Jawa Tengah",
-  },
-];
-
-type Outlet = typeof outletsData[0];
+type Outlet = OutletData;
 
 export default function QrOutletPage() {
     const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
