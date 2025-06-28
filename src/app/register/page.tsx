@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/logo";
 import { interestCategories } from "../dashboard/campaigns/data/categories";
 
+// Firebase imports
 import { db, messaging } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { getToken } from "firebase/messaging";
@@ -32,7 +33,6 @@ const allInterests = Object.values(interestCategories).flatMap(category => categ
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus memiliki setidaknya 2 karakter." }),
   email: z.string().email({ message: "Format email tidak valid." }),
-  whatsapp: z.string().min(10, { message: "Nomor WhatsApp harus memiliki setidaknya 10 digit." }),
   interests: z.array(z.string()).refine((value) => value.length > 0, {
     message: "Anda harus memilih setidaknya satu minat.",
   }),
@@ -47,28 +47,21 @@ export default function RegisterPage() {
     defaultValues: {
       name: "",
       email: "",
-      whatsapp: "",
       interests: [],
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-
-    if (typeof window === "undefined" || !navigator.serviceWorker) {
+    
+    if (typeof window === "undefined" || !navigator.serviceWorker || !messaging) {
       toast({
         variant: "destructive",
         title: "Browser Tidak Mendukung",
-        description: "Fitur notifikasi tidak didukung di browser ini.",
+        description: "Fitur notifikasi tidak didukung di browser ini atau layanan notifikasi gagal dimuat.",
       });
       setIsSubmitting(false);
       return;
-    }
-    
-    if (!messaging) {
-        toast({ variant: "destructive", title: "Error", description: "Layanan notifikasi tidak dapat dimuat." });
-        setIsSubmitting(false);
-        return;
     }
     
     try {
@@ -87,7 +80,6 @@ export default function RegisterPage() {
             await addDoc(collection(db, "pelanggan"), {
                 name: values.name,
                 email: values.email,
-                whatsapp: values.whatsapp,
                 interests: values.interests,
                 token_fcm: fcmToken,
                 registeredAt: new Date().toISOString(),
@@ -99,7 +91,7 @@ export default function RegisterPage() {
             });
             form.reset();
         } else {
-             throw new Error('Gagal mendapatkan token notifikasi. Coba muat ulang halaman.');
+             throw new Error('Gagal mendapatkan token notifikasi. Pastikan Anda tidak dalam mode incognito dan coba muat ulang halaman.');
         }
 
     } catch (err) {
@@ -158,19 +150,6 @@ export default function RegisterPage() {
               />
               <FormField
                 control={form.control}
-                name="whatsapp"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nomor WhatsApp</FormLabel>
-                    <FormControl>
-                      <Input type="tel" placeholder="081234567890" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="interests"
                 render={() => (
                   <FormItem>
@@ -196,10 +175,11 @@ export default function RegisterPage() {
                                     <Checkbox
                                       checked={field.value?.includes(item.id)}
                                       onCheckedChange={(checked) => {
+                                        const currentValue = field.value || [];
                                         return checked
-                                          ? field.onChange([...field.value, item.id])
+                                          ? field.onChange([...currentValue, item.id])
                                           : field.onChange(
-                                              field.value?.filter(
+                                              currentValue.filter(
                                                 (value) => value !== item.id
                                               )
                                             );
@@ -218,7 +198,7 @@ export default function RegisterPage() {
                 )}
               />
               <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                {isSubmitting ? "Memproses..." : "Saya Terima Notifikasi Promo"}
+                {isSubmitting ? "Memproses..." : "Daftar & Aktifkan Notifikasi"}
               </Button>
             </form>
           </Form>
