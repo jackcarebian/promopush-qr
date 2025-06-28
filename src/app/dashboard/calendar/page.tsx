@@ -75,7 +75,8 @@ const parseDate = (dateStr: string): Date | null => {
     const month = monthMap[monthName];
 
     if (!isNaN(day) && month !== undefined && !isNaN(year)) {
-        return new Date(Date.UTC(year, month, day));
+        // Use local date for consistency with the calendar component
+        return new Date(year, month, day);
     }
     return null;
 }
@@ -84,12 +85,46 @@ const parseDate = (dateStr: string): Date | null => {
 export default function CalendarPage() {
     const [date, setDate] = useState<Date | undefined>(new Date());
 
+    const campaignsByDate = useMemo(() => {
+        const map = new Map<string, Array<{ title: string }>>();
+        campaigns
+            .filter(campaign => campaign.status === 'Akan Datang')
+            .forEach(campaign => {
+                const d = parseDate(campaign.date);
+                if (d) {
+                    const dateString = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                    if (!map.has(dateString)) {
+                        map.set(dateString, []);
+                    }
+                    map.get(dateString)!.push({ title: campaign.title });
+                }
+            });
+        return map;
+    }, []);
+
+
     const upcomingCampaignDates = useMemo(() => {
         return campaigns
             .filter(campaign => campaign.status === 'Akan Datang')
             .map(campaign => parseDate(campaign.date))
             .filter((d): d is Date => d !== null);
     }, []);
+
+    const formatDay = (day: Date) => {
+        const dateString = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
+        const dayCampaigns = campaignsByDate.get(dateString);
+
+        return (
+            <>
+                <div className="flex-1 text-sm">{day.getDate()}</div>
+                {dayCampaigns && (
+                    <div className="w-full text-[10px] leading-tight font-semibold text-primary text-center line-clamp-2 break-words">
+                        {dayCampaigns.map(c => c.title).join(', ')}
+                    </div>
+                )}
+            </>
+        );
+    };
 
     return (
         <div className="space-y-8">
@@ -104,7 +139,12 @@ export default function CalendarPage() {
                         mode="single"
                         selected={date}
                         onSelect={setDate}
-                        className="rounded-md"
+                        className="rounded-md w-full"
+                        classNames={{
+                           cell: 'h-20 p-0 md:h-28',
+                           day: 'h-full w-full rounded-md flex flex-col items-center justify-start p-1.5'
+                        }}
+                        formatters={{ formatDay }}
                         modifiers={{ campaign: upcomingCampaignDates }}
                         modifiersClassNames={{
                             campaign: 'day-campaign'

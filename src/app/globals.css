@@ -99,15 +99,11 @@
 }
 
 .day-campaign {
-    @apply relative bg-primary/10 text-primary-foreground rounded-full font-bold;
+    @apply relative bg-primary/10 text-primary-foreground rounded-md font-bold;
     color: hsl(var(--primary));
 }
 .day-campaign:hover {
     @apply bg-primary/20;
-}
-.day-campaign::after {
-    content: '';
-    @apply absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary;
 }
 
 @media print {
