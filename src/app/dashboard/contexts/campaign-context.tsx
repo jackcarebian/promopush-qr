@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
@@ -134,7 +135,10 @@ export const CampaignsProvider = ({ children }: { children: ReactNode }) => {
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
 
   const addCampaign = (campaign: Campaign) => {
-    setCampaigns((prevCampaigns) => [...prevCampaigns, campaign].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+    // Add the new campaign and sort the entire array by date
+    setCampaigns((prevCampaigns) => 
+      [...prevCampaigns, campaign].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    );
   };
 
   return (

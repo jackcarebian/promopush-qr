@@ -32,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
+// Schema for form validation
 const formSchema = z.object({
   campaignName: z.string().min(5, { message: "Nama kampanye minimal 5 karakter." }),
   audience: z.coerce.number().min(1, { message: "Jumlah target audiens minimal 1." }),
@@ -41,6 +42,7 @@ const formSchema = z.object({
   }),
   scheduledDate: z.date().optional(),
 }).refine(data => {
+    // If scheduling, a date must be selected
     if (data.sendTime === 'scheduled' && !data.scheduledDate) {
         return false;
     }
@@ -54,11 +56,12 @@ const formSchema = z.object({
 export function CreateCampaignForm() {
     const { addCampaign } = useCampaigns();
     const router = useRouter();
-    const [isSending, setIsSending] = React.useState(false);
+    const { toast } = useToast();
+    
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [progress, setProgress] = React.useState(0);
     const [imagePreview, setImagePreview] = React.useState<string | null>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
-    const { toast } = useToast();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -83,6 +86,11 @@ export function CreateCampaignForm() {
             reader.readAsDataURL(file);
         } else {
             setImagePreview(null);
+            toast({
+                variant: "destructive",
+                title: "File tidak valid",
+                description: "Silakan pilih file gambar (PNG, JPG, GIF).",
+            });
         }
     };
     
@@ -94,50 +102,48 @@ export function CreateCampaignForm() {
     };
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        setIsSending(true);
+        setIsSubmitting(true);
         setProgress(0);
 
-        const targetDate = values.sendTime === 'scheduled' && values.scheduledDate
-            ? values.scheduledDate
-            : new Date();
-        
-        const newCampaign: Campaign = {
-            title: values.campaignName,
-            date: format(targetDate, "yyyy-MM-dd"),
-            status: "Akan Datang",
-            description: values.message,
-            image: imagePreview || "https://placehold.co/600x400",
-            dataAiHint: "new campaign",
-            audience: values.audience,
-            variant: "default",
-        };
-
+        // Simulate submission process
         const interval = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 90) {
-                    return 100;
-                }
-                return prev + 10;
-            });
+            setProgress(prev => Math.min(prev + 20, 100));
         }, 300);
 
         setTimeout(() => {
             clearInterval(interval);
             setProgress(100);
 
+            const targetDate = values.sendTime === 'scheduled' && values.scheduledDate
+                ? values.scheduledDate
+                : new Date();
+            
+            // This is the new campaign that will be added to the shared state
+            const newCampaign: Campaign = {
+                title: values.campaignName,
+                date: format(targetDate, "yyyy-MM-dd"), // Standard format
+                status: "Akan Datang",
+                description: values.message,
+                image: imagePreview || "https://placehold.co/600x400",
+                dataAiHint: "new campaign",
+                audience: values.audience,
+                variant: "default",
+            };
+
+            // Add campaign to the global context
             addCampaign(newCampaign);
 
-            setTimeout(() => {
-                setIsSending(false);
-                toast({
-                    title: "Kampanye Berhasil Dibuat!",
-                    description: `Kampanye "${values.campaignName}" telah berhasil dibuat dan ditambahkan ke kalender.`,
-                });
-                form.reset();
-                handleRemoveImage();
-                router.push('/dashboard/calendar'); 
-            }, 500);
-        }, 3000);
+            toast({
+                title: "Kampanye Berhasil Dibuat!",
+                description: `Kampanye "${values.campaignName}" telah berhasil dibuat dan dijadwalkan.`,
+            });
+            
+            // Reset form and navigate to calendar page to see the result
+            form.reset();
+            handleRemoveImage();
+            setIsSubmitting(false);
+            router.push('/dashboard/calendar'); 
+        }, 1500);
     }
 
     return (
@@ -324,7 +330,7 @@ export function CreateCampaignForm() {
                     />
                 )}
 
-                {isSending && (
+                {isSubmitting && (
                     <div className="space-y-2">
                         <Label>Menyimpan Kampanye...</Label>
                         <Progress value={progress} className="w-full" />
@@ -332,8 +338,8 @@ export function CreateCampaignForm() {
                     </div>
                 )}
                 
-                <Button type="submit" disabled={isSending}>
-                    {isSending ? 'Menyimpan...' : 'Simpan dan Publikasikan Kampanye'}
+                <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Menyimpan...' : 'Simpan dan Publikasikan Kampanye'}
                 </Button>
             </form>
         </Form>
