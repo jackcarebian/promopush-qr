@@ -222,7 +222,6 @@ export function CreateCampaignForm() {
                                 <div className="flex justify-between items-center mb-2">
                                     <div>
                                         <FormLabel>Preferensi Minat Pelanggan</FormLabel>
-                                        <FormDescription>Pilih minat yang paling relevan untuk kampanye ini.</FormDescription>
                                     </div>
                                     <div className="flex items-center gap-2 text-sm font-medium p-2 rounded-lg bg-secondary text-secondary-foreground shrink-0">
                                         <Users className="h-5 w-5 text-primary" />
