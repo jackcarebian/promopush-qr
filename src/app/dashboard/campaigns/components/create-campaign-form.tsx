@@ -11,6 +11,7 @@ import { id } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { useCampaigns, Campaign } from "../../contexts/campaign-context";
 import { useRouter } from "next/navigation";
+import { interestCategories, businessCategories } from "../data/categories";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,15 +28,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Calendar as CalendarIcon, Send, X, Users } from "lucide-react";
+import { Upload, Calendar as CalendarIcon, Send, X, Tag } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Schema for form validation
 const formSchema = z.object({
   campaignName: z.string().min(5, { message: "Nama kampanye minimal 5 karakter." }),
-  audience: z.coerce.number().min(1, { message: "Jumlah target audiens minimal 1." }),
+  businessCategory: z.string({ required_error: "Pilih kategori bisnis." }),
+  interests: z.array(z.string()).refine(value => value.length > 0, {
+    message: "Pilih setidaknya satu preferensi minat.",
+  }),
   message: z.string().min(10, { message: "Pesan minimal 10 karakter." }).max(200, { message: "Pesan maksimal 200 karakter." }),
   sendTime: z.enum(["now", "scheduled"], {
     required_error: "Anda perlu memilih waktu pengiriman.",
@@ -67,7 +73,8 @@ export function CreateCampaignForm() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             campaignName: "",
-            audience: 1000,
+            businessCategory: undefined,
+            interests: [],
             message: "",
             sendTime: "now",
             scheduledDate: undefined,
@@ -75,6 +82,11 @@ export function CreateCampaignForm() {
     });
 
     const watchSendTime = form.watch("sendTime");
+    const watchBusinessCategory = form.watch("businessCategory");
+
+    React.useEffect(() => {
+        form.setValue("interests", []);
+    }, [watchBusinessCategory, form]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -118,20 +130,19 @@ export function CreateCampaignForm() {
                 ? values.scheduledDate
                 : new Date();
             
-            // This is the new campaign that will be added to the shared state
             const newCampaign: Campaign = {
-                id: `campaign-${new Date().getTime()}`, // Generate unique ID
+                id: `campaign-${new Date().getTime()}`,
                 title: values.campaignName,
-                date: format(targetDate, "yyyy-MM-dd"), // Standard format
+                date: format(targetDate, "yyyy-MM-dd"),
                 status: "Akan Datang",
                 description: values.message,
                 image: imagePreview || "https://placehold.co/600x400",
                 dataAiHint: "new campaign",
-                audience: values.audience,
+                businessCategory: values.businessCategory,
+                interests: values.interests,
                 variant: "default",
             };
 
-            // Add campaign to the global context
             addCampaign(newCampaign);
 
             toast({
@@ -139,7 +150,6 @@ export function CreateCampaignForm() {
                 description: `Kampanye "${values.campaignName}" telah berhasil dibuat dan ditambahkan ke daftar.`,
             });
             
-            // Reset form and state
             form.reset();
             handleRemoveImage();
             setIsSubmitting(false);
@@ -149,32 +159,89 @@ export function CreateCampaignForm() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <FormField
+                    control={form.control}
+                    name="campaignName"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Nama Kampanye</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Contoh: Diskon Kemerdekaan" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                
                 <div className="grid md:grid-cols-2 gap-8">
-                    <FormField
+                     <FormField
                         control={form.control}
-                        name="campaignName"
+                        name="businessCategory"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Nama Kampanye</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Contoh: Diskon Kemerdekaan" {...field} />
-                                </FormControl>
+                                <FormLabel>Kategori Bisnis</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Pilih kategori bisnis Anda" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {businessCategories.map(category => (
+                                            <SelectItem key={category} value={category}>
+                                                {interestCategories[category].emoji} {category}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <FormField
+                     <FormField
                         control={form.control}
-                        name="audience"
-                        render={({ field }) => (
+                        name="interests"
+                        render={() => (
                             <FormItem>
-                                <FormLabel>Target Audiens</FormLabel>
-                                <FormControl>
-                                    <div className="relative">
-                                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input type="number" placeholder="1000" className="pl-10" {...field} />
-                                    </div>
-                                </FormControl>
+                                <FormLabel>Preferensi Minat Pelanggan</FormLabel>
+                                <FormDescription>Pilih minat yang paling relevan untuk kampanye ini.</FormDescription>
+                                <div className="space-y-2 rounded-md border p-4">
+                                {!watchBusinessCategory ? (
+                                    <p className="text-sm text-muted-foreground">Pilih kategori bisnis terlebih dahulu.</p>
+                                ) : (
+                                    interestCategories[watchBusinessCategory].interests.map((item) => (
+                                      <FormField
+                                        key={item.id}
+                                        control={form.control}
+                                        name="interests"
+                                        render={({ field }) => {
+                                          return (
+                                            <FormItem
+                                              key={item.id}
+                                              className="flex flex-row items-start space-x-3 space-y-0"
+                                            >
+                                              <FormControl>
+                                                <Checkbox
+                                                  checked={field.value?.includes(item.id)}
+                                                  onCheckedChange={(checked) => {
+                                                    return checked
+                                                      ? field.onChange([...field.value, item.id])
+                                                      : field.onChange(
+                                                          field.value?.filter(
+                                                            (value) => value !== item.id
+                                                          )
+                                                        );
+                                                  }}
+                                                />
+                                              </FormControl>
+                                              <FormLabel className="font-normal">{item.label}</FormLabel>
+                                            </FormItem>
+                                          );
+                                        }}
+                                      />
+                                    ))
+                                )}
+                                </div>
                                 <FormMessage />
                             </FormItem>
                         )}

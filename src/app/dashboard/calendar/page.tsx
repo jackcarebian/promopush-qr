@@ -10,7 +10,7 @@ import { useCampaigns, Campaign } from '../contexts/campaign-context';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
-import { Users, Calendar as CalendarIcon } from 'lucide-react';
+import { Tag, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
@@ -57,8 +57,8 @@ export default function CalendarPage() {
                         <span>{format(new Date(`${campaign.date}T00:00:00`), "dd MMMM yyyy", { locale: id })}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users className="w-4 h-4" />
-                        <span>Target: {campaign.audience.toLocaleString('id-ID')} orang</span>
+                        <Tag className="w-4 h-4" />
+                        <span>Kategori: {campaign.businessCategory}</span>
                     </div>
                 </CardFooter>
             </div>
