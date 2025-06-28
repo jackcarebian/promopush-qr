@@ -163,13 +163,10 @@
     @apply bg-accent;
 }
 
-.fc-direction-ltr .fc-daygrid-event.fc-event-start,
-.fc-direction-rtl .fc-daygrid-event.fc-event-end {
-    @apply rounded-md p-1;
-}
-
-.fc-h-event {
-    @apply text-xs;
+.fc-daygrid-event {
+  @apply rounded-md p-1 text-xs;
+  white-space: normal !important; /* Allow text wrapping */
+  line-height: 1.3;
 }
 
 .fc-daygrid-event-dot {
