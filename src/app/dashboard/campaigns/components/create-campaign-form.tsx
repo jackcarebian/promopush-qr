@@ -7,7 +7,10 @@ import * as z from "zod";
 import React from "react";
 import Image from "next/image";
 import { format } from "date-fns";
+import { id } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { useCampaigns, Campaign } from "../../contexts/campaign-context";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,14 +27,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Calendar as CalendarIcon, Send, X } from "lucide-react";
+import { Upload, Calendar as CalendarIcon, Send, X, Users } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
 const formSchema = z.object({
   campaignName: z.string().min(5, { message: "Nama kampanye minimal 5 karakter." }),
-  message: z.string().min(10, { message: "Pesan minimal 10 karakter." }).max(160, { message: "Pesan maksimal 160 karakter." }),
+  audience: z.coerce.number().min(1, { message: "Jumlah target audiens minimal 1." }),
+  message: z.string().min(10, { message: "Pesan minimal 10 karakter." }).max(200, { message: "Pesan maksimal 200 karakter." }),
   sendTime: z.enum(["now", "scheduled"], {
     required_error: "Anda perlu memilih waktu pengiriman.",
   }),
@@ -48,6 +52,8 @@ const formSchema = z.object({
 
 
 export function CreateCampaignForm() {
+    const { addCampaign } = useCampaigns();
+    const router = useRouter();
     const [isSending, setIsSending] = React.useState(false);
     const [progress, setProgress] = React.useState(0);
     const [imagePreview, setImagePreview] = React.useState<string | null>(null);
@@ -58,6 +64,7 @@ export function CreateCampaignForm() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             campaignName: "",
+            audience: 1000,
             message: "",
             sendTime: "now",
             scheduledDate: undefined,
@@ -87,9 +94,23 @@ export function CreateCampaignForm() {
     };
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log("Starting campaign:", values);
         setIsSending(true);
         setProgress(0);
+
+        const targetDate = values.sendTime === 'scheduled' && values.scheduledDate
+            ? values.scheduledDate
+            : new Date();
+        
+        const newCampaign: Campaign = {
+            title: values.campaignName,
+            date: format(targetDate, "yyyy-MM-dd"),
+            status: "Akan Datang",
+            description: values.message,
+            image: imagePreview || "https://placehold.co/600x400",
+            dataAiHint: "new campaign",
+            audience: values.audience,
+            variant: "default",
+        };
 
         const interval = setInterval(() => {
             setProgress(prev => {
@@ -103,14 +124,18 @@ export function CreateCampaignForm() {
         setTimeout(() => {
             clearInterval(interval);
             setProgress(100);
+
+            addCampaign(newCampaign);
+
             setTimeout(() => {
                 setIsSending(false);
                 toast({
-                    title: "Kampanye Terkirim!",
-                    description: `Kampanye "${values.campaignName}" telah berhasil ${values.sendTime === 'scheduled' ? `dijadwalkan pada ${format(values.scheduledDate!, 'PPP')}` : 'dikirim'}.`,
+                    title: "Kampanye Berhasil Dibuat!",
+                    description: `Kampanye "${values.campaignName}" telah berhasil dibuat dan ditambahkan ke kalender.`,
                 });
                 form.reset();
                 handleRemoveImage();
+                router.push('/dashboard/calendar'); 
             }, 500);
         }, 3000);
     }
@@ -118,19 +143,37 @@ export function CreateCampaignForm() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField
-                    control={form.control}
-                    name="campaignName"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Nama Kampanye</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Contoh: Diskon Kemerdekaan" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                <div className="grid md:grid-cols-2 gap-8">
+                    <FormField
+                        control={form.control}
+                        name="campaignName"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Nama Kampanye</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Contoh: Diskon Kemerdekaan" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="audience"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Target Audiens</FormLabel>
+                                <FormControl>
+                                    <div className="relative">
+                                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input type="number" placeholder="1000" className="pl-10" {...field} />
+                                    </div>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
 
                 <FormItem>
                     <FormLabel>Gambar Kampanye</FormLabel>
@@ -184,11 +227,12 @@ export function CreateCampaignForm() {
                     name="message"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Pesan Notifikasi</FormLabel>
+                            <FormLabel>Deskripsi Kampanye</FormLabel>
                             <FormControl>
                                 <Textarea
-                                    placeholder="Tulis pesan menarik Anda di sini..."
+                                    placeholder="Jelaskan detail promo atau kampanye Anda di sini..."
                                     className="resize-none"
+                                    rows={4}
                                     {...field}
                                 />
                             </FormControl>
@@ -202,7 +246,7 @@ export function CreateCampaignForm() {
                     name="sendTime"
                     render={({ field }) => (
                         <FormItem className="space-y-3">
-                            <FormLabel>Waktu Pengiriman</FormLabel>
+                            <FormLabel>Waktu Publikasi Kampanye</FormLabel>
                             <FormControl>
                                 <RadioGroup
                                     onValueChange={field.onChange}
@@ -214,7 +258,7 @@ export function CreateCampaignForm() {
                                             <RadioGroupItem value="now" />
                                         </FormControl>
                                         <FormLabel className="font-normal flex items-center gap-2">
-                                            <Send className="w-4 h-4"/> Kirim Sekarang
+                                            <Send className="w-4 h-4"/> Publikasikan Sekarang
                                         </FormLabel>
                                     </FormItem>
                                     <FormItem className="flex items-center space-x-3 space-y-0">
@@ -222,7 +266,7 @@ export function CreateCampaignForm() {
                                             <RadioGroupItem value="scheduled" />
                                         </FormControl>
                                         <FormLabel className="font-normal flex items-center gap-2">
-                                            <CalendarIcon className="w-4 h-4" /> Jadwalkan Kampanye
+                                            <CalendarIcon className="w-4 h-4" /> Jadwalkan Publikasi
                                         </FormLabel>
                                     </FormItem>
                                 </RadioGroup>
@@ -238,7 +282,7 @@ export function CreateCampaignForm() {
                         name="scheduledDate"
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
-                                <FormLabel>Tanggal Penjadwalan</FormLabel>
+                                <FormLabel>Tanggal Publikasi</FormLabel>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <FormControl>
@@ -250,7 +294,7 @@ export function CreateCampaignForm() {
                                                 )}
                                             >
                                                 {field.value ? (
-                                                    format(field.value, "PPP")
+                                                    format(field.value, "PPP", { locale: id })
                                                 ) : (
                                                     <span>Pilih tanggal</span>
                                                 )}
@@ -267,11 +311,12 @@ export function CreateCampaignForm() {
                                                 date < new Date(new Date().setHours(0, 0, 0, 0))
                                             }
                                             initialFocus
+                                            locale={id}
                                         />
                                     </PopoverContent>
                                 </Popover>
                                 <FormDescription>
-                                    Kampanye Anda akan dikirim pada tanggal yang dipilih.
+                                    Kampanye Anda akan dipublikasikan pada tanggal yang dipilih.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -281,14 +326,14 @@ export function CreateCampaignForm() {
 
                 {isSending && (
                     <div className="space-y-2">
-                        <Label>Mengirim Kampanye...</Label>
+                        <Label>Menyimpan Kampanye...</Label>
                         <Progress value={progress} className="w-full" />
                         <p className="text-sm text-muted-foreground text-center">{progress}%</p>
                     </div>
                 )}
                 
                 <Button type="submit" disabled={isSending}>
-                    {isSending ? 'Mengirim...' : 'Kirim Kampanye'}
+                    {isSending ? 'Menyimpan...' : 'Simpan dan Publikasikan Kampanye'}
                 </Button>
             </form>
         </Form>
