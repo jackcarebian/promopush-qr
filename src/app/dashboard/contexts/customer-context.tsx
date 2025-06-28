@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 // Define the shape of a single customer
 export interface Customer {
@@ -117,15 +117,17 @@ const generateCustomers = () => {
 };
 
 
-// Initial data for customers with interest IDs
-const initialCustomers: Customer[] = generateCustomers();
-
 // Create the context with a default value
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
 
 // Create the provider component
 export const CustomersProvider = ({ children }: { children: ReactNode }) => {
-  const [customers] = useState<Customer[]>(initialCustomers);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+
+  useEffect(() => {
+    // Generate customer data on the client side to avoid hydration mismatch
+    setCustomers(generateCustomers());
+  }, []);
 
   return (
     <CustomerContext.Provider value={{ customers }}>
