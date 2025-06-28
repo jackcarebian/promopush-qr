@@ -33,6 +33,7 @@ const allInterests = Object.values(interestCategories).flatMap(category => categ
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus memiliki setidaknya 2 karakter." }),
   email: z.string().email({ message: "Format email tidak valid." }),
+  whatsapp: z.string().optional(),
   interests: z.array(z.string()).refine((value) => value.length > 0, {
     message: "Anda harus memilih setidaknya satu minat.",
   }),
@@ -47,6 +48,7 @@ export default function RegisterPage() {
     defaultValues: {
       name: "",
       email: "",
+      whatsapp: "",
       interests: [],
     },
   });
@@ -54,11 +56,21 @@ export default function RegisterPage() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     
-    if (typeof window === "undefined" || !navigator.serviceWorker || !messaging) {
+    if (typeof window === "undefined" || !navigator.serviceWorker) {
       toast({
         variant: "destructive",
         title: "Browser Tidak Mendukung",
-        description: "Fitur notifikasi tidak didukung di browser ini atau layanan notifikasi gagal dimuat.",
+        description: "Fitur notifikasi tidak didukung di browser ini.",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!messaging) {
+      toast({
+        variant: "destructive",
+        title: "Layanan Notifikasi Gagal",
+        description: "Gagal memuat layanan notifikasi. Coba muat ulang halaman.",
       });
       setIsSubmitting(false);
       return;
@@ -80,6 +92,7 @@ export default function RegisterPage() {
             await addDoc(collection(db, "pelanggan"), {
                 name: values.name,
                 email: values.email,
+                whatsapp: values.whatsapp || '',
                 interests: values.interests,
                 token_fcm: fcmToken,
                 registeredAt: new Date().toISOString(),
@@ -143,6 +156,19 @@ export default function RegisterPage() {
                     <FormLabel>Alamat Email</FormLabel>
                     <FormControl>
                       <Input type="email" placeholder="budi.s@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="whatsapp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nomor WhatsApp (Opsional)</FormLabel>
+                    <FormControl>
+                      <Input type="tel" placeholder="081234567890" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
