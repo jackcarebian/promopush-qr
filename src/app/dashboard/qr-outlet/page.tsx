@@ -12,32 +12,32 @@ import { PrintableQrCard } from "./components/printable-qr-card";
 const outlets = [
   {
     id: "outlet-001",
-    name: "Warung Makan \"Soto Seger Bu Sri\"",
+    name: "Kedai Kopi Lereng Merapi",
     location: "Boyolali, Jawa Tengah",
     qrData: "https://promopush.com/register?outlet=001",
   },
   {
     id: "outlet-002",
-    name: "Batik Pesisir \"Sekar Jagad\"",
-    location: "Pekalongan, Jawa Tengah",
+    name: "Griya Batik Kencana",
+    location: "Solo, Jawa Tengah",
     qrData: "https://promopush.com/register?outlet=002",
   },
   {
     id: "outlet-003",
-    name: "Griya Rias \"Ayu Jelita\"",
-    location: "Solo, Jawa Tengah",
+    name: "Omah Cantik Raras",
+    location: "Semarang, Jawa Tengah",
     qrData: "https://promopush.com/register?outlet=003",
   },
    {
     id: "outlet-004",
-    name: "Lumpia \"Gang Lombok\" Semarang",
-    location: "Semarang, Jawa Tengah",
+    name: "Toko Roti & Jajan Pasar Bu Warni",
+    location: "Kudus, Jawa Tengah",
     qrData: "https://promopush.com/register?outlet=004",
   },
   {
     id: "outlet-005",
-    name: "UMKM Center \"Jateng Gayeng\"",
-    location: "Online - Pengiriman dari Magelang",
+    name: "UMKM Digital 'Guyub Rukun'",
+    location: "Online - Pusat di Magelang",
     qrData: "https://promopush.com/register?outlet=005",
   },
 ];
