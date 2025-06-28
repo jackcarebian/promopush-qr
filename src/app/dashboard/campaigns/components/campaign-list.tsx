@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useCampaigns, Campaign } from "../../contexts/campaign-context";
+import { useCustomers } from "../../contexts/customer-context";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -37,7 +38,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
@@ -231,6 +232,7 @@ function EditCampaignDialog({ campaign, onUpdate }: { campaign: Campaign, onUpda
 
 export function CampaignList() {
   const { campaigns, updateCampaign, deleteCampaign } = useCampaigns();
+  const { customers } = useCustomers();
   const { toast } = useToast();
 
   const handleDelete = (id: string, title: string) => {
@@ -248,48 +250,62 @@ export function CampaignList() {
           <TableHead>Nama Kampanye</TableHead>
           <TableHead>Tanggal</TableHead>
           <TableHead>Kategori</TableHead>
+          <TableHead>Target Pelanggan</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="text-right">Aksi</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {campaigns.map((campaign) => (
-          <TableRow key={campaign.id}>
-            <TableCell className="font-medium">{campaign.title}</TableCell>
-            <TableCell>{format(new Date(`${campaign.date}T00:00:00`), "dd MMMM yyyy", { locale: id })}</TableCell>
-            <TableCell>{campaign.businessCategory}</TableCell>
-            <TableCell>
-              <Badge variant={campaign.status === "Berakhir" ? "secondary" : "default"}>
-                {campaign.status}
-              </Badge>
-            </TableCell>
-            <TableCell className="text-right space-x-1">
-              <EditCampaignDialog campaign={campaign} onUpdate={updateCampaign} />
-              
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Hapus</span>
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Tindakan ini tidak dapat dibatalkan. Ini akan menghapus kampanye "{campaign.title}" secara permanen.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Batal</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleDelete(campaign.id, campaign.title)}>Hapus</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+        {campaigns.map((campaign) => {
+          const targetedCustomers = customers.filter(customer =>
+            customer.interests.some(interest => campaign.interests.includes(interest))
+          );
+          const targetCount = targetedCustomers.length;
 
-            </TableCell>
-          </TableRow>
-        ))}
+          return (
+            <TableRow key={campaign.id}>
+              <TableCell className="font-medium">{campaign.title}</TableCell>
+              <TableCell>{format(new Date(`${campaign.date}T00:00:00`), "dd MMMM yyyy", { locale: id })}</TableCell>
+              <TableCell>{campaign.businessCategory}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2 font-medium">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span>{targetCount}</span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Badge variant={campaign.status === "Berakhir" ? "secondary" : "default"}>
+                  {campaign.status}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right space-x-1">
+                <EditCampaignDialog campaign={campaign} onUpdate={updateCampaign} />
+                
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Hapus</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tindakan ini tidak dapat dibatalkan. Ini akan menghapus kampanye "{campaign.title}" secara permanen.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Batal</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(campaign.id, campaign.title)}>Hapus</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
+              </TableCell>
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );
