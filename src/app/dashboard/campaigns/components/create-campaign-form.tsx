@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useCampaigns, Campaign } from "../../contexts/campaign-context";
 import { useRouter } from "next/navigation";
 import { interestCategories, businessCategories } from "../data/categories";
+import { useCustomers } from "../../contexts/customer-context";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Calendar as CalendarIcon, Send, X, Tag } from "lucide-react";
+import { Upload, Calendar as CalendarIcon, Send, X, Tag, Users } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -61,12 +62,14 @@ const formSchema = z.object({
 
 export function CreateCampaignForm() {
     const { addCampaign } = useCampaigns();
+    const { customers } = useCustomers();
     const router = useRouter();
     const { toast } = useToast();
     
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [progress, setProgress] = React.useState(0);
     const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+    const [targetedCustomerCount, setTargetedCustomerCount] = React.useState(0);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -83,10 +86,23 @@ export function CreateCampaignForm() {
 
     const watchSendTime = form.watch("sendTime");
     const watchBusinessCategory = form.watch("businessCategory");
+    const watchInterests = form.watch("interests");
 
     React.useEffect(() => {
         form.setValue("interests", []);
     }, [watchBusinessCategory, form]);
+
+    React.useEffect(() => {
+        if (!watchInterests || watchInterests.length === 0) {
+            setTargetedCustomerCount(0);
+            return;
+        }
+
+        const targeted = customers.filter(customer =>
+            customer.interests.some(interest => watchInterests.includes(interest))
+        );
+        setTargetedCustomerCount(targeted.length);
+    }, [watchInterests, customers]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -203,9 +219,17 @@ export function CreateCampaignForm() {
                         name="interests"
                         render={() => (
                             <FormItem>
-                                <FormLabel>Preferensi Minat Pelanggan</FormLabel>
-                                <FormDescription>Pilih minat yang paling relevan untuk kampanye ini.</FormDescription>
-                                <div className="space-y-2 rounded-md border p-4">
+                                <div className="flex justify-between items-center mb-2">
+                                    <div>
+                                        <FormLabel>Preferensi Minat Pelanggan</FormLabel>
+                                        <FormDescription>Pilih minat yang paling relevan untuk kampanye ini.</FormDescription>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm font-medium p-2 rounded-lg bg-secondary text-secondary-foreground shrink-0">
+                                        <Users className="h-5 w-5 text-primary" />
+                                        <span>{targetedCustomerCount} Pelanggan Tertarget</span>
+                                    </div>
+                                </div>
+                                <div className="space-y-2 rounded-md border p-4 max-h-40 overflow-y-auto">
                                 {!watchBusinessCategory ? (
                                     <p className="text-sm text-muted-foreground">Pilih kategori bisnis terlebih dahulu.</p>
                                 ) : (
