@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 // Define the shape of a single customer
@@ -30,21 +30,27 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Create a query to get customers, ordered by registration date
-    const q = query(collection(db, "pelanggan"), orderBy("registeredAt", "desc"));
+    // Query without ordering to be more robust against missing fields
+    const q = query(collection(db, "pelanggan"));
 
     // Set up a real-time listener with error handling
     const unsubscribe = onSnapshot(q, 
       (querySnapshot) => {
-        const customersData: Customer[] = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          customersData.push({
-            id: doc.id,
+        const customersData = querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+                ...data,
+                id: doc.id,
+            };
+        })
+        .filter(data => data.registeredAt) // Ensure the document has a registration date
+        .sort((a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime()) // Sort on the client side
+        .map((data) => ({ // Map to the final format for the UI
+            id: data.id,
             name: data.name,
             email: data.email,
             whatsapp: data.whatsapp || '',
-            interests: data.interests,
+            interests: data.interests || [],
             registeredAt: new Date(data.registeredAt).toLocaleString('id-ID', {
               year: 'numeric',
               month: 'long',
@@ -52,9 +58,9 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
               hour: '2-digit',
               minute: '2-digit'
             }),
-          });
-        });
-        setCustomers(customersData);
+        }));
+        
+        setCustomers(customersData as Customer[]);
       },
       (error) => {
         console.error("Gagal mengambil data pelanggan:", error);
