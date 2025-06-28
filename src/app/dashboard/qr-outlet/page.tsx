@@ -12,21 +12,33 @@ import { PrintableQrCard } from "./components/printable-qr-card";
 const outlets = [
   {
     id: "outlet-001",
-    name: "Toko Kopi Kenangan - Grand Indonesia",
-    location: "Jakarta Pusat",
+    name: "Warung Makan \"Soto Seger Bu Sri\"",
+    location: "Boyolali, Jawa Tengah",
     qrData: "https://promopush.com/register?outlet=001",
   },
   {
     id: "outlet-002",
-    name: "Salon Cantika - Mall Kelapa Gading",
-    location: "Jakarta Utara",
+    name: "Batik Pesisir \"Sekar Jagad\"",
+    location: "Pekalongan, Jawa Tengah",
     qrData: "https://promopush.com/register?outlet=002",
   },
   {
     id: "outlet-003",
-    name: "Resto Padang Sederhana - Benhil",
-    location: "Jakarta Pusat",
+    name: "Griya Rias \"Ayu Jelita\"",
+    location: "Solo, Jawa Tengah",
     qrData: "https://promopush.com/register?outlet=003",
+  },
+   {
+    id: "outlet-004",
+    name: "Lumpia \"Gang Lombok\" Semarang",
+    location: "Semarang, Jawa Tengah",
+    qrData: "https://promopush.com/register?outlet=004",
+  },
+  {
+    id: "outlet-005",
+    name: "UMKM Center \"Jateng Gayeng\"",
+    location: "Online - Pengiriman dari Magelang",
+    qrData: "https://promopush.com/register?outlet=005",
   },
 ];
 
