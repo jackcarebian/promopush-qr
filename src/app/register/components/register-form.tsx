@@ -108,72 +108,79 @@ export function RegisterForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    
+
     if (typeof window === "undefined" || !navigator.serviceWorker) {
       toast({
         variant: "destructive",
         title: "Browser Tidak Mendukung",
-        description: "Fitur notifikasi tidak didukung di browser ini.",
+        description: "Fitur notifikasi tidak didukung di browser ini. Namun, pendaftaran Anda tetap kami proses.",
       });
-      setIsSubmitting(false);
-      return;
     }
 
-    if (!messaging) {
+    let fcmToken = "";
+    let toastTitle = "Pendaftaran Berhasil!";
+    let toastDescription = "Terima kasih! Notifikasi promo telah diaktifkan untuk Anda.";
+
+    try {
+      // 1. Attempt to get notification permission and token if messaging is available
+      if (messaging) {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          try {
+            const sw = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            const token = await getToken(messaging, {
+              vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+              serviceWorkerRegistration: sw,
+            });
+
+            if (token) {
+              fcmToken = token;
+            } else {
+              toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
+              toastDescription = "Kami gagal mendapatkan token notifikasi. Anda dapat mencobanya lagi nanti di pengaturan browser.";
+            }
+          } catch (tokenError) {
+            console.error("Error getting FCM token:", tokenError);
+            toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
+            toastDescription = "Terjadi kesalahan teknis saat mengaktifkan notifikasi.";
+          }
+        } else {
+          // User denied or dismissed the permission prompt
+          toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Aktif";
+          toastDescription = "Data Anda telah disimpan. Anda tidak akan menerima notifikasi promo hingga Anda mengizinkannya di pengaturan browser.";
+        }
+      } else {
+        toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Tersedia";
+        toastDescription = "Data Anda telah disimpan, namun layanan notifikasi tidak dapat dimuat saat ini.";
+      }
+
+      // 2. Always save customer data to Firestore
+      await addDoc(collection(db, "pelanggan"), {
+        name: values.name,
+        email: values.email,
+        whatsapp: values.whatsapp || '',
+        interests: values.interests,
+        fcmToken: fcmToken, // Will be empty if permission is not granted or token fails
+        registeredAt: new Date().toISOString(),
+        outletId: outletId || 'unknown',
+      });
+
+      toast({
+        title: toastTitle,
+        description: toastDescription,
+      });
+      form.reset();
+
+    } catch (dbError) {
+      console.error("Gagal menyimpan pendaftaran ke DB:", dbError);
+      const errorMessage = dbError instanceof Error ? dbError.message : "Terjadi kesalahan pada database.";
       toast({
         variant: "destructive",
-        title: "Layanan Notifikasi Gagal",
-        description: "Gagal memuat layanan notifikasi. Coba muat ulang halaman.",
+        title: "Pendaftaran Gagal Total",
+        description: `Kami tidak dapat menyimpan data Anda saat ini. ${errorMessage}`,
       });
-      setIsSubmitting(false);
-      return;
-    }
-    
-    try {
-        // 1. Request permission from the user
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-            throw new Error('Izin notifikasi ditolak oleh pengguna.');
-        }
-
-        // 2. Register the service worker and get the FCM token
-        const sw = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        const fcmToken = await getToken(messaging, {
-            vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-            serviceWorkerRegistration: sw,
-        });
-
-        if (fcmToken) {
-            // 3. Save customer data AND the FCM token to Firestore
-            await addDoc(collection(db, "pelanggan"), {
-                name: values.name,
-                email: values.email,
-                whatsapp: values.whatsapp || '',
-                interests: values.interests,
-                fcmToken: fcmToken, // The unique "address" for notifications
-                registeredAt: new Date().toISOString(),
-                outletId: outletId || 'unknown',
-            });
-
-            toast({
-                title: "Pendaftaran Berhasil!",
-                description: "Terima kasih! Notifikasi promo telah diaktifkan untuk Anda.",
-            });
-            form.reset();
-        } else {
-             throw new Error('Gagal mendapatkan token notifikasi. Pastikan Anda tidak dalam mode incognito dan coba muat ulang halaman.');
-        }
-
-    } catch (err) {
-        console.error("Gagal mendaftar:", err);
-        const errorMessage = err instanceof Error ? err.message : "Terjadi kesalahan.";
-        toast({
-            variant: "destructive",
-            title: "Pendaftaran Gagal",
-            description: `Gagal menyimpan data atau mengaktifkan notifikasi. ${errorMessage}`,
-        });
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   }
 
