@@ -109,17 +109,25 @@ export function RegisterForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
 
-    if (typeof window === "undefined" || !messaging) {
-      toast({
-        variant: "destructive",
-        title: "Browser Tidak Didukung",
-        description: "Fitur notifikasi tidak didukung di browser ini. Namun, pendaftaran Anda tetap kami proses.",
-      });
+    if (!db) {
+        toast({
+            variant: "destructive",
+            title: "Pendaftaran Gagal",
+            description: "Layanan tidak tersedia. Konfigurasi server tidak lengkap.",
+        });
+        setIsSubmitting(false);
+        return;
     }
 
+    if (typeof window === "undefined") {
+      // Should not happen, but as a safeguard
+      setIsSubmitting(false);
+      return;
+    }
+    
     let fcmToken = "";
     let toastTitle = "Pendaftaran Berhasil!";
-    let toastDescription = "Terima kasih! Notifikasi promo telah diaktifkan untuk Anda.";
+    let toastDescription = "Terima kasih! Data Anda telah kami simpan.";
 
     try {
       // 1. Attempt to get notification permission and token
@@ -129,6 +137,7 @@ export function RegisterForm() {
           const token = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY });
           if (token) {
             fcmToken = token;
+            toastDescription = "Terima kasih! Notifikasi promo telah diaktifkan untuk Anda."
           } else {
             toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
             toastDescription = "Kami gagal mendapatkan token notifikasi. Anda dapat mencobanya lagi nanti di pengaturan browser.";
@@ -160,7 +169,6 @@ export function RegisterForm() {
       form.reset();
 
     } catch (error) {
-      // This catch block will now mostly handle Firestore errors or unexpected errors from getToken
       console.error("Gagal menyimpan pendaftaran:", error);
       const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan pada database.";
       toast({

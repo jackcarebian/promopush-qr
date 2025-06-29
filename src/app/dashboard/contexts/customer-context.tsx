@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, doc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, doc, deleteDoc, type DocumentData } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 // Define the shape of a single customer
@@ -32,6 +32,14 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   const deleteCustomer = async (id: string) => {
+    if (!db) {
+      toast({
+          variant: "destructive",
+          title: "Konfigurasi Firebase Tidak Ditemukan",
+          description: "Harap periksa kredensial Firebase Anda di file .env."
+      });
+      return;
+    }
     try {
       await deleteDoc(doc(db, "pelanggan", id));
       toast({
@@ -49,10 +57,18 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Query without ordering to be more robust against missing fields
+    if (!db) {
+        toast({
+            variant: "destructive",
+            title: "Database Tidak Terhubung",
+            description: "Konfigurasi Firebase tidak lengkap. Silakan periksa file .env Anda.",
+            duration: Infinity, // Keep the toast visible
+        });
+        return;
+    }
+    
     const q = query(collection(db, "pelanggan"));
 
-    // Set up a real-time listener with error handling
     const unsubscribe = onSnapshot(q, 
       (querySnapshot) => {
         const customersData = querySnapshot.docs.map((doc) => {
@@ -62,16 +78,16 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
                 id: doc.id,
             };
         })
-        .filter(data => data.registeredAt) // Ensure the document has a registration date
-        .sort((a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime()) // Sort on the client side
-        .map((data) => ({ // Map to the final format for the UI
+        .filter(data => data.registeredAt)
+        .sort((a, b) => new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime())
+        .map((data: DocumentData) => ({
             id: data.id,
             name: data.name,
             email: data.email,
             whatsapp: data.whatsapp || '',
             interests: data.interests || [],
             registeredAt: data.registeredAt,
-            fcmToken: data.fcmToken || '', // Get the FCM token
+            fcmToken: data.fcmToken || '',
         }));
         
         setCustomers(customersData as Customer[]);
@@ -86,9 +102,8 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Cleanup subscription on component unmount
     return () => unsubscribe();
-  }, [toast]); // Empty dependency array means this effect runs once on mount
+  }, [toast]);
 
   return (
     <CustomerContext.Provider value={{ customers, deleteCustomer }}>

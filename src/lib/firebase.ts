@@ -1,7 +1,7 @@
 
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getMessaging } from 'firebase/messaging';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
+import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getMessaging, type Messaging } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,10 +12,29 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+let app: FirebaseApp | null = null;
+let db: Firestore | null = null;
+let messaging: Messaging | null = null;
 
-const db = getFirestore(app);
-const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
+// Only initialize Firebase if the configuration is valid.
+const isConfigValid = firebaseConfig.projectId && firebaseConfig.apiKey;
+
+if (isConfigValid) {
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+  db = getFirestore(app);
+  if (typeof window !== 'undefined') {
+    try {
+      // Messaging requires a service worker which might not be set up,
+      // so we'll wrap this in a try-catch to prevent crashes.
+      messaging = getMessaging(app);
+    } catch (error) {
+      console.error("Could not initialize Firebase Messaging.", error);
+    }
+  }
+} else {
+  // Log an error to the console for developers.
+  // The UI will handle showing a message to the user.
+  console.error("Firebase configuration is missing or invalid. Please check your environment variables.");
+}
 
 export { db, messaging, app };
