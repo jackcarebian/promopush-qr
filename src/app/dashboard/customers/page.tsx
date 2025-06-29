@@ -52,9 +52,9 @@ export default function CustomersPage() {
                             <TableRow>
                             <TableHead>Nama</TableHead>
                             <TableHead>Email</TableHead>
-                            <TableHead>WhatsApp</TableHead>
                             <TableHead>Minat</TableHead>
                             <TableHead>Tanggal Daftar</TableHead>
+                            <TableHead>Token FCM</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -62,7 +62,6 @@ export default function CustomersPage() {
                             <TableRow key={customer.id}>
                                 <TableCell className="font-medium">{customer.name}</TableCell>
                                 <TableCell>{customer.email}</TableCell>
-                                <TableCell>{customer.whatsapp}</TableCell>
                                 <TableCell>
                                     <div className="flex flex-wrap gap-1">
                                         {customer.interests.map((interestId) => (
@@ -73,6 +72,11 @@ export default function CustomersPage() {
                                     </div>
                                 </TableCell>
                                 <TableCell>{format(new Date(customer.registeredAt), 'dd MMMM yyyy, HH:mm', { locale: id })}</TableCell>
+                                <TableCell>
+                                    <span title={customer.fcmToken} className="block max-w-xs truncate text-muted-foreground text-xs font-mono">
+                                        {customer.fcmToken || "-"}
+                                    </span>
+                                </TableCell>
                             </TableRow>
                             ))}
                         </TableBody>

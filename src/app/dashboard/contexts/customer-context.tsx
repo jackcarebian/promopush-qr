@@ -14,6 +14,7 @@ export interface Customer {
   whatsapp: string;
   interests: string[]; // Array of interest IDs
   registeredAt: string; // ISO date string
+  fcmToken: string; // Token for push notifications
 }
 
 // Define the shape of the context
@@ -51,7 +52,8 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
             email: data.email,
             whatsapp: data.whatsapp || '',
             interests: data.interests || [],
-            registeredAt: data.registeredAt, // Pass ISO string directly
+            registeredAt: data.registeredAt,
+            fcmToken: data.fcmToken || '', // Get the FCM token
         }));
         
         setCustomers(customersData as Customer[]);

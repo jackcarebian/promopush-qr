@@ -84,6 +84,7 @@ export function RegisterForm() {
     if (outlet && interestCategories[outlet.businessCategory]) {
       return interestCategories[outlet.businessCategory].interests;
     }
+    // As a fallback, show all interests if outlet is not found or has no specific category
     return Object.values(interestCategories).flatMap(category => category.interests);
   }, [outlet]);
 
@@ -100,6 +101,7 @@ export function RegisterForm() {
     },
   });
 
+  // Reset interests when the available options change
   React.useEffect(() => {
     form.reset({ ...form.getValues(), interests: [] });
   }, [interestsToShow, form]);
@@ -128,11 +130,13 @@ export function RegisterForm() {
     }
     
     try {
+        // 1. Request permission from the user
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
             throw new Error('Izin notifikasi ditolak oleh pengguna.');
         }
 
+        // 2. Register the service worker and get the FCM token
         const sw = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
         const fcmToken = await getToken(messaging, {
             vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
@@ -140,12 +144,13 @@ export function RegisterForm() {
         });
 
         if (fcmToken) {
+            // 3. Save customer data AND the FCM token to Firestore
             await addDoc(collection(db, "pelanggan"), {
                 name: values.name,
                 email: values.email,
                 whatsapp: values.whatsapp || '',
                 interests: values.interests,
-                token_fcm: fcmToken,
+                fcmToken: fcmToken, // The unique "address" for notifications
                 registeredAt: new Date().toISOString(),
                 outletId: outletId || 'unknown',
             });
