@@ -82,7 +82,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Jasa & Profesional": {
-        emoji: "🧺",
+        emoji: " ",
         interests: [
             { id: "promo-laundry", label: "Promo Laundry Kiloan" },
             { id: "diskon-cleaning-service", label: "Diskon Jasa Kebersihan" },
@@ -91,7 +91,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Kesehatan & Kebugaran": {
-        emoji: "💪",
+        emoji: " ",
         interests: [
             { id: "promo-membership-gym", label: "Promo Membership Gym" },
             { id: "diskon-kelas-yoga", label: "Diskon Kelas Yoga / Pilates" },
@@ -100,7 +100,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Hiburan & Hobi": {
-        emoji: "🎟️",
+        emoji: " ",
         interests: [
             { id: "promo-tiket-nonton", label: "Promo Tiket Nonton Bioskop" },
             { id: "diskon-buku-game", label: "Diskon Buku atau Game" },
