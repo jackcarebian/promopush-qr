@@ -1,4 +1,3 @@
-
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getMessaging, type Messaging } from 'firebase/messaging';
@@ -31,10 +30,6 @@ if (isConfigValid) {
       console.error("Could not initialize Firebase Messaging.", error);
     }
   }
-} else {
-  // Log an error to the console for developers.
-  // The UI will handle showing a message to the user.
-  console.error("Firebase configuration is missing or invalid. Please check your environment variables.");
 }
 
 export { db, messaging, app };
