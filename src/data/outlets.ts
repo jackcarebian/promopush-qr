@@ -40,9 +40,45 @@ export const outlets: OutletData[] = [
   },
   {
     id: "outlet-006",
-    name: "Warung Mendoan Mbah Kakung",
-    location: "Banyumas, Jawa Tengah",
-    businessCategory: "Cafe, Resto, Foodcourt",
+    name: "Jaya Elektronik",
+    location: "Surabaya, Jawa Timur",
+    businessCategory: "Elektronik & Gadget",
+  },
+  {
+    id: "outlet-007",
+    name: "Sentosa Furnitur",
+    location: "Bandung, Jawa Barat",
+    businessCategory: "Furnitur & Dekorasi",
+  },
+  {
+    id: "outlet-008",
+    name: "Glamour Kosmetik",
+    location: "Jakarta Selatan, DKI Jakarta",
+    businessCategory: "Kosmetik & Skincare",
+  },
+  {
+    id: "outlet-009",
+    name: "Bengkel Maju Jaya Motor",
+    location: "Yogyakarta, DIY",
+    businessCategory: "Bengkel & Otomotif",
+  },
+  {
+    id: "outlet-010",
+    name: "KlinKlin Laundry",
+    location: "Denpasar, Bali",
+    businessCategory: "Jasa & Profesional",
+  },
+  {
+    id: "outlet-011",
+    name: "Pusat Kebugaran Bugar Selalu",
+    location: "Medan, Sumatera Utara",
+    businessCategory: "Kesehatan & Kebugaran",
+  },
+  {
+    id: "outlet-012",
+    name: "Toko Buku 'Cakrawala Ilmu'",
+    location: "Makassar, Sulawesi Selatan",
+    businessCategory: "Hiburan & Hobi",
   },
 ];
 

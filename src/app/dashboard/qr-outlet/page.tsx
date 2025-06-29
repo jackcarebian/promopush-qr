@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogClose, DialogHeader, DialogTitle, DialogDe
 import { PrintableQrCard } from "./components/printable-qr-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { outlets as outletsData, type OutletData } from "@/data/outlets";
+import { interestCategories } from "../campaigns/data/categories";
 import { useAuth } from "../contexts/auth-context";
 
 type Outlet = OutletData;
@@ -72,13 +73,17 @@ export default function QrOutletPage() {
                 <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {outletsData.map((outlet) => {
                         const qrData = getQrDataUrl(outlet.id);
+                        const categoryEmoji = interestCategories[outlet.businessCategory]?.emoji || '🏢';
                         return (
-                            <Card key={outlet.id}>
+                            <Card key={outlet.id} className="flex flex-col">
                                 <CardHeader>
-                                    <CardTitle className="text-lg">{outlet.name}</CardTitle>
+                                    <CardTitle className="flex items-center gap-2 text-lg">
+                                        <span>{categoryEmoji}</span>
+                                        {outlet.name}
+                                    </CardTitle>
                                     <CardDescription>{outlet.location}</CardDescription>
                                 </CardHeader>
-                                <CardContent className="flex justify-center items-center p-4">
+                                <CardContent className="flex-grow flex justify-center items-center p-4">
                                     {origin ? (
                                         <Image
                                             src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`}
