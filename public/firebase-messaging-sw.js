@@ -1,32 +1,38 @@
-// This file must be in the public folder.
+// Import skrip Firebase
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-// These scripts are required for the service worker to work.
-importScripts("https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/9.22.2/firebase-messaging-compat.js");
+try {
+    // Ambil konfigurasi Firebase dari parameter URL
+    const urlParams = new URLSearchParams(location.search);
+    const firebaseConfigParam = urlParams.get('firebaseConfig');
+    
+    if (!firebaseConfigParam) {
+        console.error('Konfigurasi Firebase tidak ditemukan di URL service worker.');
+    } else {
+        const firebaseConfig = JSON.parse(decodeURIComponent(firebaseConfigParam));
+        
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
 
-// Initialize the Firebase app in the service worker with the same config.
-// IMPORTANT: These values are hardcoded for the demo and should be
-// replaced with a secure method of loading configuration in a production environment.
-firebase.initializeApp({
-  apiKey: "AIzaSyASqEDrSRQ0ZgOW8V5NMALQ1RBtTp8o5mI",
-  authDomain: "promopush-qr.firebaseapp.com",
-  projectId: "promopush-qr",
-  storageBucket: "promopush-qr.firebasestorage.app",
-  messagingSenderId: "246705033642",
-  appId: "1:246705033642:web:b244307a45314efa6f1bd3"
-});
+        const messaging = firebase.messaging();
 
-// Retrieve an instance of Firebase Messaging so that it can handle background messages.
-const messaging = firebase.messaging();
+        // Tangani pesan notifikasi saat aplikasi berada di background
+        messaging.onBackgroundMessage((payload) => {
+            console.log(
+                '[firebase-messaging-sw.js] Menerima pesan background ',
+                payload,
+            );
+            
+            const notificationTitle = payload.notification.title || 'Notifikasi Baru';
+            const notificationOptions = {
+                body: payload.notification.body || 'Anda punya pesan baru.',
+                icon: '/logo.png', // Ganti dengan path ke logo Anda
+            };
 
-messaging.onBackgroundMessage(function(payload) {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/icon.png'
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
-});
+            self.registration.showNotification(notificationTitle, notificationOptions);
+        });
+    }
+} catch (e) {
+    console.error('Error di service worker:', e);
+}
