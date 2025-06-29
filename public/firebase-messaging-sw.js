@@ -1,38 +1,41 @@
-// Import skrip Firebase
-importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
+// This file must be in the public folder.
+// It's used by Firebase Messaging to handle background notifications.
 
-try {
-    // Ambil konfigurasi Firebase dari parameter URL
-    const urlParams = new URLSearchParams(location.search);
-    const firebaseConfigParam = urlParams.get('firebaseConfig');
-    
-    if (!firebaseConfigParam) {
-        console.error('Konfigurasi Firebase tidak ditemukan di URL service worker.');
-    } else {
-        const firebaseConfig = JSON.parse(decodeURIComponent(firebaseConfigParam));
-        
-        // Inisialisasi Firebase
+// Firebase SDKs are imported dynamically.
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+
+// The service worker is initialized with the Firebase config passed via URL parameters
+// when the service worker is registered in register-form.tsx.
+const urlParams = new URLSearchParams(location.search);
+const firebaseConfigParam = urlParams.get('firebaseConfig');
+
+if (firebaseConfigParam) {
+    try {
+        const firebaseConfig = JSON.parse(firebaseConfigParam);
         firebase.initializeApp(firebaseConfig);
 
         const messaging = firebase.messaging();
 
-        // Tangani pesan notifikasi saat aplikasi berada di background
+        // Optional: Handle background messages here.
+        // This allows you to show notifications even when the app is not in the foreground.
         messaging.onBackgroundMessage((payload) => {
             console.log(
-                '[firebase-messaging-sw.js] Menerima pesan background ',
-                payload,
+                '[firebase-messaging-sw.js] Received background message ',
+                payload
             );
-            
-            const notificationTitle = payload.notification.title || 'Notifikasi Baru';
+
+            const notificationTitle = payload.notification.title;
             const notificationOptions = {
-                body: payload.notification.body || 'Anda punya pesan baru.',
-                icon: '/logo.png', // Ganti dengan path ke logo Anda
+                body: payload.notification.body,
+                icon: '/icon.png' // Optional: path to a public icon
             };
 
             self.registration.showNotification(notificationTitle, notificationOptions);
         });
+    } catch (e) {
+        console.error('Error initializing Firebase in service worker', e);
     }
-} catch (e) {
-    console.error('Error di service worker:', e);
+} else {
+    console.error('Firebase config not found in service worker URL.');
 }
