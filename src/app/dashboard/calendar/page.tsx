@@ -37,8 +37,12 @@ export default function CalendarPage() {
         }
     });
 
-    const activeAndUpcomingCampaigns = campaigns
-        .filter(c => c.status === 'Akan Datang' || c.status === 'Sedang Berlangsung')
+    const ongoingCampaigns = campaigns
+        .filter(c => c.status === 'Sedang Berlangsung')
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    
+    const upcomingCampaigns = campaigns
+        .filter(c => c.status === 'Akan Datang')
         .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
     const pastCampaigns = campaigns
@@ -128,15 +132,35 @@ export default function CalendarPage() {
                     />
                 </CardContent>
             </Card>
+            
+            <div className="space-y-6">
+                <div>
+                    <h2 className="text-2xl font-headline font-semibold">Kampanye Sedang Berlangsung</h2>
+                    <p className="text-muted-foreground">Kampanye yang sedang aktif dan berjalan saat ini.</p>
+                </div>
+                {ongoingCampaigns.length > 0 ? (
+                    <div className="grid gap-6">
+                        {ongoingCampaigns.map((campaign, index) => (
+                           <CampaignCard key={`ongoing-${index}`} campaign={campaign} />
+                        ))}
+                    </div>
+                ) : (
+                    <Card>
+                        <CardContent className="p-6 text-center text-muted-foreground">
+                            Tidak ada kampanye yang sedang berlangsung.
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
 
             <div className="space-y-6">
                 <div>
-                    <h2 className="text-2xl font-headline font-semibold">Kampanye Aktif & Akan Datang</h2>
+                    <h2 className="text-2xl font-headline font-semibold">Kampanye Akan Datang</h2>
                     <p className="text-muted-foreground">Berikut adalah kampanye yang sudah Anda jadwalkan.</p>
                 </div>
-                {activeAndUpcomingCampaigns.length > 0 ? (
+                {upcomingCampaigns.length > 0 ? (
                     <div className="grid gap-6">
-                        {activeAndUpcomingCampaigns.map((campaign, index) => (
+                        {upcomingCampaigns.map((campaign, index) => (
                            <CampaignCard key={`upcoming-${index}`} campaign={campaign} />
                         ))}
                     </div>
