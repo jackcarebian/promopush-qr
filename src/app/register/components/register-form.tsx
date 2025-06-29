@@ -75,6 +75,78 @@ export function RegisterFormSkeleton() {
     )
 }
 
+// Helper function to isolate the token logic for better error handling and clarity
+async function getNotificationToken(): Promise<{ fcmToken: string; toastTitle: string; toastDescription: string }> {
+  let toastTitle = "Pendaftaran Berhasil!";
+  let toastDescription = "Terima kasih! Data Anda telah kami simpan.";
+
+  // 1. Check for browser support & secure environment
+  if (typeof window === "undefined" || !('serviceWorker' in navigator) || !window.isSecureContext) {
+    console.warn("Browser tidak mendukung notifikasi atau konteks tidak aman. Proses aktivasi notifikasi dilewati.");
+    toastDescription = "Browser Anda tidak mendukung notifikasi atau koneksi tidak aman.";
+    return { fcmToken: "", toastTitle, toastDescription };
+  }
+  
+  if (!messaging) {
+    console.warn("Layanan Firebase Messaging tidak tersedia. Proses aktivasi notifikasi dilewati.");
+    toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Tersedia";
+    toastDescription = "Layanan notifikasi tidak dapat dimuat saat ini.";
+    return { fcmToken: "", toastTitle, toastDescription };
+  }
+
+  try {
+    // 2. Request permission from the user
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.log("Izin notifikasi ditolak oleh pengguna.");
+      toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Aktif";
+      toastDescription = "Anda tidak akan menerima promo hingga izin notifikasi diberikan di pengaturan browser.";
+      return { fcmToken: "", toastTitle, toastDescription };
+    }
+
+    // 3. Register the service worker
+    console.log("Izin notifikasi diberikan. Mendaftarkan service worker...");
+    const firebaseConfig = {
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    };
+    const swUrl = `/firebase-messaging-sw.js?${new URLSearchParams(firebaseConfig as Record<string, string>).toString()}`;
+    const registration = await navigator.serviceWorker.register(swUrl);
+    console.log("Service worker berhasil didaftarkan:", registration);
+
+    // 4. Get the FCM token
+    console.log("Mencoba mendapatkan token FCM...");
+    const token = await getToken(messaging, {
+      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: registration,
+    });
+
+    if (token) {
+      console.log("Token FCM berhasil didapatkan:", token);
+      toastDescription = "Terima kasih! Notifikasi promo telah diaktifkan untuk Anda.";
+      return { fcmToken: token, toastTitle, toastDescription };
+    } else {
+      console.warn("Gagal mendapatkan token FCM. 'getToken' tidak mengembalikan token.");
+      toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
+      toastDescription = "Kami gagal mengaktifkan notifikasi untuk browser Anda. Anda dapat mencobanya lagi nanti.";
+      return { fcmToken: "", toastTitle, toastDescription };
+    }
+  } catch (err) {
+    console.error("Error saat proses aktivasi notifikasi:", err);
+    toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
+    if (err instanceof Error && err.message.includes("unsupported-browser")) {
+      toastDescription = "Browser Anda tidak mendukung fitur notifikasi ini.";
+    } else {
+      toastDescription = "Terjadi kesalahan saat mencoba mengaktifkan notifikasi.";
+    }
+    return { fcmToken: "", toastTitle, toastDescription };
+  }
+}
+
 export function RegisterForm() {
   const searchParams = useSearchParams();
   const outletId = searchParams.get('outlet');
@@ -84,7 +156,6 @@ export function RegisterForm() {
     if (outlet && interestCategories[outlet.businessCategory]) {
       return interestCategories[outlet.businessCategory].interests;
     }
-    // As a fallback, show all interests if outlet is not found or has no specific category
     return Object.values(interestCategories).flatMap(category => category.interests);
   }, [outlet]);
 
@@ -101,7 +172,6 @@ export function RegisterForm() {
     },
   });
 
-  // Reset interests when the available options change
   React.useEffect(() => {
     form.reset({ ...form.getValues(), interests: [] });
   }, [interestsToShow, form]);
@@ -119,61 +189,18 @@ export function RegisterForm() {
         return;
     }
 
-    if (typeof window === "undefined") {
-      // Should not happen, but as a safeguard
-      setIsSubmitting(false);
-      return;
-    }
-    
-    let fcmToken = "";
-    let toastTitle = "Pendaftaran Berhasil!";
-    let toastDescription = "Terima kasih! Data Anda telah kami simpan.";
+    // Get token and user-facing messages by running our robust helper function
+    const { fcmToken, toastTitle, toastDescription } = await getNotificationToken();
 
     try {
-      // 1. Attempt to get notification permission and token
-      if (messaging) {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          // Construct the service worker URL with config params
-          const firebaseConfig = {
-            apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-            authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-            messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-            appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-          };
-          const swUrl = `/firebase-messaging-sw.js?${new URLSearchParams(firebaseConfig as Record<string, string>).toString()}`;
-          const registration = await navigator.serviceWorker.register(swUrl);
-          
-          const token = await getToken(messaging, {
-              vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-              serviceWorkerRegistration: registration,
-          });
-
-          if (token) {
-            fcmToken = token;
-            toastDescription = "Terima kasih! Notifikasi promo telah diaktifkan untuk Anda."
-          } else {
-            toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
-            toastDescription = "Kami gagal mendapatkan token notifikasi. Anda dapat mencobanya lagi nanti di pengaturan browser.";
-          }
-        } else {
-          toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Aktif";
-          toastDescription = "Data Anda telah disimpan. Anda tidak akan menerima notifikasi promo hingga Anda mengizinkannya di pengaturan browser.";
-        }
-      } else {
-          toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Tersedia";
-          toastDescription = "Data Anda telah disimpan, namun layanan notifikasi tidak dapat dimuat saat ini.";
-      }
-
-      // 2. Always save customer data to Firestore
+      console.log(`Menyimpan data pelanggan dengan token FCM: ${fcmToken || 'tidak ada'}`);
+      // Always save customer data to Firestore, with or without a token
       await addDoc(collection(db, "pelanggan"), {
         name: values.name,
         email: values.email,
         whatsapp: values.whatsapp || '',
         interests: values.interests,
-        fcmToken: fcmToken, // Will be empty if permission not granted or token fails
+        fcmToken: fcmToken,
         registeredAt: new Date().toISOString(),
         outletId: outletId || 'unknown',
       });
@@ -185,11 +212,11 @@ export function RegisterForm() {
       form.reset();
 
     } catch (error) {
-      console.error("Gagal menyimpan pendaftaran:", error);
+      console.error("Gagal menyimpan pendaftaran ke Firestore:", error);
       const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan pada database.";
       toast({
         variant: "destructive",
-        title: "Pendaftaran Gagal Total",
+        title: "Pendaftaran Gagal Disimpan",
         description: `Kami tidak dapat menyimpan data Anda saat ini. ${errorMessage}`,
       });
     } finally {
