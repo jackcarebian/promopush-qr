@@ -19,12 +19,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { interestCategories } from "@/app/dashboard/campaigns/data/categories";
 import { getOutletById } from "@/data/outlets";
+import { Check } from "lucide-react";
+
 
 // Firebase imports
 import { db, messaging } from "@/lib/firebase";
@@ -161,6 +163,7 @@ export function RegisterForm() {
 
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSuccess, setIsSuccess] = React.useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -209,7 +212,7 @@ export function RegisterForm() {
         title: toastTitle,
         description: toastDescription,
       });
-      form.reset();
+      setIsSuccess(true);
 
     } catch (error) {
       console.error("Gagal menyimpan pendaftaran ke Firestore:", error);
@@ -222,6 +225,28 @@ export function RegisterForm() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (isSuccess) {
+    return (
+        <Card className="w-full max-w-lg text-center shadow-2xl">
+            <CardHeader>
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
+                    <Check className="h-10 w-10 text-green-600 dark:text-green-400" />
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+                <CardTitle className="font-headline text-2xl">Pendaftaran Berhasil!</CardTitle>
+                <CardDescription className="px-4">
+                    Terima kasih telah bergabung. Anda akan menjadi orang pertama yang tahu tentang promo eksklusif kami.
+                </CardDescription>
+            </CardContent>
+            <CardFooter className="flex flex-col items-center justify-center gap-4 pt-4">
+                <p className="text-sm text-muted-foreground">Anda sekarang dapat menutup halaman ini.</p>
+                <Button onClick={() => window.close()} className="w-full max-w-xs">Tutup Halaman</Button>
+            </CardFooter>
+        </Card>
+    );
   }
 
   return (
