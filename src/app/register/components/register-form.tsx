@@ -183,11 +183,14 @@ export function RegisterForm() {
       interests: [],
     },
   });
+  
+  const { setValue } = form;
 
   React.useEffect(() => {
-    // Reset interests when the available interests change, ensuring no invalid selections persist.
-    form.reset({ ...form.getValues(), interests: [] });
-  }, [interestsToShow, form]);
+    // Reset interests when the available interests change. This is safer than form.reset()
+    // and prevents submitting interests for a different business category if the URL changes.
+    setValue("interests", []);
+  }, [interestsToShow, setValue]);
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
