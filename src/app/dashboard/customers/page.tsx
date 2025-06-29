@@ -13,18 +13,29 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 import { useCustomers } from "../contexts/customer-context";
 import { interestCategories } from "../campaigns/data/categories";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
   
 // Helper to create a flat map of all possible interests for easy lookup
 const allInterests = Object.values(interestCategories).flatMap(category => category.interests);
 const interestLabelMap = new Map(allInterests.map(interest => [interest.id, interest.label]));
 
 export default function CustomersPage() {
-    const { customers } = useCustomers();
+    const { customers, deleteCustomer } = useCustomers();
 
     return (
         <div className="space-y-8">
@@ -55,6 +66,7 @@ export default function CustomersPage() {
                             <TableHead>Minat</TableHead>
                             <TableHead>Tanggal Daftar</TableHead>
                             <TableHead>Token FCM</TableHead>
+                            <TableHead className="text-right">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -76,6 +88,28 @@ export default function CustomersPage() {
                                     <span title={customer.fcmToken} className="block max-w-xs truncate text-muted-foreground text-xs font-mono">
                                         {customer.fcmToken || "-"}
                                     </span>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                          <Trash2 className="h-4 w-4" />
+                                          <span className="sr-only">Hapus</span>
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Tindakan ini tidak dapat dibatalkan. Ini akan menghapus data pelanggan <strong>{customer.name}</strong> secara permanen.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Batal</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => deleteCustomer(customer.id)}>Hapus</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
                                 </TableCell>
                             </TableRow>
                             ))}

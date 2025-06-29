@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import { collection, onSnapshot, query, doc, deleteDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 // Define the shape of a single customer
@@ -20,6 +20,7 @@ export interface Customer {
 // Define the shape of the context
 interface CustomerContextType {
   customers: Customer[];
+  deleteCustomer: (id: string) => void;
 }
 
 // Create the context with a default value
@@ -29,6 +30,23 @@ const CustomerContext = createContext<CustomerContextType | undefined>(undefined
 export const CustomersProvider = ({ children }: { children: ReactNode }) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const { toast } = useToast();
+
+  const deleteCustomer = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "pelanggan", id));
+      toast({
+        title: "Pelanggan Dihapus",
+        description: "Data pelanggan telah berhasil dihapus dari database."
+      });
+    } catch (error) {
+      console.error("Gagal menghapus pelanggan:", error);
+      toast({
+        variant: "destructive",
+        title: "Gagal Menghapus",
+        description: "Terjadi kesalahan saat menghapus data pelanggan."
+      });
+    }
+  };
 
   useEffect(() => {
     // Query without ordering to be more robust against missing fields
@@ -73,7 +91,7 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
   }, [toast]); // Empty dependency array means this effect runs once on mount
 
   return (
-    <CustomerContext.Provider value={{ customers }}>
+    <CustomerContext.Provider value={{ customers, deleteCustomer }}>
       {children}
     </CustomerContext.Provider>
   );
