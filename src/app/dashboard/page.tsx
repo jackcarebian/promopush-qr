@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -8,17 +9,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Megaphone, Users, BarChart2, Calendar } from "lucide-react";
+import { Megaphone, Users, BarChart2, Calendar, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useCustomers } from "./contexts/customer-context";
 import { useCampaigns } from "./contexts/campaign-context";
 import { CustomerLoyaltyChart } from "./components/customer-loyalty-chart";
 import { InterestDistributionChart } from "./components/interest-distribution-chart";
 import { useEffect, useState } from "react";
+import { useAuth } from "./contexts/auth-context";
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function DashboardPage() {
   const { customers } = useCustomers();
   const { campaigns } = useCampaigns();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [conversionRate, setConversionRate] = useState("0.0%");
 
   const totalCustomers = customers.length;
@@ -33,6 +39,34 @@ export default function DashboardPage() {
       setConversionRate(`${finalRate.toFixed(1)}%`);
     }
   }, [totalCampaigns, totalCustomers]);
+
+  const handleCacheClean = async () => {
+    toast({ title: "Pembersihan dimulai...", description: "Mencoba menghapus service worker dan membersihkan cache." });
+    try {
+        if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            if (registrations.length) {
+                for (const registration of registrations) {
+                    await registration.unregister();
+                }
+                toast({ title: "Service Worker Dihapus", description: "Semua service worker aktif telah berhasil dihapus." });
+            } else {
+                toast({ title: "Tidak Ada Service Worker", description: "Tidak ada service worker aktif yang ditemukan untuk dibersihkan." });
+            }
+        }
+        
+        // Force a hard reload, bypassing the cache
+        window.location.reload(true);
+
+    } catch (error) {
+        console.error('Gagal membersihkan cache:', error);
+        toast({
+            variant: "destructive",
+            title: "Gagal Membersihkan",
+            description: "Terjadi kesalahan saat mencoba membersihkan cache.",
+        });
+    }
+  };
 
 
   return (
@@ -117,6 +151,25 @@ export default function DashboardPage() {
             </Button>
         </CardContent>
       </Card>
+
+      {user?.role === 'admin' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-headline">Utilitas Admin</CardTitle>
+            <CardDescription>Alat untuk pemeliharaan dan pemecahan masalah.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleCacheClean}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Bersihkan Cache & Segarkan
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Gunakan ini jika Anda mengalami masalah dengan data yang usang atau notifikasi. Ini akan menghapus paksa service worker dan memuat ulang halaman.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
     </div>
   );
 }
