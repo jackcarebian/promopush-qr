@@ -1,10 +1,11 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, doc, deleteDoc, type DocumentData } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from './auth-context';
 
 // Define the shape of a single customer
 export interface Customer {
@@ -15,6 +16,7 @@ export interface Customer {
   interests: string[]; // Array of interest IDs
   registeredAt: string; // ISO date string
   fcmToken: string; // Token for push notifications
+  outletId: string;
 }
 
 // Define the shape of the context
@@ -28,8 +30,9 @@ const CustomerContext = createContext<CustomerContextType | undefined>(undefined
 
 // Create the provider component
 export const CustomersProvider = ({ children }: { children: ReactNode }) => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [allCustomers, setAllCustomers] = useState<Customer[]>([]);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const deleteCustomer = async (id: string) => {
     if (!db) {
@@ -40,6 +43,13 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
       });
       return;
     }
+    // Optional: Add role-based check if members can delete customers
+    const customerToDelete = allCustomers.find(c => c.id === id);
+     if (user?.role === 'member' && customerToDelete?.outletId !== user.outletId) {
+        toast({ variant: "destructive", title: "Akses Ditolak" });
+        return;
+    }
+
     try {
       await deleteDoc(doc(db, "pelanggan", id));
       toast({
@@ -88,9 +98,10 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
             interests: data.interests || [],
             registeredAt: data.registeredAt,
             fcmToken: data.fcmToken || '',
+            outletId: data.outletId || 'unknown'
         }));
         
-        setCustomers(customersData as Customer[]);
+        setAllCustomers(customersData as Customer[]);
       },
       (error) => {
         console.error("Gagal mengambil data pelanggan:", error);
@@ -105,8 +116,16 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, [toast]);
 
+  const filteredCustomers = useMemo(() => {
+    if (user?.role === 'member') {
+        return allCustomers.filter(c => c.outletId === user.outletId);
+    }
+    return allCustomers;
+  }, [allCustomers, user]);
+
+
   return (
-    <CustomerContext.Provider value={{ customers, deleteCustomer }}>
+    <CustomerContext.Provider value={{ customers: filteredCustomers, deleteCustomer }}>
       {children}
     </CustomerContext.Provider>
   );

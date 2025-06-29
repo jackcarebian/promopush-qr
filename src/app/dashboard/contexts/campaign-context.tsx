@@ -2,6 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import { useAuth } from './auth-context';
 
 // Define the shape of a single campaign
 export interface Campaign {
@@ -15,12 +16,13 @@ export interface Campaign {
   businessCategory: string;
   interests: string[];
   variant: "default" | "secondary";
+  outletId: string;
 }
 
 // Define the shape of the context
 interface CampaignContextType {
   campaigns: Campaign[];
-  addCampaign: (campaign: Campaign) => void;
+  addCampaign: (campaign: Omit<Campaign, 'id' | 'status' | 'outletId'>) => void;
   updateCampaign: (id: string, updatedCampaign: Omit<Campaign, 'id'>) => void;
   deleteCampaign: (id: string) => void;
 }
@@ -39,6 +41,7 @@ const initialCampaigns: Campaign[] = [
     businessCategory: "Butik & Aksesoris",
     interests: ["promo-pakaian", "flash-sale"],
     variant: "secondary",
+    outletId: "outlet-002",
   },
   {
     id: 'campaign-2',
@@ -51,6 +54,7 @@ const initialCampaigns: Campaign[] = [
     businessCategory: "Toko Online",
     interests: ["diskon-spesial"],
     variant: "secondary",
+    outletId: "outlet-005",
   },
   {
     id: 'campaign-3',
@@ -63,6 +67,7 @@ const initialCampaigns: Campaign[] = [
     businessCategory: "Cafe, Resto, Foodcourt",
     interests: ["promo-minuman"],
     variant: "secondary",
+    outletId: "outlet-001",
   },
   // 7 Upcoming Campaigns
   {
@@ -76,6 +81,7 @@ const initialCampaigns: Campaign[] = [
     businessCategory: "Cafe, Resto, Foodcourt",
     interests: ["promo-makanan", "promo-minuman"],
     variant: "default",
+    outletId: "outlet-006",
   },
   {
     id: 'campaign-5',
@@ -88,6 +94,7 @@ const initialCampaigns: Campaign[] = [
     businessCategory: "Toko Online",
     interests: ["diskon-spesial"],
     variant: "default",
+    outletId: "outlet-005",
   },
   {
     id: 'campaign-6',
@@ -100,6 +107,7 @@ const initialCampaigns: Campaign[] = [
     businessCategory: "Butik & Aksesoris",
     interests: ["promo-pakaian", "promo-tas-sepatu"],
     variant: "default",
+    outletId: "outlet-002",
   },
   {
     id: 'campaign-7',
@@ -112,6 +120,7 @@ const initialCampaigns: Campaign[] = [
     businessCategory: "Toko Online",
     interests: ["flash-sale-online"],
     variant: "default",
+    outletId: "outlet-005",
   },
   {
     id: 'campaign-8',
@@ -124,6 +133,7 @@ const initialCampaigns: Campaign[] = [
     businessCategory: "Butik & Aksesoris",
     interests: ["promo-pakaian", "koleksi-terbaru"],
     variant: "default",
+    outletId: "outlet-002",
   },
   {
     id: 'campaign-9',
@@ -136,6 +146,7 @@ const initialCampaigns: Campaign[] = [
     businessCategory: "Toko Online",
     interests: ["diskon-spesial"],
     variant: "default",
+    outletId: "outlet-005",
   },
   {
     id: 'campaign-10',
@@ -148,6 +159,7 @@ const initialCampaigns: Campaign[] = [
     businessCategory: "Toko Online",
     interests: ["diskon-spesial"],
     variant: "default",
+    outletId: "outlet-005",
   }
 ];
 
@@ -158,16 +170,35 @@ const CampaignContext = createContext<CampaignContextType | undefined>(undefined
 // Create the provider component
 export const CampaignsProvider = ({ children }: { children: ReactNode }) => {
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
+  const { user } = useAuth();
 
-  const addCampaign = (campaign: Campaign) => {
-    setCampaigns((prevCampaigns) => [...prevCampaigns, campaign]);
+  const addCampaign = (campaign: Omit<Campaign, 'id' | 'status' | 'outletId'>) => {
+    if (!user) return; // Should not happen if called from an authenticated page
+    const newCampaign: Campaign = {
+      ...campaign,
+      id: `campaign-${new Date().getTime()}`,
+      status: "Akan Datang", // Default status for new campaigns
+      outletId: user.outletId || 'unknown'
+    };
+    setCampaigns((prevCampaigns) => [...prevCampaigns, newCampaign]);
   };
   
   const updateCampaign = (id: string, updatedCampaignData: Omit<Campaign, 'id'>) => {
+     if (!user) return;
+     // Ensure members can only update campaigns for their own outlet
+    const campaignToUpdate = campaigns.find(c => c.id === id);
+    if (user.role === 'member' && campaignToUpdate?.outletId !== user.outletId) {
+        return;
+    }
     setCampaigns(prev => prev.map(c => (c.id === id ? { id, ...updatedCampaignData } : c)));
   };
 
   const deleteCampaign = (id: string) => {
+    if (!user) return;
+    const campaignToDelete = campaigns.find(c => c.id === id);
+    if (user.role === 'member' && campaignToDelete?.outletId !== user.outletId) {
+        return;
+    }
     setCampaigns(prev => prev.filter(c => c.id !== id));
   };
   
@@ -175,16 +206,21 @@ export const CampaignsProvider = ({ children }: { children: ReactNode }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
 
-    return campaigns
+    const allProcessed = campaigns
       .map(campaign => {
-        // Dates in context are YYYY-MM-DD.
-        // Parsing with T00:00:00 avoids timezone issues and treats the date as local.
         const campaignDate = new Date(`${campaign.date}T00:00:00`);
         const status: "Akan Datang" | "Berakhir" = campaignDate < today ? "Berakhir" : "Akan Datang";
         return { ...campaign, status };
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [campaigns]);
+    
+    if (user?.role === 'member') {
+        return allProcessed.filter(c => c.outletId === user.outletId);
+    }
+    
+    return allProcessed;
+
+  }, [campaigns, user]);
 
   return (
     <CampaignContext.Provider value={{ campaigns: processedCampaigns, addCampaign, updateCampaign, deleteCampaign }}>

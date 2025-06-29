@@ -1,9 +1,27 @@
+
+"use client";
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, QrCode, Store, Building, Globe } from "lucide-react";
+import { useAuth } from "../contexts/auth-context";
 
 export default function QrCodesPage() {
+    const { user } = useAuth();
+    if (user?.role !== 'admin') {
+         return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Akses Ditolak</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p>Hanya Admin yang dapat mengakses halaman ini.</p>
+                </CardContent>
+            </Card>
+        )
+    }
+
     return (
         <div className="space-y-8">
             <div>

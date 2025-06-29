@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,12 +10,14 @@ import { Dialog, DialogContent, DialogClose, DialogHeader, DialogTitle, DialogDe
 import { PrintableQrCard } from "./components/printable-qr-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { outlets as outletsData, type OutletData } from "@/data/outlets";
+import { useAuth } from "../contexts/auth-context";
 
 type Outlet = OutletData;
 
 export default function QrOutletPage() {
     const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
     const [origin, setOrigin] = useState('');
+    const { user } = useAuth();
 
     useEffect(() => {
         // This ensures the code runs only on the client side, after the window object is available.
@@ -35,6 +38,19 @@ export default function QrOutletPage() {
         // Construct the full, dynamic URL for the QR code
         return origin ? `${origin}/register?outlet=${outletId}` : "";
     };
+
+    if (user?.role !== 'admin') {
+         return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Akses Ditolak</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p>Hanya Admin yang dapat mengakses halaman ini.</p>
+                </CardContent>
+            </Card>
+        )
+    }
 
     return (
         <div className="space-y-8">

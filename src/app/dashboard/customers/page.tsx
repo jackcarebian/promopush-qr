@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useAuth } from "../contexts/auth-context";
   
 // Helper to create a flat map of all possible interests for easy lookup
 const allInterests = Object.values(interestCategories).flatMap(category => category.interests);
@@ -36,12 +37,28 @@ const interestLabelMap = new Map(allInterests.map(interest => [interest.id, inte
 
 export default function CustomersPage() {
     const { customers, deleteCustomer } = useCustomers();
+    const { user } = useAuth();
+
+    if (user?.role === 'operator') {
+         return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Akses Ditolak</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+                </CardContent>
+            </Card>
+        )
+    }
 
     return (
         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-headline font-bold">Database Pelanggan</h1>
-                <p className="text-muted-foreground">Kelola semua pelanggan terdaftar Anda di satu tempat.</p>
+                <p className="text-muted-foreground">
+                    {user?.role === 'member' ? 'Kelola semua pelanggan terdaftar dari outlet Anda.' : 'Kelola semua pelanggan terdaftar Anda di satu tempat.'}
+                </p>
             </div>
 
             <Card>

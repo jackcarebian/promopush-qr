@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,25 +12,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Link from "next/link";
+import { useAuth } from "../contexts/auth-context";
 
 export function UserNav() {
+  const { user, logout } = useAuth();
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="https://placehold.co/40x40" alt="@admin" />
-            <AvatarFallback>A</AvatarFallback>
+            <AvatarImage src={`https://i.pravatar.cc/40?u=${user.email}`} alt={user.name} />
+            <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Admin</p>
+            <p className="text-sm font-medium leading-none">{user.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              admin@promopush.com
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -39,8 +46,8 @@ export function UserNav() {
           <DropdownMenuItem>Pengaturan</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-            <Link href="/login">Logout</Link>
+        <DropdownMenuItem onClick={logout}>
+            Logout
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

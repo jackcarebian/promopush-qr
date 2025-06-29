@@ -1,9 +1,28 @@
 
+"use client";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreateCampaignForm } from "./components/create-campaign-form";
 import { CampaignList } from "./components/campaign-list";
+import { useAuth } from "../contexts/auth-context";
 
 export default function CampaignsPage() {
+    const { user } = useAuth();
+    
+    // Operator does not manage campaigns
+    if (user?.role === 'operator') {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Akses Ditolak</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+                </CardContent>
+            </Card>
+        )
+    }
+
     return (
         <div className="space-y-8">
              <div>
@@ -24,7 +43,12 @@ export default function CampaignsPage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline">Daftar Kampanye</CardTitle>
-                    <CardDescription>Berikut adalah semua kampanye yang telah Anda buat. Anda dapat mengedit atau menghapusnya dari sini.</CardDescription>
+                    <CardDescription>
+                        {user?.role === 'member' 
+                            ? "Berikut adalah semua kampanye yang telah Anda buat untuk outlet Anda."
+                            : "Berikut adalah semua kampanye yang telah Anda buat. Anda dapat mengedit atau menghapusnya dari sini."
+                        }
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <CampaignList />
