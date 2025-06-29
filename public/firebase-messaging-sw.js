@@ -1,7 +1,8 @@
-// Import and initialize the Firebase SDK
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getMessaging } from 'firebase/messaging/sw';
+// Using compat libraries for broader browser support in service workers
+importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js");
 
+// This configuration is public and safe to expose in a client-side file.
 const firebaseConfig = {
   apiKey: "AIzaSyASqEDrSRQ0ZgOW8V5NMALQ1RBtTp8o5mI",
   authDomain: "promopush-qr.firebaseapp.com",
@@ -11,11 +12,27 @@ const firebaseConfig = {
   appId: "1:246705033642:web:b244307a45314efa6f1bd3"
 };
 
-// Initialize the Firebase app in the service worker
-// using the same pattern as the main app to avoid conflicts.
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const messaging = getMessaging(app);
+// Only initialize if the config is valid
+if (firebaseConfig && firebaseConfig.apiKey) {
+    firebase.initializeApp(firebaseConfig);
 
-// The service worker is now correctly set up to handle background notifications.
-// You can add event listeners here for 'push' events if you need custom
-// background notification handling in the future.
+    const messaging = firebase.messaging();
+
+    // Optional: Handle background messages
+    messaging.onBackgroundMessage(function(payload) {
+      console.log(
+        "[firebase-messaging-sw.js] Received background message ",
+        payload
+      );
+
+      // Customize notification here
+      const notificationTitle = payload.notification.title || "Promo Baru!";
+      const notificationOptions = {
+        body: payload.notification.body,
+      };
+
+      self.registration.showNotification(notificationTitle, notificationOptions);
+    });
+} else {
+    console.log("Firebase config not found, service worker not initialized.");
+}
