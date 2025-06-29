@@ -5,7 +5,6 @@ import { UserNav } from "./components/user-nav";
 import { Logo } from "@/components/logo";
 import { CampaignsProvider } from "./contexts/campaign-context";
 import { CustomersProvider } from "./contexts/customer-context";
-import { AuthProvider } from "./contexts/auth-context";
 
 export default function DashboardLayout({
   children,
@@ -13,7 +12,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
       <CampaignsProvider>
         <CustomersProvider>
           <SidebarProvider>
@@ -40,6 +38,5 @@ export default function DashboardLayout({
           </SidebarProvider>
         </CustomersProvider>
       </CampaignsProvider>
-    </AuthProvider>
   );
 }
