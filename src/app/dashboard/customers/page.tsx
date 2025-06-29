@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { useCustomers } from "../contexts/customer-context";
 import { interestCategories } from "../campaigns/data/categories";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
   
 // Helper to create a flat map of all possible interests for easy lookup
 const allInterests = Object.values(interestCategories).flatMap(category => category.interests);
@@ -70,7 +72,7 @@ export default function CustomersPage() {
                                         ))}
                                     </div>
                                 </TableCell>
-                                <TableCell>{customer.registeredAt}</TableCell>
+                                <TableCell>{format(new Date(customer.registeredAt), 'dd MMMM yyyy, HH:mm', { locale: id })}</TableCell>
                             </TableRow>
                             ))}
                         </TableBody>

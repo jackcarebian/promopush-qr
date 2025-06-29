@@ -13,7 +13,7 @@ export interface Customer {
   email: string;
   whatsapp: string;
   interests: string[]; // Array of interest IDs
-  registeredAt: string;
+  registeredAt: string; // ISO date string
 }
 
 // Define the shape of the context
@@ -51,13 +51,7 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
             email: data.email,
             whatsapp: data.whatsapp || '',
             interests: data.interests || [],
-            registeredAt: new Date(data.registeredAt).toLocaleString('id-ID', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            }),
+            registeredAt: data.registeredAt, // Pass ISO string directly
         }));
         
         setCustomers(customersData as Customer[]);

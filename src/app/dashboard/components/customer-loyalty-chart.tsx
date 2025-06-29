@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,7 +26,7 @@ export function CustomerLoyaltyChart() {
         // Group customers by registration month
         const monthlyData: { [key: string]: number } = {};
         customers.forEach(customer => {
-            const date = new Date(customer.registeredAt.split(' ')[0]);
+            const date = new Date(customer.registeredAt);
             const monthKey = format(date, "yyyy-MM");
             if (!monthlyData[monthKey]) {
                 monthlyData[monthKey] = 0;
