@@ -1,49 +1,34 @@
 
-// This script is executed in a service worker context
-// It must be able to initialize Firebase Messaging to handle background notifications
+// This file must be in the public directory
+// Import the Firebase app and messaging packages.
+// The versions must match the ones in package.json
+importScripts('https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/11.9.1/firebase-messaging-compat.js');
 
-try {
-    // Dynamically import the configuration from a dedicated API endpoint
-    // This is the most reliable way to get environment variables into a service worker
-    importScripts('/api/firebase-config-script');
+// We need to fetch the config from the server, because we can't use
+// process.env here.
+//
+// The server will respond with a script that we can import.
+importScripts('/api/firebase-config-script');
 
-    // These imports are needed for Firebase v9+ modular SDK
-    importScripts('https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js');
-    importScripts('https://www.gstatic.com/firebasejs/10.12.3/firebase-messaging-compat.js');
+// It's very important that you call this function.
+// Otherwise, the service worker will not be able to handle notifications.
+if (self.firebaseConfig) {
+  firebase.initializeApp(self.firebaseConfig);
 
-    if (self.firebaseConfig && self.firebaseConfig.apiKey) {
-        // Initialize Firebase with the fetched config
-        firebase.initializeApp(self.firebaseConfig);
+  // Retrieve an instance of Firebase Messaging so that it can handle background
+  // messages.
+  const messaging = firebase.messaging();
 
-        // Get an instance of Firebase Messaging
-        const messaging = firebase.messaging();
+  messaging.onBackgroundMessage((payload) => {
+    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+    // Customize notification here
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+      body: payload.notification.body,
+      icon: payload.notification.image,
+    };
 
-        // Set a handler for background messages
-        messaging.onBackgroundMessage((payload) => {
-            console.log('[firebase-messaging-sw.js] Received background message: ', payload);
-
-            // Customize the notification that will be shown to the user
-            const notificationTitle = payload.notification?.title || 'Promo Baru!';
-            const notificationOptions = {
-                body: payload.notification?.body || 'Cek promo terbaru dari kami.',
-                icon: '/logo-192.png' // A default icon for notifications
-            };
-
-            // Display the notification
-            self.registration.showNotification(notificationTitle, notificationOptions);
-        });
-
-        console.log('[firebase-messaging-sw.js] Firebase initialized successfully.');
-
-    } else {
-        console.error('[firebase-messaging-sw.js] Firebase config not found or invalid. Background messaging will not work.');
-    }
-
-} catch (error) {
-    console.error('[firebase-messaging-sw.js] Error initializing service worker:', error);
+    self.registration.showNotification(notificationTitle, notificationOptions);
+  });
 }
-
-// Good practice: ensure the new service worker activates immediately
-self.addEventListener('activate', event => {
-    event.waitUntil(clients.claim());
-});

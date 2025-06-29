@@ -128,6 +128,8 @@ async function getNotificationToken(): Promise<{ fcmToken: string; toastTitle: s
             errorMessage = "Browser Anda tidak mendukung fitur notifikasi ini.";
         } else if (err.message.includes("permission-blocked")) {
             errorMessage = "Izin notifikasi diblokir. Harap aktifkan di pengaturan browser Anda.";
+        } else if (err.message.includes("failed to get service worker registration")) {
+            errorMessage = "Gagal menghubungi server notifikasi. Coba lagi nanti atau periksa koneksi Anda.";
         } else {
             errorMessage = `Gagal mengaktifkan notifikasi. Silakan coba lagi nanti.`;
         }
@@ -167,10 +169,12 @@ export function RegisterForm() {
   
   const { setValue, trigger } = form;
 
+  // This effect safely resets the interests when the outlet context changes,
+  // preventing the infinite render loop. It runs only when `outletId` changes.
   React.useEffect(() => {
     setValue("interests", []);
     trigger("interests");
-  }, [interestsToShow, setValue, trigger]);
+  }, [outletId, setValue, trigger]);
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
