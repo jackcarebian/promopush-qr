@@ -88,13 +88,13 @@ async function getNotificationToken(): Promise<{ fcmToken: string; toastTitle: s
 
   // 1. Check for browser support
   if (typeof window === "undefined" || !('serviceWorker' in navigator) || !window.isSecureContext) {
-    console.warn("Browser tidak mendukung notifikasi atau konteks tidak aman. Proses aktivasi notifikasi dilewati.");
+    console.warn("DIAGNOSTIC: Browser tidak mendukung notifikasi atau konteks tidak aman. Proses aktivasi notifikasi dilewati.");
     toastDescription = "Data Anda tersimpan, namun notifikasi tidak dapat diaktifkan di browser ini.";
     return { fcmToken: "", toastTitle, toastDescription };
   }
   
   if (!messaging) {
-    console.warn("Layanan Firebase Messaging tidak tersedia. Proses aktivasi notifikasi dilewati.");
+    console.warn("DIAGNOSTIC: Layanan Firebase Messaging tidak tersedia. Proses aktivasi notifikasi dilewati.");
     toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Tersedia";
     toastDescription = "Layanan notifikasi tidak dapat dimuat saat ini.";
     return { fcmToken: "", toastTitle, toastDescription };
@@ -104,47 +104,51 @@ async function getNotificationToken(): Promise<{ fcmToken: string; toastTitle: s
   try {
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
-      console.log("Izin notifikasi ditolak oleh pengguna.");
+      console.log("DIAGNOSTIC: Izin notifikasi ditolak oleh pengguna.");
       toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Aktif";
       toastDescription = "Anda tidak akan menerima promo hingga izin notifikasi diberikan di pengaturan browser.";
       return { fcmToken: "", toastTitle, toastDescription };
     }
   } catch (err) {
-      console.error("Error saat meminta izin notifikasi:", err);
+      console.error("DIAGNOSTIC: Error saat meminta izin notifikasi:", err);
       toastDescription = "Gagal meminta izin notifikasi. Anda dapat mengaktifkannya secara manual nanti.";
       return { fcmToken: "", toastTitle, toastDescription };
   }
 
   // 3. Get the FCM token
   try {
-    console.log("Mencoba mendapatkan token FCM...");
-    const token = await getToken(messaging, {
-      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-    });
+    console.log("DIAGNOSTIC: Mencoba mendapatkan token FCM...");
+    const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+    if (!vapidKey) {
+        console.error("DIAGNOSTIC: VAPID key tidak ditemukan di environment variables.");
+        throw new Error("Missing VAPID key configuration.");
+    }
+
+    const token = await getToken(messaging, { vapidKey });
 
     if (token) {
-      console.log("Token FCM berhasil didapatkan:", token);
+      console.log("DIAGNOSTIC: Token FCM berhasil didapatkan:", token);
       toastTitle = "Pendaftaran Berhasil!";
       toastDescription = "Terima kasih! Notifikasi promo telah diaktifkan untuk Anda.";
       return { fcmToken: token, toastTitle, toastDescription };
     } else {
-      // This case is unlikely if permission is granted, but good to handle.
-      // It often points to an issue with the service worker.
-      console.warn("Gagal mendapatkan token FCM: 'getToken' tidak mengembalikan token.");
+      console.warn("DIAGNOSTIC: Gagal mendapatkan token FCM: 'getToken' tidak mengembalikan token. Cek service worker.");
       toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
       toastDescription = "Kami gagal mengaktifkan notifikasi untuk browser Anda. Pastikan tidak ada yang memblokir service worker.";
       return { fcmToken: "", toastTitle, toastDescription };
     }
   } catch (err) {
-    console.error("Error saat proses mendapatkan token FCM:", err);
+    console.error("DIAGNOSTIC: Error saat proses mendapatkan token FCM:", err);
     toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
     if (err instanceof Error) {
         if (err.message.includes("permission-blocked") || err.message.includes("permission default")) {
           toastDescription = "Izin notifikasi diblokir. Harap aktifkan di pengaturan browser Anda.";
         } else if (err.message.includes("unsupported-browser")) {
             toastDescription = "Browser Anda tidak mendukung fitur notifikasi ini.";
+        } else if (err.message.includes("service-worker-unsupported")) {
+            toastDescription = "Service worker tidak didukung di browser ini.";
         } else {
-            toastDescription = "Terjadi kesalahan saat mencoba mengaktifkan notifikasi.";
+            toastDescription = "Terjadi kesalahan saat mencoba mengaktifkan notifikasi. Cek konsol untuk detail.";
         }
     } else {
         toastDescription = "Terjadi kesalahan yang tidak diketahui saat mengaktifkan notifikasi.";
@@ -162,7 +166,8 @@ export function RegisterForm() {
     if (outlet && interestCategories[outlet.businessCategory]) {
       return interestCategories[outlet.businessCategory].interests;
     }
-    return allInterests; // Use the stable, pre-calculated array
+    // Fallback to a stable, pre-calculated array of all interests
+    return allInterests; 
   }, [outlet]);
 
   const { toast } = useToast();
@@ -202,7 +207,7 @@ export function RegisterForm() {
     const { fcmToken, toastTitle, toastDescription } = await getNotificationToken();
 
     try {
-      console.log(`Menyimpan data pelanggan dengan token FCM: ${fcmToken || 'tidak ada'}`);
+      console.log(`DIAGNOSTIC: Menyimpan data pelanggan dengan token FCM: ${fcmToken || 'tidak ada'}`);
       // Always save customer data to Firestore, with or without a token
       await addDoc(collection(db, "pelanggan"), {
         name: values.name,
@@ -221,7 +226,7 @@ export function RegisterForm() {
       setIsSuccess(true);
 
     } catch (error) {
-      console.error("Gagal menyimpan pendaftaran ke Firestore:", error);
+      console.error("DIAGNOSTIC: Gagal menyimpan pendaftaran ke Firestore:", error);
       const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan pada database.";
       toast({
         variant: "destructive",

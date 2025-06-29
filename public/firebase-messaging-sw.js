@@ -1,29 +1,42 @@
 
-// This file should be intentionally left blank in the source code.
-// Firebase SDK automatically generates the necessary service worker logic
-// during the build process when messaging is initialized correctly in the app.
-// It looks for a file with this *exact name* in the public root directory.
+// Use the modern compat libraries for service workers.
+// The version should ideally match the one used in your package.json, but using a recent static version is fine.
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
 
-// The presence of this file, even if empty, is crucial for the Firebase
-// SDK to correctly register its service worker for handling background push notifications.
-
-// For more advanced use cases, you can import and initialize the Firebase app here:
-/*
-import { initializeApp } from "firebase/app";
-import { getMessaging } from "firebase/messaging/sw";
-
+// IMPORTANT: This configuration must match the one in your main app.
+// Since environment variables aren't available in service workers, we hardcode them.
+// Ensure these values are correct and match your .env file.
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyASqEDrSRQ0ZgOW8V5NMALQ1RBtTp8o5mI",
+  authDomain: "promopush-qr.firebaseapp.com",
+  projectId: "promopush-qr",
+  storageBucket: "promopush-qr.appspot.com",
+  messagingSenderId: "246705033642",
+  appId: "1:246705033642:web:b244307a45314efa6f1bd3"
 };
 
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+// Initialize Firebase
+try {
+  const app = firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
+  
+  console.log('Firebase Messaging Service Worker Initialized Successfully.');
 
-// If you want to customize background notification handling, you can add a
-// 'message' event listener here.
-*/
+  // Optional: Set a background message handler.
+  // This is triggered when the app is in the background or closed.
+  messaging.onBackgroundMessage((payload) => {
+    console.log('[firebase-messaging-sw.js] Received background message: ', payload);
+
+    // Customize the notification that will be shown to the user.
+    const notificationTitle = payload.notification.title || 'Promo Baru!';
+    const notificationOptions = {
+      body: payload.notification.body || 'Cek promo terbaru dari kami.',
+      icon: '/logo-192.png' // Make sure you have an icon at this path
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+  });
+} catch (e) {
+  console.error('Error initializing Firebase in Service Worker:', e);
+}
