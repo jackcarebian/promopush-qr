@@ -109,10 +109,10 @@ export function RegisterForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
 
-    if (typeof window === "undefined" || !navigator.serviceWorker) {
+    if (typeof window === "undefined" || !messaging) {
       toast({
         variant: "destructive",
-        title: "Browser Tidak Mendukung",
+        title: "Browser Tidak Didukung",
         description: "Fitur notifikasi tidak didukung di browser ini. Namun, pendaftaran Anda tetap kami proses.",
       });
     }
@@ -122,49 +122,24 @@ export function RegisterForm() {
     let toastDescription = "Terima kasih! Notifikasi promo telah diaktifkan untuk Anda.";
 
     try {
-      // 1. Attempt to get notification permission and token if messaging is available
+      // 1. Attempt to get notification permission and token
       if (messaging) {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-          try {
-            // Construct config to pass to service worker
-            const firebaseConfig = {
-              apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-              authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-              projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-              storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-              messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-              appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-            };
-
-            // Register the service worker with the config
-            const swUrl = `/firebase-messaging-sw.js?firebaseConfig=${encodeURIComponent(JSON.stringify(firebaseConfig))}`;
-            const sw = await navigator.serviceWorker.register(swUrl);
-            
-            const token = await getToken(messaging, {
-              vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-              serviceWorkerRegistration: sw,
-            });
-
-            if (token) {
-              fcmToken = token;
-            } else {
-              toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
-              toastDescription = "Kami gagal mendapatkan token notifikasi. Anda dapat mencobanya lagi nanti di pengaturan browser.";
-            }
-          } catch (tokenError) {
-            console.error("Error getting FCM token:", tokenError);
+          const token = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY });
+          if (token) {
+            fcmToken = token;
+          } else {
             toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
-            toastDescription = "Terjadi kesalahan teknis saat mengaktifkan notifikasi.";
+            toastDescription = "Kami gagal mendapatkan token notifikasi. Anda dapat mencobanya lagi nanti di pengaturan browser.";
           }
         } else {
-          // User denied or dismissed the permission prompt
           toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Aktif";
           toastDescription = "Data Anda telah disimpan. Anda tidak akan menerima notifikasi promo hingga Anda mengizinkannya di pengaturan browser.";
         }
       } else {
-        toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Tersedia";
-        toastDescription = "Data Anda telah disimpan, namun layanan notifikasi tidak dapat dimuat saat ini.";
+          toastTitle = "Pendaftaran Berhasil, Notifikasi Tidak Tersedia";
+          toastDescription = "Data Anda telah disimpan, namun layanan notifikasi tidak dapat dimuat saat ini.";
       }
 
       // 2. Always save customer data to Firestore
@@ -173,7 +148,7 @@ export function RegisterForm() {
         email: values.email,
         whatsapp: values.whatsapp || '',
         interests: values.interests,
-        fcmToken: fcmToken, // Will be empty if permission is not granted or token fails
+        fcmToken: fcmToken, // Will be empty if permission not granted or token fails
         registeredAt: new Date().toISOString(),
         outletId: outletId || 'unknown',
       });
@@ -184,9 +159,10 @@ export function RegisterForm() {
       });
       form.reset();
 
-    } catch (dbError) {
-      console.error("Gagal menyimpan pendaftaran ke DB:", dbError);
-      const errorMessage = dbError instanceof Error ? dbError.message : "Terjadi kesalahan pada database.";
+    } catch (error) {
+      // This catch block will now mostly handle Firestore errors or unexpected errors from getToken
+      console.error("Gagal menyimpan pendaftaran:", error);
+      const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan pada database.";
       toast({
         variant: "destructive",
         title: "Pendaftaran Gagal Total",
