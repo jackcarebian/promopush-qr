@@ -23,7 +23,8 @@ export default function QrOutletPage() {
     const generateQrUrl = (outletId: string) => {
         if (!baseUrl) return "";
         const registerUrl = `${baseUrl}/register?outlet=${outletId}`;
-        return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(registerUrl)}`;
+        // Gunakan API internal yang baru
+        return `/api/qr?data=${encodeURIComponent(registerUrl)}`;
     };
 
     if (user?.role !== 'admin') {
