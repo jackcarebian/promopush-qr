@@ -17,7 +17,6 @@ const allNavItems = [
     { href: "/dashboard/reports", icon: FileText, label: "Laporan Outlet", roles: ['member'] },
     { href: "/dashboard/marketing-ai", icon: Bot, label: "Tool Pemasaran AI", roles: ['admin'] },
     { href: "/dashboard/cashier", icon: ScanLine, label: "Kasir", roles: ['admin', 'operator'] },
-    { href: "/dashboard/qr-outlet", icon: Store, label: "QR Outlet", roles: ['admin'] },
     { href: "/dashboard/qrcodes", icon: QrCode, label: "Langganan QR", roles: ['admin'] },
 ];
 
