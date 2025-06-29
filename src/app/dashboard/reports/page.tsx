@@ -31,7 +31,7 @@ export default function ReportPage() {
     }
 
     const outlet = getOutletById(user.outletId || '');
-    const upcomingCampaigns = campaigns.filter(c => c.status === "Akan Datang");
+    const upcomingCampaigns = campaigns.filter(c => c.status === "Akan Datang" || c.status === "Sedang Berlangsung");
     const pastCampaigns = campaigns.filter(c => c.status === "Berakhir");
 
     if (!outlet) {
@@ -63,7 +63,7 @@ export default function ReportPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{campaigns.length}</div>
-                        <p className="text-xs text-muted-foreground">{upcomingCampaigns.length} kampanye akan datang</p>
+                        <p className="text-xs text-muted-foreground">{upcomingCampaigns.length} kampanye aktif/akan datang</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -80,7 +80,7 @@ export default function ReportPage() {
             
              <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline">Kampanye Akan Datang</CardTitle>
+                    <CardTitle className="font-headline">Kampanye Aktif & Akan Datang</CardTitle>
                     <CardDescription>Kampanye yang telah Anda jadwalkan untuk outlet ini.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -92,11 +92,15 @@ export default function ReportPage() {
                                     <h3 className="font-semibold">{campaign.title}</h3>
                                     <p className="text-sm text-muted-foreground">{campaign.description}</p>
                                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                                        <div className="flex items-center gap-1"><Calendar className="w-3 h-3"/> {format(new Date(`${campaign.date}T00:00:00`), "dd MMMM yyyy", { locale: id })}</div>
+                                        <div className="flex items-center gap-1"><Calendar className="w-3 h-3"/> {format(new Date(`${campaign.startDate}T00:00:00`), "d MMM", { locale: id })} - {format(new Date(`${campaign.endDate}T00:00:00`), "d MMM yyyy", { locale: id })}</div>
                                         <div className="flex items-center gap-1"><Tag className="w-3 h-3"/> {campaign.businessCategory}</div>
                                     </div>
                                </div>
-                               <Badge>{campaign.status}</Badge>
+                               <Badge variant={
+                                    campaign.status === "Berakhir" ? "secondary" 
+                                    : campaign.status === "Sedang Berlangsung" ? "default" 
+                                    : "outline"
+                                }>{campaign.status}</Badge>
                             </div>
                         ))
                     ) : (

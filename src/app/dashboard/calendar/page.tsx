@@ -19,20 +19,31 @@ export default function CalendarPage() {
     const { campaigns } = useCampaigns();
     const { customers } = useCustomers();
 
-    const calendarEvents = campaigns.map(campaign => ({
-        title: campaign.title,
-        start: campaign.date,
-        allDay: true,
-        className: campaign.status === 'Akan Datang' ? 'fc-event-upcoming' : 'fc-event-past',
-    }));
+    const calendarEvents = campaigns.map(campaign => {
+        const endDate = new Date(`${campaign.endDate}T00:00:00`);
+        endDate.setDate(endDate.getDate() + 1); // Make end date inclusive for FullCalendar
+        
+        let className = '';
+        if (campaign.status === 'Akan Datang') className = 'fc-event-upcoming';
+        else if (campaign.status === 'Berakhir') className = 'fc-event-past';
+        else if (campaign.status === 'Sedang Berlangsung') className = 'fc-event-active';
 
-    const upcomingCampaigns = campaigns
-        .filter(c => c.status === 'Akan Datang')
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        return {
+            title: campaign.title,
+            start: campaign.startDate,
+            end: endDate.toISOString().split('T')[0],
+            allDay: true,
+            className: className,
+        }
+    });
+
+    const activeAndUpcomingCampaigns = campaigns
+        .filter(c => c.status === 'Akan Datang' || c.status === 'Sedang Berlangsung')
+        .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
     const pastCampaigns = campaigns
         .filter(c => c.status === 'Berakhir')
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        .sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
 
     const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
         // Calculate the number of targeted customers
@@ -56,7 +67,11 @@ export default function CalendarPage() {
                     <CardHeader>
                         <div className="flex justify-between items-start">
                             <CardTitle className="font-headline">{campaign.title}</CardTitle>
-                            <Badge variant={campaign.status === 'Berakhir' ? 'secondary' : 'default'}>{campaign.status}</Badge>
+                            <Badge variant={
+                                campaign.status === "Berakhir" ? "secondary" 
+                                : campaign.status === "Sedang Berlangsung" ? "default" 
+                                : "outline"
+                            }>{campaign.status}</Badge>
                         </div>
                         <CardDescription>{campaign.description}</CardDescription>
                     </CardHeader>
@@ -64,7 +79,7 @@ export default function CalendarPage() {
                         <div className="flex flex-wrap gap-x-4 gap-y-2">
                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <CalendarIcon className="w-4 h-4" />
-                                <span>{format(new Date(`${campaign.date}T00:00:00`), "dd MMMM yyyy", { locale: id })}</span>
+                                <span>{format(new Date(`${campaign.startDate}T00:00:00`), "d MMM", { locale: id })} - {format(new Date(`${campaign.endDate}T00:00:00`), "d MMM yyyy", { locale: id })}</span>
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Tag className="w-4 h-4" />
@@ -116,12 +131,12 @@ export default function CalendarPage() {
 
             <div className="space-y-6">
                 <div>
-                    <h2 className="text-2xl font-headline font-semibold">Kampanye Akan Datang</h2>
+                    <h2 className="text-2xl font-headline font-semibold">Kampanye Aktif & Akan Datang</h2>
                     <p className="text-muted-foreground">Berikut adalah kampanye yang sudah Anda jadwalkan.</p>
                 </div>
-                {upcomingCampaigns.length > 0 ? (
+                {activeAndUpcomingCampaigns.length > 0 ? (
                     <div className="grid gap-6">
-                        {upcomingCampaigns.map((campaign, index) => (
+                        {activeAndUpcomingCampaigns.map((campaign, index) => (
                            <CampaignCard key={`upcoming-${index}`} campaign={campaign} />
                         ))}
                     </div>

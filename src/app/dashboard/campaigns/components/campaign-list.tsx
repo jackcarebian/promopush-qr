@@ -38,10 +38,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Pencil, Trash2, Users } from "lucide-react";
+import { Pencil, Trash2, Users, Calendar as CalendarIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { DateRange } from "react-day-picker";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -49,6 +50,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { businessCategories, interestCategories } from "../data/categories";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   title: z.string().min(5, { message: "Nama kampanye minimal 5 karakter." }),
@@ -57,6 +61,10 @@ const formSchema = z.object({
   interests: z.array(z.string()).refine(value => value.length > 0, {
     message: "Pilih setidaknya satu preferensi minat.",
   }),
+  dateRange: z.object({
+    from: z.date({ required_error: "Tanggal mulai harus diisi." }),
+    to: z.date({ required_error: "Tanggal berakhir harus diisi." }),
+  }, { required_error: "Pilih rentang tanggal kampanye." })
 });
 
 function EditCampaignDialog({ campaign, onUpdate }: { campaign: Campaign, onUpdate: (id: string, data: Omit<Campaign, 'id'>) => void }) {
@@ -70,6 +78,10 @@ function EditCampaignDialog({ campaign, onUpdate }: { campaign: Campaign, onUpda
       description: campaign.description,
       businessCategory: campaign.businessCategory,
       interests: campaign.interests,
+      dateRange: {
+        from: new Date(`${campaign.startDate}T00:00:00`),
+        to: new Date(`${campaign.endDate}T00:00:00`),
+      }
     },
   });
 
@@ -82,6 +94,10 @@ function EditCampaignDialog({ campaign, onUpdate }: { campaign: Campaign, onUpda
         description: campaign.description,
         businessCategory: campaign.businessCategory,
         interests: campaign.interests,
+        dateRange: {
+            from: new Date(`${campaign.startDate}T00:00:00`),
+            to: new Date(`${campaign.endDate}T00:00:00`),
+        }
       });
     }
   }, [isOpen, campaign, form]);
@@ -101,12 +117,14 @@ function EditCampaignDialog({ campaign, onUpdate }: { campaign: Campaign, onUpda
       description: values.description,
       businessCategory: values.businessCategory,
       interests: values.interests,
+      startDate: format(values.dateRange.from, "yyyy-MM-dd"),
+      endDate: format(values.dateRange.to, "yyyy-MM-dd"),
     };
 
     // Remove id before passing to update function
     const { id, ...dataToUpdate } = updatedData;
 
-    onUpdate(campaign.id, dataToUpdate);
+    onUpdate(campaign.id, dataToUpdate as Omit<Campaign, 'id'>);
 
     toast({
       title: "Kampanye Diperbarui!",
@@ -142,6 +160,54 @@ function EditCampaignDialog({ campaign, onUpdate }: { campaign: Campaign, onUpda
                   <FormMessage />
                 </FormItem>
               )}
+            />
+            <FormField
+                control={form.control}
+                name="dateRange"
+                render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                        <FormLabel>Tanggal Berlaku</FormLabel>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <FormControl>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal",
+                                            !field.value?.from && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {field.value?.from ? (
+                                            field.value.to ? (
+                                                <>
+                                                    {format(field.value.from, "d MMMM yyyy", {locale: id})} -{" "}
+                                                    {format(field.value.to, "d MMMM yyyy", {locale: id})}
+                                                </>
+                                            ) : (
+                                                format(field.value.from, "d MMMM yyyy", {locale: id})
+                                            )
+                                        ) : (
+                                            <span>Pilih rentang tanggal</span>
+                                        )}
+                                    </Button>
+                                </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    initialFocus
+                                    mode="range"
+                                    defaultMonth={field.value?.from}
+                                    selected={field.value}
+                                    onSelect={field.onChange as (range: DateRange | undefined) => void}
+                                    numberOfMonths={2}
+                                    locale={id}
+                                />
+                            </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                    </FormItem>
+                )}
             />
             <FormField
               control={form.control}
@@ -248,7 +314,7 @@ export function CampaignList() {
       <TableHeader>
         <TableRow>
           <TableHead>Nama Kampanye</TableHead>
-          <TableHead>Tanggal</TableHead>
+          <TableHead>Tanggal Berlaku</TableHead>
           <TableHead>Kategori</TableHead>
           <TableHead>Target Pelanggan</TableHead>
           <TableHead>Status</TableHead>
@@ -265,7 +331,7 @@ export function CampaignList() {
           return (
             <TableRow key={campaign.id}>
               <TableCell className="font-medium">{campaign.title}</TableCell>
-              <TableCell>{format(new Date(`${campaign.date}T00:00:00`), "dd MMMM yyyy", { locale: id })}</TableCell>
+              <TableCell>{format(new Date(`${campaign.startDate}T00:00:00`), "d MMM yyyy", { locale: id })} - {format(new Date(`${campaign.endDate}T00:00:00`), "d MMM yyyy", { locale: id })}</TableCell>
               <TableCell>{campaign.businessCategory}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2 font-medium">
@@ -274,7 +340,11 @@ export function CampaignList() {
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant={campaign.status === "Berakhir" ? "secondary" : "default"}>
+                <Badge variant={
+                    campaign.status === "Berakhir" ? "secondary" 
+                    : campaign.status === "Sedang Berlangsung" ? "default" 
+                    : "outline"
+                }>
                   {campaign.status}
                 </Badge>
               </TableCell>

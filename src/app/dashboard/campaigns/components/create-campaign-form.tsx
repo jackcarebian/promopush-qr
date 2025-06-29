@@ -8,6 +8,7 @@ import React from "react";
 import Image from "next/image";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import { useCampaigns, Campaign } from "../../contexts/campaign-context";
 import { useRouter } from "next/navigation";
@@ -26,7 +27,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Calendar as CalendarIcon, Send, X, Tag, Users } from "lucide-react";
@@ -44,19 +44,10 @@ const formSchema = z.object({
     message: "Pilih setidaknya satu preferensi minat.",
   }),
   message: z.string().min(10, { message: "Pesan minimal 10 karakter." }).max(200, { message: "Pesan maksimal 200 karakter." }),
-  sendTime: z.enum(["now", "scheduled"], {
-    required_error: "Anda perlu memilih waktu pengiriman.",
-  }),
-  scheduledDate: z.date().optional(),
-}).refine(data => {
-    // If scheduling, a date must be selected
-    if (data.sendTime === 'scheduled' && !data.scheduledDate) {
-        return false;
-    }
-    return true;
-}, {
-    message: "Silakan pilih tanggal penjadwalan.",
-    path: ["scheduledDate"],
+  dateRange: z.object({
+      from: z.date({ required_error: "Tanggal mulai harus diisi." }),
+      to: z.date({ required_error: "Tanggal berakhir harus diisi." }),
+  }, { required_error: "Pilih rentang tanggal kampanye." }),
 });
 
 
@@ -79,12 +70,10 @@ export function CreateCampaignForm() {
             businessCategory: undefined,
             interests: [],
             message: "",
-            sendTime: "now",
-            scheduledDate: undefined,
+            dateRange: undefined
         },
     });
 
-    const watchSendTime = form.watch("sendTime");
     const watchBusinessCategory = form.watch("businessCategory");
     const watchInterests = form.watch("interests");
 
@@ -141,16 +130,11 @@ export function CreateCampaignForm() {
         setTimeout(() => {
             clearInterval(interval);
             setProgress(100);
-
-            const targetDate = values.sendTime === 'scheduled' && values.scheduledDate
-                ? values.scheduledDate
-                : new Date();
             
-            const newCampaign: Campaign = {
-                id: `campaign-${new Date().getTime()}`,
+            const newCampaign: Omit<Campaign, 'id' | 'status' | 'outletId'> = {
                 title: values.campaignName,
-                date: format(targetDate, "yyyy-MM-dd"),
-                status: "Akan Datang",
+                startDate: format(values.dateRange.from, "yyyy-MM-dd"),
+                endDate: format(values.dateRange.to, "yyyy-MM-dd"),
                 description: values.message,
                 image: imagePreview || "https://placehold.co/600x400",
                 dataAiHint: "new campaign",
@@ -175,19 +159,72 @@ export function CreateCampaignForm() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField
-                    control={form.control}
-                    name="campaignName"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Nama Kampanye</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Contoh: Diskon Kemerdekaan" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                <div className="grid md:grid-cols-2 gap-8">
+                    <FormField
+                        control={form.control}
+                        name="campaignName"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Nama Kampanye</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Contoh: Diskon Kemerdekaan" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="dateRange"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                                <FormLabel>Tanggal Berlaku Kampanye</FormLabel>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal",
+                                                    !field.value?.from && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {field.value?.from ? (
+                                                    field.value.to ? (
+                                                        <>
+                                                            {format(field.value.from, "d MMMM yyyy", {locale: id})} -{" "}
+                                                            {format(field.value.to, "d MMMM yyyy", {locale: id})}
+                                                        </>
+                                                    ) : (
+                                                        format(field.value.from, "d MMMM yyyy", {locale: id})
+                                                    )
+                                                ) : (
+                                                    <span>Pilih rentang tanggal</span>
+                                                )}
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="start">
+                                        <Calendar
+                                            initialFocus
+                                            mode="range"
+                                            defaultMonth={field.value?.from}
+                                            selected={field.value}
+                                            onSelect={field.onChange as (range: DateRange | undefined) => void}
+                                            numberOfMonths={2}
+                                            locale={id}
+                                            disabled={(date) =>
+                                                date < new Date(new Date().setHours(0,0,0,0))
+                                            }
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
                 
                 <div className="grid md:grid-cols-2 gap-8">
                      <FormField
@@ -336,89 +373,6 @@ export function CreateCampaignForm() {
                         </FormItem>
                     )}
                 />
-
-                <FormField
-                    control={form.control}
-                    name="sendTime"
-                    render={({ field }) => (
-                        <FormItem className="space-y-3">
-                            <FormLabel>Waktu Publikasi Kampanye</FormLabel>
-                            <FormControl>
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    className="flex flex-col space-y-1"
-                                >
-                                    <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                            <RadioGroupItem value="now" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal flex items-center gap-2">
-                                            <Send className="w-4 h-4"/> Publikasikan Sekarang
-                                        </FormLabel>
-                                    </FormItem>
-                                    <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl>
-                                            <RadioGroupItem value="scheduled" />
-                                        </FormControl>
-                                        <FormLabel className="font-normal flex items-center gap-2">
-                                            <CalendarIcon className="w-4 h-4" /> Jadwalkan Publikasi
-                                        </FormLabel>
-                                    </FormItem>
-                                </RadioGroup>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                {watchSendTime === "scheduled" && (
-                     <FormField
-                        control={form.control}
-                        name="scheduledDate"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Tanggal Publikasi</FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <FormControl>
-                                            <Button
-                                                variant={"outline"}
-                                                className={cn(
-                                                    "w-[240px] pl-3 text-left font-normal",
-                                                    !field.value && "text-muted-foreground"
-                                                )}
-                                            >
-                                                {field.value ? (
-                                                    format(field.value, "PPP", { locale: id })
-                                                ) : (
-                                                    <span>Pilih tanggal</span>
-                                                )}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                            </Button>
-                                        </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value}
-                                            onSelect={field.onChange}
-                                            disabled={(date) =>
-                                                date < new Date(new Date().setHours(0, 0, 0, 0))
-                                            }
-                                            initialFocus
-                                            locale={id}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                                <FormDescription>
-                                    Kampanye Anda akan dipublikasikan pada tanggal yang dipilih.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
 
                 {isSubmitting && (
                     <div className="space-y-2">

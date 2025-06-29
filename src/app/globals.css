@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -177,6 +178,7 @@
     border-color: hsl(var(--primary));
 }
 
+.fc-event-active,
 .fc-event-upcoming {
   border: 1px solid hsl(var(--primary)) !important;
   background-color: hsl(var(--primary)) !important;

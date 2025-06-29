@@ -8,8 +8,9 @@ import { useAuth } from './auth-context';
 export interface Campaign {
   id: string;
   title: string;
-  date: string; // YYYY-MM-DD format
-  status: "Akan Datang" | "Berakhir";
+  startDate: string; // YYYY-MM-DD format
+  endDate: string; // YYYY-MM-DD format
+  status: "Akan Datang" | "Berakhir" | "Sedang Berlangsung";
   description: string;
   image: string;
   dataAiHint: string;
@@ -28,13 +29,13 @@ interface CampaignContextType {
 }
 
 // Initial data for campaigns, ensuring dates are in YYYY-MM-DD format
-const initialCampaigns: Campaign[] = [
+const initialCampaigns: Omit<Campaign, 'status'>[] = [
   // 3 Past Campaigns
   {
     id: 'campaign-1',
     title: "Diskon Kilat Ramadhan",
-    date: "2024-04-05",
-    status: "Berakhir",
+    startDate: "2024-03-25",
+    endDate: "2024-04-05",
     description: "Serbu diskon spesial hingga 70% untuk persiapan Lebaran. Baju baru, hati baru!",
     image: "https://placehold.co/600x400",
     dataAiHint: "ramadan sale",
@@ -46,8 +47,8 @@ const initialCampaigns: Campaign[] = [
   {
     id: 'campaign-2',
     title: "Promo Hari Pendidikan",
-    date: "2024-05-02",
-    status: "Berakhir",
+    startDate: "2024-05-01",
+    endDate: "2024-05-07",
     description: "Spesial Hari Pendidikan Nasional, dapatkan diskon 25% untuk semua buku dan alat tulis.",
     image: "https://placehold.co/600x400",
     dataAiHint: "books stationery",
@@ -59,8 +60,8 @@ const initialCampaigns: Campaign[] = [
   {
     id: 'campaign-3',
     title: "Gebyar Diskon Akhir Pekan",
-    date: "2024-05-24",
-    status: "Berakhir",
+    startDate: "2024-05-24",
+    endDate: "2024-05-26",
     description: "Nikmati akhir pekan dengan promo Beli 1 Gratis 1 untuk semua minuman boba favoritmu.",
     image: "https://placehold.co/600x400",
     dataAiHint: "bubble tea",
@@ -73,8 +74,8 @@ const initialCampaigns: Campaign[] = [
   {
     id: 'campaign-4',
     title: "Promo Nonton Bola Bareng",
-    date: "2024-06-15",
-    status: "Akan Datang",
+    startDate: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString().split('T')[0],
+    endDate: new Date(new Date().setDate(new Date().getDate() + 5)).toISOString().split('T')[0],
     description: "Dukung tim favoritmu! Paket nobar hemat: pizza + minuman hanya Rp 50.000.",
     image: "https://placehold.co/600x400",
     dataAiHint: "pizza soccer",
@@ -86,8 +87,8 @@ const initialCampaigns: Campaign[] = [
   {
     id: 'campaign-5',
     title: "Diskon Liburan Sekolah Ceria",
-    date: "2024-06-22",
-    status: "Akan Datang",
+    startDate: new Date(new Date().setDate(new Date().getDate() + 10)).toISOString().split('T')[0],
+    endDate: new Date(new Date().setDate(new Date().getDate() + 20)).toISOString().split('T')[0],
     description: "Isi liburan anak dengan mainan edukatif, diskon spesial 30% untuk semua item.",
     image: "https://placehold.co/600x400",
     dataAiHint: "kids toys",
@@ -99,8 +100,8 @@ const initialCampaigns: Campaign[] = [
   {
     id: 'campaign-6',
     title: "Pesta Gajian Juni",
-    date: "2024-06-28",
-    status: "Akan Datang",
+    startDate: new Date(new Date().setDate(new Date().getDate() + 22)).toISOString().split('T')[0],
+    endDate: new Date(new Date().setDate(new Date().getDate() + 28)).toISOString().split('T')[0],
     description: "Waktunya self-reward! Nikmati cashback 20% untuk semua produk fashion.",
     image: "https://placehold.co/600x400",
     dataAiHint: "fashion sale",
@@ -112,8 +113,8 @@ const initialCampaigns: Campaign[] = [
   {
     id: 'campaign-7',
     title: "Flash Sale 7.7",
-    date: "2024-07-07",
-    status: "Akan Datang",
+    startDate: "2024-07-07",
+    endDate: "2024-07-07",
     description: "Jangan lewatkan flash sale terbesar! Diskon hingga 77% di jam-jam tertentu.",
     image: "https://placehold.co/600x400",
     dataAiHint: "online shopping",
@@ -122,45 +123,6 @@ const initialCampaigns: Campaign[] = [
     variant: "default",
     outletId: "outlet-005",
   },
-  {
-    id: 'campaign-8',
-    title: "Promo Kembali ke Kantor",
-    date: "2024-07-15",
-    status: "Akan Datang",
-    description: "Tampil profesional dengan koleksi kemeja baru, diskon 20% + gratis ongkir.",
-    image: "https://placehold.co/600x400",
-    dataAiHint: "office fashion",
-    businessCategory: "Butik & Aksesoris",
-    interests: ["promo-pakaian", "koleksi-terbaru"],
-    variant: "default",
-    outletId: "outlet-002",
-  },
-  {
-    id: 'campaign-9',
-    title: "Spesial Hari Anak Nasional",
-    date: "2024-07-23",
-    status: "Akan Datang",
-    description: "Kado istimewa untuk si kecil. Diskon 40% untuk semua pakaian dan mainan anak.",
-    image: "https://placehold.co/600x400",
-    dataAiHint: "kids fashion toys",
-    businessCategory: "Toko Online",
-    interests: ["diskon-spesial"],
-    variant: "default",
-    outletId: "outlet-005",
-  },
-  {
-    id: 'campaign-10',
-    title: "Promo Merdeka",
-    date: "2024-08-17",
-    status: "Akan Datang",
-    description: "Rayakan kemerdekaan dengan semangat! Semua produk merah-putih diskon 17%.",
-    image: "https://placehold.co/600x400",
-    dataAiHint: "indonesia independence",
-    businessCategory: "Toko Online",
-    interests: ["diskon-spesial"],
-    variant: "default",
-    outletId: "outlet-005",
-  }
 ];
 
 
@@ -169,15 +131,14 @@ const CampaignContext = createContext<CampaignContextType | undefined>(undefined
 
 // Create the provider component
 export const CampaignsProvider = ({ children }: { children: ReactNode }) => {
-  const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
+  const [campaigns, setCampaigns] = useState<Omit<Campaign, 'status'>[]>(initialCampaigns);
   const { user } = useAuth();
 
   const addCampaign = (campaign: Omit<Campaign, 'id' | 'status' | 'outletId'>) => {
     if (!user) return; // Should not happen if called from an authenticated page
-    const newCampaign: Campaign = {
+    const newCampaign: Omit<Campaign, 'status'> = {
       ...campaign,
       id: `campaign-${new Date().getTime()}`,
-      status: "Akan Datang", // Default status for new campaigns
       outletId: user.outletId || 'unknown'
     };
     setCampaigns((prevCampaigns) => [...prevCampaigns, newCampaign]);
@@ -208,11 +169,22 @@ export const CampaignsProvider = ({ children }: { children: ReactNode }) => {
 
     const allProcessed = campaigns
       .map(campaign => {
-        const campaignDate = new Date(`${campaign.date}T00:00:00`);
-        const status: "Akan Datang" | "Berakhir" = campaignDate < today ? "Berakhir" : "Akan Datang";
+        const startDate = new Date(`${campaign.startDate}T00:00:00`);
+        const endDate = new Date(`${campaign.endDate}T00:00:00`);
+        
+        let status: "Akan Datang" | "Berakhir" | "Sedang Berlangsung";
+
+        if (endDate < today) {
+          status = "Berakhir";
+        } else if (startDate > today) {
+          status = "Akan Datang";
+        } else {
+          status = "Sedang Berlangsung";
+        }
+
         return { ...campaign, status };
       })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
     
     if (user?.role === 'member') {
         return allProcessed.filter(c => c.outletId === user.outletId);
