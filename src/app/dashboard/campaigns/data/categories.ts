@@ -1,7 +1,7 @@
 
 export const interestCategories: Record<string, { emoji: string; interests: { id: string; label: string }[] }> = {
     "Cafe, Resto, Foodcourt": {
-        emoji: "🍽️",
+        emoji: " ",
         interests: [
             { id: "promo-makanan", label: "Promo Makanan" },
             { id: "promo-minuman", label: "Promo Minuman" },
@@ -10,7 +10,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Butik & Aksesoris": {
-        emoji: "👗",
+        emoji: " ",
         interests: [
             { id: "promo-pakaian", label: "Promo Pakaian" },
             { id: "promo-tas-sepatu", label: "Promo Tas, Sepatu, Sandal" },
@@ -19,7 +19,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Kosmetik & Skincare": {
-        emoji: "💄",
+        emoji: " ",
         interests: [
             { id: "promo-makeup", label: "Promo Makeup (Lipstik, Eyeliner, dll)" },
             { id: "promo-skincare", label: "Promo Skincare (Serum, Masker, Toner)" },
@@ -28,7 +28,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Elektronik & Gadget": {
-        emoji: "📱",
+        emoji: " ",
         interests: [
             { id: "promo-hp-aksesoris", label: "Promo HP & Aksesoris" },
             { id: "promo-laptop-gadget", label: "Promo Laptop / Gadget" },
@@ -37,7 +37,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Furnitur & Dekorasi": {
-        emoji: "🏠",
+        emoji: " ",
         interests: [
             { id: "promo-perabot", label: "Promo Perabot Rumah" },
             { id: "diskon-dekorasi", label: "Diskon Dekorasi Rumah Minimalis" },
@@ -46,7 +46,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Toko Kue & Snack": {
-        emoji: "🧁",
+        emoji: " ",
         interests: [
             { id: "promo-kue-ultah", label: "Promo Kue Ulang Tahun" },
             { id: "snack-kekinian", label: "Snack Kekinian" },
@@ -55,7 +55,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Salon & Perawatan": {
-        emoji: "💇",
+        emoji: " ",
         interests: [
             { id: "diskon-potong-rambut", label: "Diskon Potong Rambut" },
             { id: "promo-creambath-spa", label: "Promo Creambath / Spa" },
@@ -64,7 +64,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Toko Online": {
-        emoji: "🛒",
+        emoji: " ",
         interests: [
             { id: "flash-sale-online", label: "Flash Sale" },
             { id: "diskon-spesial", label: "Diskon Spesial" },
@@ -73,7 +73,7 @@ export const interestCategories: Record<string, { emoji: string; interests: { id
         ]
     },
     "Bengkel & Otomotif": {
-        emoji: "🛠️",
+        emoji: " ",
         interests: [
             { id: "promo-servis", label: "Promo Servis Rutin" },
             { id: "diskon-suku-cadang", label: "Diskon Suku Cadang" },
