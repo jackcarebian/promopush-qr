@@ -1,41 +1,37 @@
-// This file must be in the public folder.
-// It's used by Firebase Messaging to handle background notifications.
+// Scripts for firebase and firebase messaging
+importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js");
 
-// Firebase SDKs are imported dynamically.
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
-
-// The service worker is initialized with the Firebase config passed via URL parameters
-// when the service worker is registered in register-form.tsx.
+// Initialize the Firebase app in the service worker with the credentials from the URL
 const urlParams = new URLSearchParams(location.search);
-const firebaseConfigParam = urlParams.get('firebaseConfig');
 
-if (firebaseConfigParam) {
-    try {
-        const firebaseConfig = JSON.parse(firebaseConfigParam);
-        firebase.initializeApp(firebaseConfig);
+// Create a new config object from the URL search params
+const firebaseConfig = {
+  apiKey: urlParams.get("apiKey"),
+  authDomain: urlParams.get("authDomain"),
+  projectId: urlParams.get("projectId"),
+  storageBucket: urlParams.get("storageBucket"),
+  messagingSenderId: urlParams.get("messagingSenderId"),
+  appId: urlParams.get("appId"),
+};
 
-        const messaging = firebase.messaging();
+firebase.initializeApp(firebaseConfig);
 
-        // Optional: Handle background messages here.
-        // This allows you to show notifications even when the app is not in the foreground.
-        messaging.onBackgroundMessage((payload) => {
-            console.log(
-                '[firebase-messaging-sw.js] Received background message ',
-                payload
-            );
+// Retrieve an instance of Firebase Messaging so that it can handle background messages.
+const messaging = firebase.messaging();
 
-            const notificationTitle = payload.notification.title;
-            const notificationOptions = {
-                body: payload.notification.body,
-                icon: '/icon.png' // Optional: path to a public icon
-            };
+messaging.onBackgroundMessage((payload) => {
+  console.log(
+    "[firebase-messaging-sw.js] Received background message ",
+    payload
+  );
 
-            self.registration.showNotification(notificationTitle, notificationOptions);
-        });
-    } catch (e) {
-        console.error('Error initializing Firebase in service worker', e);
-    }
-} else {
-    console.error('Firebase config not found in service worker URL.');
-}
+  // Customize notification here
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: payload.notification.image,
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});
