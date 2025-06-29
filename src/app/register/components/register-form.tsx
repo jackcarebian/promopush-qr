@@ -82,13 +82,14 @@ export function RegisterFormSkeleton() {
 
 // Helper function to isolate the token logic for better error handling and clarity
 async function getNotificationToken(): Promise<{ fcmToken: string; toastTitle: string; toastDescription: string }> {
+  // Default messages for success with no token
   let toastTitle = "Pendaftaran Berhasil!";
   let toastDescription = "Terima kasih! Data Anda telah kami simpan.";
 
-  // 1. Check for browser support & secure environment
+  // 1. Check for browser support
   if (typeof window === "undefined" || !('serviceWorker' in navigator) || !window.isSecureContext) {
     console.warn("Browser tidak mendukung notifikasi atau konteks tidak aman. Proses aktivasi notifikasi dilewati.");
-    toastDescription = "Browser Anda tidak mendukung notifikasi atau koneksi tidak aman.";
+    toastDescription = "Data Anda tersimpan, namun notifikasi tidak dapat diaktifkan di browser ini.";
     return { fcmToken: "", toastTitle, toastDescription };
   }
   
@@ -99,8 +100,8 @@ async function getNotificationToken(): Promise<{ fcmToken: string; toastTitle: s
     return { fcmToken: "", toastTitle, toastDescription };
   }
 
+  // 2. Request permission
   try {
-    // 2. Request permission from the user
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') {
       console.log("Izin notifikasi ditolak oleh pengguna.");
@@ -108,54 +109,45 @@ async function getNotificationToken(): Promise<{ fcmToken: string; toastTitle: s
       toastDescription = "Anda tidak akan menerima promo hingga izin notifikasi diberikan di pengaturan browser.";
       return { fcmToken: "", toastTitle, toastDescription };
     }
+  } catch (err) {
+      console.error("Error saat meminta izin notifikasi:", err);
+      toastDescription = "Gagal meminta izin notifikasi. Anda dapat mengaktifkannya secara manual nanti.";
+      return { fcmToken: "", toastTitle, toastDescription };
+  }
 
-    // 3. Register the service worker
-    console.log("Izin notifikasi diberikan. Mendaftarkan service worker...");
-    const firebaseConfigValues = {
-      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-    };
-    
-    // Ensure all config values are present before creating the URL
-    if (Object.values(firebaseConfigValues).some(v => !v)) {
-        console.error("Konfigurasi Firebase tidak lengkap di environment variables.");
-        toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal";
-        toastDescription = "Konfigurasi notifikasi tidak lengkap, aktivasi dibatalkan.";
-        return { fcmToken: "", toastTitle, toastDescription };
-    }
-
-    const swUrl = `/firebase-messaging-sw.js?${new URLSearchParams(firebaseConfigValues as Record<string, string>).toString()}`;
-    const registration = await navigator.serviceWorker.register(swUrl);
-    console.log("Service worker berhasil didaftarkan:", registration);
-
-    // 4. Get the FCM token
+  // 3. Get the FCM token
+  try {
     console.log("Mencoba mendapatkan token FCM...");
     const token = await getToken(messaging, {
       vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: registration,
     });
 
     if (token) {
       console.log("Token FCM berhasil didapatkan:", token);
+      toastTitle = "Pendaftaran Berhasil!";
       toastDescription = "Terima kasih! Notifikasi promo telah diaktifkan untuk Anda.";
       return { fcmToken: token, toastTitle, toastDescription };
     } else {
-      console.warn("Gagal mendapatkan token FCM. 'getToken' tidak mengembalikan token.");
+      // This case is unlikely if permission is granted, but good to handle.
+      // It often points to an issue with the service worker.
+      console.warn("Gagal mendapatkan token FCM: 'getToken' tidak mengembalikan token.");
       toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
-      toastDescription = "Kami gagal mengaktifkan notifikasi untuk browser Anda. Anda dapat mencobanya lagi nanti.";
+      toastDescription = "Kami gagal mengaktifkan notifikasi untuk browser Anda. Pastikan tidak ada yang memblokir service worker.";
       return { fcmToken: "", toastTitle, toastDescription };
     }
   } catch (err) {
-    console.error("Error saat proses aktivasi notifikasi:", err);
+    console.error("Error saat proses mendapatkan token FCM:", err);
     toastTitle = "Pendaftaran Berhasil, Notifikasi Gagal Aktif";
-    if (err instanceof Error && err.message.includes("unsupported-browser")) {
-      toastDescription = "Browser Anda tidak mendukung fitur notifikasi ini.";
+    if (err instanceof Error) {
+        if (err.message.includes("permission-blocked") || err.message.includes("permission default")) {
+          toastDescription = "Izin notifikasi diblokir. Harap aktifkan di pengaturan browser Anda.";
+        } else if (err.message.includes("unsupported-browser")) {
+            toastDescription = "Browser Anda tidak mendukung fitur notifikasi ini.";
+        } else {
+            toastDescription = "Terjadi kesalahan saat mencoba mengaktifkan notifikasi.";
+        }
     } else {
-      toastDescription = "Terjadi kesalahan saat mencoba mengaktifkan notifikasi.";
+        toastDescription = "Terjadi kesalahan yang tidak diketahui saat mengaktifkan notifikasi.";
     }
     return { fcmToken: "", toastTitle, toastDescription };
   }
@@ -188,8 +180,10 @@ export function RegisterForm() {
   });
 
   React.useEffect(() => {
+    // Reset interests when the available interests change, ensuring no invalid selections persist.
     form.reset({ ...form.getValues(), interests: [] });
   }, [interestsToShow, form]);
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
