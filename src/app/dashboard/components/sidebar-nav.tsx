@@ -10,13 +10,13 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "../contexts/auth-context";
 
 const allNavItems = [
-    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ['admin', 'operator', 'member'] },
+    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ['admin', 'demo', 'member'] },
     { href: "/dashboard/campaigns", icon: Megaphone, label: "Kampanye", roles: ['admin', 'member'] },
     { href: "/dashboard/calendar", icon: Calendar, label: "Kalender Kampanye", roles: ['admin', 'member'] },
     { href: "/dashboard/customers", icon: Users, label: "Database Pelanggan", roles: ['admin', 'member'] },
     { href: "/dashboard/reports", icon: FileText, label: "Laporan Outlet", roles: ['member'] },
     { href: "/dashboard/marketing-ai", icon: Bot, label: "Tool Pemasaran AI", roles: ['admin'] },
-    { href: "/dashboard/cashier", icon: ScanLine, label: "Kasir", roles: ['admin', 'operator'] },
+    { href: "/dashboard/cashier", icon: ScanLine, label: "Kasir", roles: ['admin'] },
     { href: "/dashboard/qr-outlet", icon: QrCode, label: "QR Outlet", roles: ['admin'] },
 ];
 
@@ -37,7 +37,7 @@ export function SidebarNav() {
                 <SidebarMenu>
                     {navItems.map((item) => (
                         <SidebarMenuItem key={item.href}>
-                            <SidebarMenuButton asChild isActive={pathname.startsWith(item.href)}>
+                            <SidebarMenuButton asChild isActive={pathname.startsWith(item.href) && (item.href !== '/dashboard' || pathname === '/dashboard')}>
                                 <Link href={item.href}>
                                     <item.icon className="h-4 w-4" />
                                     <span>{item.label}</span>

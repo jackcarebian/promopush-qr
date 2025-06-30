@@ -39,7 +39,7 @@ export default function CustomersPage() {
     const { customers, deleteCustomer } = useCustomers();
     const { user } = useAuth();
 
-    if (user?.role === 'operator') {
+    if (user?.role === 'demo') {
          return (
             <Card>
                 <CardHeader>

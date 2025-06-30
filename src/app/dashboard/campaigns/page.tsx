@@ -9,8 +9,8 @@ import { useAuth } from "../contexts/auth-context";
 export default function CampaignsPage() {
     const { user } = useAuth();
     
-    // Operator does not manage campaigns
-    if (user?.role === 'operator') {
+    // Demo & Operator roles do not manage campaigns
+    if (user?.role === 'demo') {
         return (
             <Card>
                 <CardHeader>

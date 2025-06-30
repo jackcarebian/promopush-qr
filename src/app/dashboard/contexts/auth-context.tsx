@@ -9,7 +9,7 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'operator' | 'member';
+  role: 'admin' | 'demo' | 'member';
   outletId?: string;
 };
 
@@ -53,10 +53,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = useCallback((credentials: { email: string; pass: string; role: User['role'] }): boolean => {
     let loggedInUser: User | null = null;
 
-    if (credentials.role === 'admin' && credentials.email === 'admin@promopush.com' && credentials.pass === 'admin123') {
-      loggedInUser = { id: 'admin-user', name: 'Admin Utama', email: 'admin@promopush.com', role: 'admin' };
-    } else if (credentials.role === 'operator' && credentials.email === 'operator@promopush.com' && credentials.pass === 'operator123') {
-      loggedInUser = { id: 'operator-user', name: 'Operator Kasir', email: 'operator@promopush.com', role: 'operator' };
+    if (credentials.role === 'admin' && credentials.email === 'jimmy.tjahyono@gmail.com' && credentials.pass === '+-Sejam#123') {
+      loggedInUser = { id: 'admin-user', name: 'Admin Utama', email: 'jimmy.tjahyono@gmail.com', role: 'admin' };
+    } else if (credentials.role === 'demo' && credentials.email === 'demo@promopush.com' && credentials.pass === 'demo123') {
+      loggedInUser = { id: 'demo-user', name: 'Akun Demo', email: 'demo@promopush.com', role: 'demo' };
     } else if (credentials.role === 'member') {
       const member = getMemberByEmail(credentials.email);
       if (member && member.password === credentials.pass) {

@@ -14,6 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import { useAuth } from "../contexts/auth-context";
 
 interface CustomerData {
   name: string;
@@ -30,6 +31,7 @@ const customerDatabase: { [key: string]: CustomerData } = {
 };
 
 export default function CashierPage() {
+  const { user } = useAuth();
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -184,6 +186,19 @@ export default function CashierPage() {
       setIsLoading(false);
     }, 1500);
   };
+  
+  if (user?.role !== 'admin') {
+     return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Akses Ditolak</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p>Hanya Admin yang dapat mengakses halaman ini.</p>
+            </CardContent>
+        </Card>
+    )
+  }
 
   return (
     <div className="space-y-8 flex flex-col items-center">

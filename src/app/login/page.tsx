@@ -40,11 +40,11 @@ function LoginForm({ role }: { role: User['role'] }) {
     // Pre-fill for demo purposes
     React.useEffect(() => {
         if (role === 'admin') {
-            setEmail('admin@promopush.com');
-            setPassword('admin123');
-        } else if (role === 'operator') {
-            setEmail('operator@promopush.com');
-            setPassword('operator123');
+            setEmail('jimmy.tjahyono@gmail.com');
+            setPassword('+-Sejam#123');
+        } else if (role === 'demo') {
+            setEmail('demo@promopush.com');
+            setPassword('demo123');
         } else if (role === 'member') {
             setEmail('anyar@example.com');
             setPassword('password');
@@ -87,17 +87,17 @@ export default function LoginPage() {
         </div>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="admin">Admin</TabsTrigger>
-          <TabsTrigger value="operator">Operator</TabsTrigger>
           <TabsTrigger value="member">Member</TabsTrigger>
+          <TabsTrigger value="demo">Demo</TabsTrigger>
         </TabsList>
         <TabsContent value="admin">
           <LoginForm role="admin" />
         </TabsContent>
-        <TabsContent value="operator">
-          <LoginForm role="operator" />
-        </TabsContent>
         <TabsContent value="member">
           <LoginForm role="member" />
+        </TabsContent>
+        <TabsContent value="demo">
+          <LoginForm role="demo" />
         </TabsContent>
       </Tabs>
     </div>
