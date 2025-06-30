@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 
 function RegisterMemberFormSkeleton() {
     return (
-        <Card className="w-full max-w-lg">
+        <Card className="w-full max-w-4xl">
              <CardHeader className="text-center">
                 <div className="mx-auto mb-4 w-fit">
                     <Logo />

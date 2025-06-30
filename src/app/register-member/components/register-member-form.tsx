@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -168,7 +169,7 @@ Tim Notiflayer
 
   if (isSuccess) {
     return (
-        <Card className="w-full max-w-lg text-center shadow-2xl">
+        <Card className="w-full max-w-4xl text-center shadow-2xl">
             <CardHeader>
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
                     <Check className="h-10 w-10 text-green-600 dark:text-green-400" />
@@ -190,7 +191,7 @@ Tim Notiflayer
   }
 
   return (
-    <Card className="w-full max-w-lg shadow-2xl">
+    <Card className="w-full max-w-4xl shadow-2xl">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 w-fit">
           <Logo />
