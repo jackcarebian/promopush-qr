@@ -56,7 +56,7 @@ export default function Home() {
           <div className="container text-center">
             <div className="mb-10 flex justify-center">
                 <Image
-                    src="https://i.imghippo.com/files/XPds9978DuU.png"
+                    src="https://i.imghippo.com/files/kHRT8148tqk.png"
                     alt="Dua orang tersenyum bahagia sambil menunjukkan notifikasi promo di ponsel mereka"
                     data-ai-hint="happy people"
                     width={1024}
