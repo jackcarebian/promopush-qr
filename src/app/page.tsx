@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -382,7 +381,7 @@ export default function Home() {
                     {Object.entries(plans).map(([key, { name, cost }]) => (
                       <div key={key} className="flex items-center space-x-3">
                         <RadioGroupItem value={key} id={key} />
-                        <Label htmlFor={key} className="flex justify-between w-full font-normal cursor-pointer text-sm">
+                        <Label htmlFor={key} className="grid grid-cols-[1fr_auto] gap-4 w-full font-normal cursor-pointer text-sm">
                           <span>{name}</span>
                           <span className="font-medium">{formatCurrency(cost)}</span>
                         </Label>
@@ -467,5 +466,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
