@@ -80,7 +80,7 @@ export default function Home() {
         
         let currentBranchAddonCost = 0;
         if (selectedPlan === 'banyak-cabang') {
-            currentBranchAddonCost = 25000; // Fixed cost for this plan
+            currentBranchAddonCost = 49000;
         } else if (selectedPlan === 'multi-bisnis') {
             currentBranchAddonCost = pc * 0.5; // 50% of the 'Multi Bisnis' plan cost
         }
@@ -327,7 +327,7 @@ export default function Home() {
                         <TableBody>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Cabang (Banyak Cabang)</TableCell>
-                                <TableCell>Rp 25.000 / cabang</TableCell>
+                                <TableCell>Rp 49.000 / cabang</TableCell>
                                 <TableCell>Termasuk: 1 QR unik + 1 slot dashboard cabang.</TableCell>
                             </TableRow>
                             <TableRow>

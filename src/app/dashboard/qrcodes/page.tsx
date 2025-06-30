@@ -183,7 +183,7 @@ export default function QrCodesPage() {
                         <TableBody>
                              <TableRow>
                                 <TableCell className="font-medium">Tambah Cabang (Banyak Cabang)</TableCell>
-                                <TableCell>Rp 25.000 / cabang</TableCell>
+                                <TableCell>Rp 49.000 / cabang</TableCell>
                                 <TableCell>Termasuk: 1 QR unik + 1 slot dashboard cabang.</TableCell>
                             </TableRow>
                             <TableRow>
