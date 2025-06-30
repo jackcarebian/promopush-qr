@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, QrCode, Store, Building, Globe } from "lucide-react";
 import { useAuth } from "../contexts/auth-context";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 
 export default function QrCodesPage() {
     const { user } = useAuth();
@@ -163,6 +165,69 @@ export default function QrCodesPage() {
                     </CardFooter>
                 </Card>
             </div>
+
+            <Card className="mt-12">
+                <CardHeader>
+                    <CardTitle className="font-headline">Biaya Penambahan (Add-on)</CardTitle>
+                    <CardDescription>Untuk Member "Banyak Cabang" & "Multi Bisnis"</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Jenis Penambahan</TableHead>
+                                <TableHead>Biaya Tambahan</TableHead>
+                                <TableHead>Keterangan</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell className="font-medium">Tambah 1 Cabang Baru</TableCell>
+                                <TableCell>Rp 25.000 / cabang</TableCell>
+                                <TableCell>Termasuk: 1 QR unik + 1 slot dashboard cabang</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">Upgrade dari "1 Cabang" ke "Banyak Cabang"</TableCell>
+                                <TableCell>Rp 50.000 (1x bayar)</TableCell>
+                                <TableCell>Ubah akun agar bisa menambah banyak cabang</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">Tambah Brand Baru (Multi Bisnis)</TableCell>
+                                <TableCell>Rp 35.000 / brand</TableCell>
+                                <TableCell>Untuk usaha lain dengan nama/bisnis berbeda</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">Tambah Kampanye Promo Baru</TableCell>
+                                <TableCell>Rp 10.000 / kampanye</TableCell>
+                                <TableCell>Setelah kampanye pertama (gratis) dalam bulan berjalan</TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                    <div className="mt-6 space-y-4 text-sm text-muted-foreground">
+                        <div>
+                            <h4 className="font-semibold text-foreground mb-2">Keterangan Tambahan:</h4>
+                            <ul className="list-disc pl-5 space-y-1">
+                                <li>Semua Member dapat 1 kampanye promo gratis per bulan.</li>
+                                <li>Kampanye tambahan bersifat berbayar per eksekusi.</li>
+                                <li>Sistem akan otomatis mendeteksi sisa kuota kampanye.</li>
+                                <li>Penagihan otomatis ditambahkan ke tagihan bulan berjalan.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold text-foreground mb-2">Contoh Kasus:</h4>
+                            <div className="p-4 bg-secondary rounded-lg">
+                                <p className="font-medium text-secondary-foreground">Member "Banyak Cabang"</p>
+                                <ul className="list-disc pl-5 space-y-1 mt-1">
+                                    <li>Bulan ini sudah buat 1 kampanye (gratis).</li>
+                                    <li>Mau kirim kampanye ke semua cabang → Buat 2 kampanye tambahan.</li>
+                                    <li><strong>Tambahan biaya:</strong> 2 x Rp 10.000 = Rp 20.000</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
         </div>
     );
 }
