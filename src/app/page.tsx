@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
-import { QrCode, Mail, Calendar, Users, Bot, ShoppingCart, Check, Store, Building, Globe, Calculator } from 'lucide-react';
+import { QrCode, Mail, Calendar, Users, Bot, ShoppingCart, Check, Store, Building, Globe, Calculator, Minus, Plus } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -372,7 +372,7 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-8 pt-6">
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <Label className="text-base font-semibold">1. Pilih Paket Anda</Label>
                   <RadioGroup
                     value={selectedPlan}
@@ -390,50 +390,42 @@ export default function Home() {
                     ))}
                   </RadioGroup>
                 </div>
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="campaign-count" className="text-base font-semibold">2. Jumlah Kampanye Tambahan</Label>
-                    <Input
-                      id="campaign-count"
-                      type="number"
-                      min="0"
-                      value={additionalCampaignsInput}
-                      onChange={(e) => setAdditionalCampaignsInput(Math.max(0, parseInt(e.target.value) || 0))}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Setiap akun mendapatkan 1 kampanye gratis per bulan. Masukkan hanya jumlah <strong>tambahan</strong>.
-                    </p>
-                  </div>
-                   <div className="space-y-2">
-                    <Label htmlFor="branch-count" className={cn("text-base font-semibold", selectedPlan === 'satu-cabang' && "text-muted-foreground/50")}>3. Jumlah Cabang Tambahan</Label>
-                    <Input
-                      id="branch-count"
-                      type="number"
-                      min="0"
-                      value={additionalBranchesInput}
-                      onChange={(e) => setAdditionalBranchesInput(Math.max(0, parseInt(e.target.value) || 0))}
-                      disabled={selectedPlan === 'satu-cabang'}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Hanya untuk paket "Banyak Cabang" & "Multi Bisnis".
-                    </p>
-                  </div>
-                  
-                  {selectedPlan === 'multi-bisnis' && (
-                    <div className="space-y-2">
-                      <Label htmlFor="brand-count" className="text-base font-semibold">4. Jumlah Brand/Bisnis Tambahan</Label>
-                      <Input
-                        id="brand-count"
-                        type="number"
-                        min="0"
-                        value={additionalBrandsInput}
-                        onChange={(e) => setAdditionalBrandsInput(Math.max(0, parseInt(e.target.value) || 0))}
-                      />
-                       <p className="text-xs text-muted-foreground">
-                        Khusus untuk paket "Multi Bisnis".
-                      </p>
+                <div className="space-y-8">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <Label htmlFor="campaign-count" className="font-semibold">2. Kampanye Tambahan</Label>
+                            <p className="text-xs text-muted-foreground">Di luar 1 kampanye gratis/bulan.</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalCampaignsInput(p => Math.max(0, p - 1))} disabled={additionalCampaignsInput === 0}><Minus className="h-4 w-4" /><span className="sr-only">Kurangi</span></Button>
+                            <Input id="campaign-count" type="text" className="h-8 w-12 text-center" value={additionalCampaignsInput} readOnly />
+                            <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalCampaignsInput(p => p + 1)}><Plus className="h-4 w-4" /><span className="sr-only">Tambah</span></Button>
+                        </div>
                     </div>
-                  )}
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <Label htmlFor="branch-count" className={cn("font-semibold", selectedPlan === 'satu-cabang' && "text-muted-foreground/50")}>3. Cabang Tambahan</Label>
+                            <p className="text-xs text-muted-foreground">Hanya untuk paket > 1 cabang.</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                             <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBranchesInput(p => Math.max(0, p - 1))} disabled={selectedPlan === 'satu-cabang' || additionalBranchesInput === 0}><Minus className="h-4 w-4" /><span className="sr-only">Kurangi</span></Button>
+                            <Input id="branch-count" type="text" className="h-8 w-12 text-center" value={additionalBranchesInput} readOnly disabled={selectedPlan === 'satu-cabang'} />
+                            <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBranchesInput(p => p + 1)} disabled={selectedPlan === 'satu-cabang'}><Plus className="h-4 w-4" /><span className="sr-only">Tambah</span></Button>
+                        </div>
+                    </div>
+                    <div className={cn("flex items-center justify-between transition-opacity", selectedPlan !== 'multi-bisnis' && "opacity-50")}>
+                        <div>
+                            <Label htmlFor="brand-count" className="font-semibold">4. Brand Tambahan</Label>
+                            <p className="text-xs text-muted-foreground">Hanya untuk paket Multi Bisnis.</p>
+                        </div>
+                         <div className="flex items-center gap-2">
+                            <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBrandsInput(p => Math.max(0, p - 1))} disabled={selectedPlan !== 'multi-bisnis' || additionalBrandsInput === 0}><Minus className="h-4 w-4" /><span className="sr-only">Kurangi</span></Button>
+                            <Input id="brand-count" type="text" className="h-8 w-12 text-center" value={additionalBrandsInput} readOnly disabled={selectedPlan !== 'multi-bisnis'} />
+                            <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBrandsInput(p => p + 1)} disabled={selectedPlan !== 'multi-bisnis'}><Plus className="h-4 w-4" /><span className="sr-only">Tambah</span></Button>
+                        </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col items-start bg-muted/50 p-6 rounded-b-lg mt-6">
@@ -475,3 +467,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
