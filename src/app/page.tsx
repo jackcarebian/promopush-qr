@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -97,7 +98,23 @@ export default function Home() {
                 Pilih paket langganan yang paling sesuai untuk skala dan kebutuhan bisnis Anda.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+
+            <div className="text-center max-w-3xl mx-auto">
+                <h2 className="text-2xl font-bold font-headline text-primary">Buka Potensi Penuh Bisnis Anda</h2>
+                <div className="text-muted-foreground mt-2 space-y-3">
+                    <p>
+                        Bersama Notiflayer, Anda tidak hanya mendapatkan pelanggan, tetapi membangun komunitas setia.
+                    </p>
+                    <p>
+                        Ubah pengunjung biasa menjadi pelanggan tetap dengan memberikan mereka akses mudah ke promo eksklusif dan penawaran yang dipersonalisasi.
+                    </p>
+                    <p>
+                        Setiap pemindaian adalah awal dari hubungan yang lebih erat. Pilih paket Anda di bawah ini dan mulailah membangun hubungan yang lebih kuat dengan pelanggan Anda hari ini!
+                    </p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch pt-8">
                 
                 {/* Paket Starter */}
                 <Card className="flex flex-col">
