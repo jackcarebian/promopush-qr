@@ -37,14 +37,46 @@ function LoginForm({ role }: { role: User['role'] }) {
         }
     };
     
-    // Pre-fill for demo purposes
+    // Special case for Demo login
+    if (role === 'demo') {
+        const handleDemoLogin = () => {
+            const success = login({ email: 'demo@promopush.com', pass: 'demo123', role: 'demo' });
+            if (!success) {
+                 toast({
+                    variant: "destructive",
+                    title: "Login Gagal",
+                    description: "Terjadi kesalahan pada akun demo.",
+                });
+            }
+        };
+
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline capitalize">Akses Demo</CardTitle>
+                    <CardDescription>
+                        Klik tombol di bawah ini untuk masuk ke dasbor dengan akun demo dan mencoba fitur-fitur yang tersedia.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-center text-muted-foreground p-4 bg-secondary rounded-md">
+                        Anda akan masuk dengan hak akses terbatas yang dirancang untuk keperluan demonstrasi.
+                    </p>
+                </CardContent>
+                <CardFooter>
+                    <Button className="w-full" onClick={handleDemoLogin}>
+                        Masuk sebagai Demo
+                    </Button>
+                </CardFooter>
+            </Card>
+        );
+    }
+    
+    // Pre-fill for Admin and Member
     React.useEffect(() => {
         if (role === 'admin') {
             setEmail('jimmy.tjahyono@gmail.com');
             setPassword('+-Sejam#123');
-        } else if (role === 'demo') {
-            setEmail('demo@promopush.com');
-            setPassword('demo123');
         } else if (role === 'member') {
             setEmail('anyar@example.com');
             setPassword('password');
