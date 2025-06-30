@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { cn } from '@/lib/utils';
 
 const features = [
   {
@@ -55,22 +56,41 @@ export default function Home() {
       'multi-bisnis': { name: 'Multi Bisnis', cost: 199000 },
     };
     const campaignAddonCost = 20000;
+    const branchAddonCost = 25000;
+    const brandAddonCost = 35000;
 
     // State for the calculator
     const [selectedPlan, setSelectedPlan] = useState('banyak-cabang');
     const [additionalCampaignsInput, setAdditionalCampaignsInput] = useState(0);
+    const [additionalBranchesInput, setAdditionalBranchesInput] = useState(0);
+    const [additionalBrandsInput, setAdditionalBrandsInput] = useState(0);
+    
+    // Reset inputs when plan changes to avoid invalid states
+    useEffect(() => {
+        if (selectedPlan === 'satu-cabang') {
+            setAdditionalBranchesInput(0);
+        }
+        if (selectedPlan !== 'multi-bisnis') {
+            setAdditionalBrandsInput(0);
+        }
+    }, [selectedPlan]);
 
     // Memoized calculation for performance
-    const { planCost, campaignCost, totalCost } = useMemo(() => {
+    const { planCost, campaignCost, branchCost, brandCost, totalCost } = useMemo(() => {
         const pc = plans[selectedPlan].cost;
         const cc = additionalCampaignsInput * campaignAddonCost;
-        const tc = pc + cc;
+        const bc = selectedPlan === 'satu-cabang' ? 0 : additionalBranchesInput * branchAddonCost;
+        const brc = selectedPlan === 'multi-bisnis' ? additionalBrandsInput * brandAddonCost : 0;
+        const tc = pc + cc + bc + brc;
+
         return {
             planCost: pc,
             campaignCost: cc,
+            branchCost: bc,
+            brandCost: brc,
             totalCost: tc,
         };
-    }, [selectedPlan, additionalCampaignsInput, plans, campaignAddonCost]);
+    }, [selectedPlan, additionalCampaignsInput, additionalBranchesInput, additionalBrandsInput, plans, campaignAddonCost, branchAddonCost, brandAddonCost]);
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -348,7 +368,7 @@ export default function Home() {
                 <Calculator className="w-10 h-10 text-primary mb-4" />
                 <CardTitle className="font-headline text-2xl">Kalkulator Biaya Langganan</CardTitle>
                 <CardDescription>
-                  Hitung estimasi biaya bulanan Anda berdasarkan paket dan kebutuhan kampanye.
+                  Hitung estimasi biaya bulanan Anda berdasarkan paket dan kebutuhan add-on.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid md:grid-cols-2 gap-8 pt-6">
@@ -370,19 +390,50 @@ export default function Home() {
                     ))}
                   </RadioGroup>
                 </div>
-                <div className="space-y-4">
-                  <Label htmlFor="campaign-count" className="text-base font-semibold">2. Jumlah Kampanye Tambahan per Bulan</Label>
-                  <Input
-                    id="campaign-count"
-                    type="number"
-                    min="0"
-                    value={additionalCampaignsInput}
-                    onChange={(e) => setAdditionalCampaignsInput(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="text-lg h-12"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Setiap akun mendapatkan 1 kampanye gratis per bulan. Masukkan jumlah kampanye <strong>tambahan</strong> yang Anda butuhkan.
-                  </p>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="campaign-count" className="text-base font-semibold">2. Jumlah Kampanye Tambahan</Label>
+                    <Input
+                      id="campaign-count"
+                      type="number"
+                      min="0"
+                      value={additionalCampaignsInput}
+                      onChange={(e) => setAdditionalCampaignsInput(Math.max(0, parseInt(e.target.value) || 0))}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Setiap akun mendapatkan 1 kampanye gratis per bulan. Masukkan hanya jumlah <strong>tambahan</strong>.
+                    </p>
+                  </div>
+                   <div className="space-y-2">
+                    <Label htmlFor="branch-count" className={cn("text-base font-semibold", selectedPlan === 'satu-cabang' && "text-muted-foreground/50")}>3. Jumlah Cabang Tambahan</Label>
+                    <Input
+                      id="branch-count"
+                      type="number"
+                      min="0"
+                      value={additionalBranchesInput}
+                      onChange={(e) => setAdditionalBranchesInput(Math.max(0, parseInt(e.target.value) || 0))}
+                      disabled={selectedPlan === 'satu-cabang'}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Hanya untuk paket "Banyak Cabang" & "Multi Bisnis".
+                    </p>
+                  </div>
+                  
+                  {selectedPlan === 'multi-bisnis' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="brand-count" className="text-base font-semibold">4. Jumlah Brand/Bisnis Tambahan</Label>
+                      <Input
+                        id="brand-count"
+                        type="number"
+                        min="0"
+                        value={additionalBrandsInput}
+                        onChange={(e) => setAdditionalBrandsInput(Math.max(0, parseInt(e.target.value) || 0))}
+                      />
+                       <p className="text-xs text-muted-foreground">
+                        Khusus untuk paket "Multi Bisnis".
+                      </p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col items-start bg-muted/50 p-6 rounded-b-lg mt-6">
@@ -395,6 +446,14 @@ export default function Home() {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tambahan Kampanye ({additionalCampaignsInput}x)</span>
                     <span className="font-medium text-foreground">{formatCurrency(campaignCost)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tambahan Cabang ({additionalBranchesInput}x)</span>
+                    <span className="font-medium text-foreground">{formatCurrency(branchCost)}</span>
+                  </div>
+                   <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tambahan Brand ({additionalBrandsInput}x)</span>
+                    <span className="font-medium text-foreground">{formatCurrency(brandCost)}</span>
                   </div>
                   <hr className="my-2 border-dashed border-border"/>
                   <div className="flex justify-between items-center text-lg font-bold text-primary">
