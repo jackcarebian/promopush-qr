@@ -4,8 +4,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from 'next/link';
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,14 +25,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/logo";
 import { businessCategories, interestCategories } from "@/app/dashboard/campaigns/data/categories";
-import { Check } from "lucide-react";
+import { Check, Calculator, Minus, Plus } from "lucide-react";
 
 // Schema for form validation
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus diisi, minimal 2 karakter." }),
   outletName: z.string().min(2, { message: "Nama outlet harus diisi, minimal 2 karakter." }),
   businessType: z.string({ required_error: "Pilih jenis bisnis Anda." }),
-  branchType: z.enum(["single", "multi-branch", "multi-business"], { required_error: "Pilih tipe cabang bisnis Anda." }),
+  branchType: z.enum(["satu-cabang", "banyak-cabang", "multi-bisnis"], { required_error: "Pilih paket langganan Anda." }),
   email: z.string().email({ message: "Format email tidak valid." }),
   whatsapp: z.string().min(10, { message: "Nomor WhatsApp minimal 10 digit." }),
 });
@@ -40,6 +41,19 @@ export function RegisterMemberForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
+  
+  // Pricing data for calculator
+  const plans = {
+      'satu-cabang': { name: 'Satu Cabang', cost: 49000 },
+      'banyak-cabang': { name: 'Banyak Cabang', cost: 99000 },
+      'multi-bisnis': { name: 'Multi Bisnis', cost: 199000 },
+  };
+  const campaignAddonCost = 20000;
+
+  // State for the calculator
+  const [additionalCampaignsInput, setAdditionalCampaignsInput] = useState(0);
+  const [additionalBranchesInput, setAdditionalBranchesInput] = useState(0);
+  const [additionalBrandsInput, setAdditionalBrandsInput] = useState(0);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,24 +62,72 @@ export function RegisterMemberForm() {
       outletName: "",
       email: "",
       whatsapp: "",
+      branchType: "banyak-cabang",
     },
   });
+  
+  const selectedPlan = form.watch("branchType");
+
+  // Reset inputs when plan changes to avoid invalid states
+  useEffect(() => {
+      if (selectedPlan === 'satu-cabang') {
+          setAdditionalBranchesInput(0);
+      }
+      if (selectedPlan !== 'multi-bisnis') {
+          setAdditionalBrandsInput(0);
+      }
+  }, [selectedPlan]);
+
+  // Memoized calculation for performance
+  const { planCost, campaignCost, branchCost, brandCost, totalCost } = useMemo(() => {
+      const pc = plans[selectedPlan].cost;
+      const cc = additionalCampaignsInput * campaignAddonCost;
+      
+      let currentBranchAddonCost = 0;
+      if (selectedPlan === 'banyak-cabang') {
+          currentBranchAddonCost = 49000;
+      } else if (selectedPlan === 'multi-bisnis') {
+          currentBranchAddonCost = pc * 0.5; // 50% of the 'Multi Bisnis' plan cost
+      }
+
+      const bc = selectedPlan === 'satu-cabang' ? 0 : additionalBranchesInput * currentBranchAddonCost;
+
+      let currentBrandAddonCost = 0;
+      if (selectedPlan === 'multi-bisnis') {
+          currentBrandAddonCost = pc * 0.5; // 50% of the 'Multi Bisnis' plan cost
+      }
+
+      const brc = selectedPlan === 'multi-bisnis' ? additionalBrandsInput * currentBrandAddonCost : 0;
+      const tc = pc + cc + bc + brc;
+
+      return {
+          planCost: pc,
+          campaignCost: cc,
+          branchCost: bc,
+          brandCost: brc,
+          totalCost: tc,
+      };
+  }, [selectedPlan, additionalCampaignsInput, additionalBranchesInput, additionalBrandsInput]);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
 
-    let branchTypeText = '';
-    switch (values.branchType) {
-        case 'single':
-            branchTypeText = 'Satu Cabang';
-            break;
-        case 'multi-branch':
-            branchTypeText = 'Banyak Cabang';
-            break;
-        case 'multi-business':
-            branchTypeText = 'Multi Bisnis dan Banyak Cabang';
-            break;
-    }
+    const selectedPlanName = plans[values.branchType].name;
+
+    const costDetails = `
+Estimasi Biaya Bulanan:
+--------------------------
+- Paket: ${selectedPlanName} (${formatCurrency(planCost)})
+- Kampanye Tambahan: ${additionalCampaignsInput}x (${formatCurrency(campaignCost)})
+- Cabang Tambahan: ${additionalBranchesInput}x (${formatCurrency(branchCost)})
+- Brand Tambahan: ${additionalBrandsInput}x (${formatCurrency(brandCost)})
+--------------------------
+- Total Estimasi: ${formatCurrency(totalCost)} / bulan
+    `;
 
     // Simulate sending email to admin
     console.log(`--- SIMULASI EMAIL AKTIVASI ---
@@ -76,12 +138,15 @@ Halo Admin,
 
 Ada pendaftaran baru sebagai Mitra Outlet Berbayar:
 
-Nama: ${values.name}
-Nama Outlet: ${values.outletName}
-Email: ${values.email}
-WhatsApp: ${values.whatsapp}
-Jenis Usaha: ${values.businessType}
-Tipe Cabang: ${branchTypeText}
+Informasi Pendaftar:
+- Nama: ${values.name}
+- Nama Outlet: ${values.outletName}
+- Email: ${values.email}
+- WhatsApp: ${values.whatsapp}
+- Jenis Usaha: ${values.businessType}
+
+Pilihan Paket & Estimasi Biaya:
+${costDetails}
 
 Silakan aktifkan akun melalui dasbor admin Anda.
 
@@ -190,75 +255,142 @@ Tim Notiflayer
             />
              <FormField
                 control={form.control}
-                name="branchType"
+                name="email"
                 render={({ field }) => (
-                    <FormItem className="space-y-3">
-                        <FormLabel>Skala Bisnis Anda</FormLabel>
-                        <FormControl>
-                            <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="flex flex-col space-y-1"
-                            >
-                                <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                    <RadioGroupItem value="single" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                    Satu Cabang
-                                    </FormLabel>
-                                </FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                    <RadioGroupItem value="multi-branch" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                    Banyak Cabang
-                                    </FormLabel>
-                                </FormItem>
-                                <FormItem className="flex items-center space-x-3 space-y-0">
-                                    <FormControl>
-                                    <RadioGroupItem value="multi-business" />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                    Multi Bisnis dan Banyak Cabang
-                                    </FormLabel>
-                                </FormItem>
-                            </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
+                    <FormItem>
+                    <FormLabel>Alamat Email</FormLabel>
+                    <FormControl>
+                        <Input type="email" placeholder="email@bisnisanda.com" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                        Email ini akan digunakan untuk login setelah akun diaktifkan.
+                    </FormDescription>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="whatsapp"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Nomor WhatsApp</FormLabel>
+                    <FormControl>
+                        <Input type="tel" placeholder="081234567890" {...field} />
+                    </FormControl>
+                    <FormMessage />
                     </FormItem>
                 )}
             />
+
             <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Alamat Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="email@bisnisanda.com" {...field} />
-                  </FormControl>
-                   <FormDescription>
-                    Email ini akan digunakan untuk login setelah akun diaktifkan.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+                control={form.control}
+                name="branchType"
+                render={({ field }) => (
+                    <FormItem>
+                        <Card className="shadow-none border-t border-b-0 border-x-0 rounded-none pt-6 mt-6 -mx-6 px-6">
+                            <CardHeader className="items-center text-center p-0 mb-6">
+                                <Calculator className="w-8 h-8 text-primary mb-3" />
+                                <CardTitle className="font-headline text-xl">Pilih Paket & Estimasi Biaya</CardTitle>
+                                <CardDescription>
+                                Pilih paket yang paling sesuai dengan skala bisnis Anda.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid md:grid-cols-2 gap-8 p-0">
+                            <div className="space-y-4">
+                                <FormLabel className="font-semibold">Paket Langganan</FormLabel>
+                                <FormControl>
+                                    <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        className="space-y-3"
+                                    >
+                                        {Object.entries(plans).map(([key, { name, cost }]) => (
+                                        <FormItem key={key} className="flex items-center space-x-3">
+                                            <FormControl>
+                                            <RadioGroupItem value={key} id={key} />
+                                            </FormControl>
+                                            <Label htmlFor={key} className="grid grid-cols-[1fr_auto] gap-4 w-full font-normal cursor-pointer text-sm">
+                                            <span>{name}</span>
+                                            <span className="font-medium">{formatCurrency(cost)}</span>
+                                            </Label>
+                                        </FormItem>
+                                        ))}
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </div>
+                            <div className="space-y-6">
+                                <div>
+                                    <Label className="font-semibold">Penambahan (Opsional)</Label>
+                                    <FormDescription className="text-xs">Di luar kuota paket dasar Anda.</FormDescription>
+                                </div>
+                                <div className="flex flex-col gap-4">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <Label htmlFor="campaign-count" className="text-sm">Kampanye Tambahan</Label>
+                                                <p className="text-xs text-muted-foreground">Gratis 1 per bulan.</p>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalCampaignsInput(p => Math.max(0, p - 1))} disabled={additionalCampaignsInput === 0}><Minus className="h-4 w-4" /><span className="sr-only">Kurangi</span></Button>
+                                                <Input id="campaign-count" type="text" className="h-8 w-12 text-center" value={additionalCampaignsInput} readOnly />
+                                                <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalCampaignsInput(p => p + 1)}><Plus className="h-4 w-4" /><span className="sr-only">Tambah</span></Button>
+                                            </div>
+                                        </div>
+                                        <div className={cn("flex items-center justify-between transition-opacity", selectedPlan === 'satu-cabang' && "opacity-50")}>
+                                            <div>
+                                                <Label htmlFor="branch-count" className="text-sm">Cabang Tambahan</Label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBranchesInput(p => Math.max(0, p - 1))} disabled={selectedPlan === 'satu-cabang' || additionalBranchesInput === 0}><Minus className="h-4 w-4" /><span className="sr-only">Kurangi</span></Button>
+                                                <Input id="branch-count" type="text" className="h-8 w-12 text-center" value={additionalBranchesInput} readOnly disabled={selectedPlan === 'satu-cabang'} />
+                                                <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBranchesInput(p => p + 1)} disabled={selectedPlan === 'satu-cabang'}><Plus className="h-4 w-4" /><span className="sr-only">Tambah</span></Button>
+                                            </div>
+                                        </div>
+                                        <div className={cn("flex items-center justify-between transition-opacity", selectedPlan !== 'multi-bisnis' && "opacity-50")}>
+                                            <div>
+                                                <Label htmlFor="brand-count" className="text-sm">Brand Tambahan</Label>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBrandsInput(p => Math.max(0, p - 1))} disabled={selectedPlan !== 'multi-bisnis' || additionalBrandsInput === 0}><Minus className="h-4 w-4" /><span className="sr-only">Kurangi</span></Button>
+                                                <Input id="brand-count" type="text" className="h-8 w-12 text-center" value={additionalBrandsInput} readOnly disabled={selectedPlan !== 'multi-bisnis'} />
+                                                <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBrandsInput(p => p + 1)} disabled={selectedPlan !== 'multi-bisnis'}><Plus className="h-4 w-4" /><span className="sr-only">Tambah</span></Button>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                            </CardContent>
+                            <CardFooter className="flex flex-col items-start bg-secondary p-4 rounded-lg mt-6">
+                                <h3 className="text-base font-semibold mb-3 text-foreground">Rincian Estimasi Biaya:</h3>
+                                <div className="w-full space-y-1.5 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Paket {plans[selectedPlan].name}</span>
+                                        <span className="font-medium text-foreground">{formatCurrency(planCost)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Tambahan Kampanye ({additionalCampaignsInput}x)</span>
+                                        <span className="font-medium text-foreground">{formatCurrency(campaignCost)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Tambahan Cabang ({additionalBranchesInput}x)</span>
+                                        <span className="font-medium text-foreground">{formatCurrency(branchCost)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-muted-foreground">Tambahan Brand ({additionalBrandsInput}x)</span>
+                                        <span className="font-medium text-foreground">{formatCurrency(brandCost)}</span>
+                                    </div>
+                                    <hr className="my-2 border-dashed border-border"/>
+                                    <div className="flex justify-between items-center text-base font-bold text-primary">
+                                        <span>Total Estimasi per Bulan</span>
+                                        <span className="text-xl">{formatCurrency(totalCost)}</span>
+                                    </div>
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    </FormItem>
+                )}
             />
-            <FormField
-              control={form.control}
-              name="whatsapp"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nomor WhatsApp</FormLabel>
-                  <FormControl>
-                    <Input type="tel" placeholder="081234567890" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            
             <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
               {isSubmitting ? "Mengirim Pendaftaran..." : "Daftar Sekarang"}
             </Button>

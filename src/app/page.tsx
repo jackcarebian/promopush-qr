@@ -1,19 +1,15 @@
 
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
-import { QrCode, Mail, Calendar, Users, Bot, ShoppingCart, Check, Store, Building, Globe, Calculator, Minus, Plus } from 'lucide-react';
+import { QrCode, Mail, Calendar, Users, Bot, ShoppingCart, Check, Store, Building, Globe } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { cn } from '@/lib/utils';
 
 const features = [
   {
@@ -49,65 +45,6 @@ const features = [
 ];
 
 export default function Home() {
-    // Pricing data for calculator
-    const plans = {
-      'satu-cabang': { name: 'Satu Cabang', cost: 49000 },
-      'banyak-cabang': { name: 'Banyak Cabang', cost: 99000 },
-      'multi-bisnis': { name: 'Multi Bisnis', cost: 199000 },
-    };
-    const campaignAddonCost = 20000;
-
-    // State for the calculator
-    const [selectedPlan, setSelectedPlan] = useState('banyak-cabang');
-    const [additionalCampaignsInput, setAdditionalCampaignsInput] = useState(0);
-    const [additionalBranchesInput, setAdditionalBranchesInput] = useState(0);
-    const [additionalBrandsInput, setAdditionalBrandsInput] = useState(0);
-    
-    // Reset inputs when plan changes to avoid invalid states
-    useEffect(() => {
-        if (selectedPlan === 'satu-cabang') {
-            setAdditionalBranchesInput(0);
-        }
-        if (selectedPlan !== 'multi-bisnis') {
-            setAdditionalBrandsInput(0);
-        }
-    }, [selectedPlan]);
-
-    // Memoized calculation for performance
-    const { planCost, campaignCost, branchCost, brandCost, totalCost } = useMemo(() => {
-        const pc = plans[selectedPlan].cost;
-        const cc = additionalCampaignsInput * campaignAddonCost;
-        
-        let currentBranchAddonCost = 0;
-        if (selectedPlan === 'banyak-cabang') {
-            currentBranchAddonCost = 49000;
-        } else if (selectedPlan === 'multi-bisnis') {
-            currentBranchAddonCost = pc * 0.5; // 50% of the 'Multi Bisnis' plan cost
-        }
-
-        const bc = selectedPlan === 'satu-cabang' ? 0 : additionalBranchesInput * currentBranchAddonCost;
-
-        let currentBrandAddonCost = 0;
-        if (selectedPlan === 'multi-bisnis') {
-            currentBrandAddonCost = pc * 0.5; // 50% of the 'Multi Bisnis' plan cost
-        }
-
-        const brc = selectedPlan === 'multi-bisnis' ? additionalBrandsInput * currentBrandAddonCost : 0;
-        const tc = pc + cc + bc + brc;
-
-        return {
-            planCost: pc,
-            campaignCost: cc,
-            branchCost: bc,
-            brandCost: brc,
-            totalCost: tc,
-        };
-    }, [selectedPlan, additionalCampaignsInput, additionalBranchesInput, additionalBrandsInput, plans, campaignAddonCost]);
-
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
-    };
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -226,7 +163,7 @@ export default function Home() {
                         </ul>
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full" variant="outline">Pilih Paket</Button>
+                        <Button className="w-full" variant="outline" asChild><Link href="/register-member">Pilih Paket</Link></Button>
                     </CardFooter>
                 </Card>
 
@@ -266,7 +203,7 @@ export default function Home() {
                         </ul>
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full">Pilih Paket</Button>
+                        <Button className="w-full" asChild><Link href="/register-member">Pilih Paket</Link></Button>
                     </CardFooter>
                 </Card>
 
@@ -305,7 +242,7 @@ export default function Home() {
                         </ul>
                     </CardContent>
                     <CardFooter>
-                        <Button variant="outline" className="w-full">Pilih Paket</Button>
+                        <Button variant="outline" className="w-full" asChild><Link href="/register-member">Pilih Paket</Link></Button>
                     </CardFooter>
                 </Card>
             </div>
@@ -375,103 +312,6 @@ export default function Home() {
                 </CardContent>
             </Card>
 
-          </div>
-        </section>
-
-        <section id="calculator" className="py-20 md:py-32 bg-secondary">
-          <div className="container">
-            <Card className="max-w-4xl mx-auto shadow-lg">
-              <CardHeader className="items-center text-center">
-                <Calculator className="w-10 h-10 text-primary mb-4" />
-                <CardTitle className="font-headline text-2xl">Kalkulator Biaya Langganan</CardTitle>
-                <CardDescription>
-                  Hitung estimasi biaya bulanan Anda berdasarkan paket dan kebutuhan add-on.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid md:grid-cols-2 gap-8 pt-6">
-                <div className="space-y-6">
-                  <Label className="text-base font-semibold">1. Pilih Paket Anda</Label>
-                  <RadioGroup
-                    value={selectedPlan}
-                    onValueChange={setSelectedPlan}
-                    className="space-y-3"
-                  >
-                    {Object.entries(plans).map(([key, { name, cost }]) => (
-                      <div key={key} className="flex items-center space-x-3">
-                        <RadioGroupItem value={key} id={key} />
-                        <Label htmlFor={key} className="grid grid-cols-[1fr_auto] gap-4 w-full font-normal cursor-pointer text-sm">
-                          <span>{name}</span>
-                          <span className="font-medium">{formatCurrency(cost)}</span>
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-                <div className="space-y-8">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <Label htmlFor="campaign-count" className="font-semibold">2. Kampanye Tambahan</Label>
-                            <p className="text-xs text-muted-foreground">Di luar 1 kampanye gratis/bulan.</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalCampaignsInput(p => Math.max(0, p - 1))} disabled={additionalCampaignsInput === 0}><Minus className="h-4 w-4" /><span className="sr-only">Kurangi</span></Button>
-                            <Input id="campaign-count" type="text" className="h-8 w-12 text-center" value={additionalCampaignsInput} readOnly />
-                            <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalCampaignsInput(p => p + 1)}><Plus className="h-4 w-4" /><span className="sr-only">Tambah</span></Button>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <Label htmlFor="branch-count" className={cn("font-semibold", selectedPlan === 'satu-cabang' && "text-muted-foreground/50")}>3. Cabang Tambahan</Label>
-                            <p className="text-xs text-muted-foreground">Hanya untuk paket > 1 cabang.</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                             <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBranchesInput(p => Math.max(0, p - 1))} disabled={selectedPlan === 'satu-cabang' || additionalBranchesInput === 0}><Minus className="h-4 w-4" /><span className="sr-only">Kurangi</span></Button>
-                            <Input id="branch-count" type="text" className="h-8 w-12 text-center" value={additionalBranchesInput} readOnly disabled={selectedPlan === 'satu-cabang'} />
-                            <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBranchesInput(p => p + 1)} disabled={selectedPlan === 'satu-cabang'}><Plus className="h-4 w-4" /><span className="sr-only">Tambah</span></Button>
-                        </div>
-                    </div>
-                    <div className={cn("flex items-center justify-between transition-opacity", selectedPlan !== 'multi-bisnis' && "opacity-50")}>
-                        <div>
-                            <Label htmlFor="brand-count" className="font-semibold">4. Brand Tambahan</Label>
-                            <p className="text-xs text-muted-foreground">Hanya untuk paket Multi Bisnis.</p>
-                        </div>
-                         <div className="flex items-center gap-2">
-                            <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBrandsInput(p => Math.max(0, p - 1))} disabled={selectedPlan !== 'multi-bisnis' || additionalBrandsInput === 0}><Minus className="h-4 w-4" /><span className="sr-only">Kurangi</span></Button>
-                            <Input id="brand-count" type="text" className="h-8 w-12 text-center" value={additionalBrandsInput} readOnly disabled={selectedPlan !== 'multi-bisnis'} />
-                            <Button type="button" variant="outline" size="icon" className="h-8 w-8 shrink-0 rounded-full" onClick={() => setAdditionalBrandsInput(p => p + 1)} disabled={selectedPlan !== 'multi-bisnis'}><Plus className="h-4 w-4" /><span className="sr-only">Tambah</span></Button>
-                        </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col items-start bg-muted/50 p-6 rounded-b-lg mt-6">
-                <h3 className="text-lg font-semibold mb-4 text-foreground">Rincian Estimasi Biaya:</h3>
-                <div className="w-full space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Paket {plans[selectedPlan].name}</span>
-                    <span className="font-medium text-foreground">{formatCurrency(planCost)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tambahan Kampanye ({additionalCampaignsInput}x)</span>
-                    <span className="font-medium text-foreground">{formatCurrency(campaignCost)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tambahan Cabang ({additionalBranchesInput}x)</span>
-                    <span className="font-medium text-foreground">{formatCurrency(branchCost)}</span>
-                  </div>
-                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tambahan Brand ({additionalBrandsInput}x)</span>
-                    <span className="font-medium text-foreground">{formatCurrency(brandCost)}</span>
-                  </div>
-                  <hr className="my-2 border-dashed border-border"/>
-                  <div className="flex justify-between items-center text-lg font-bold text-primary">
-                    <span>Total Estimasi per Bulan</span>
-                    <span className="text-2xl">{formatCurrency(totalCost)}</span>
-                  </div>
-                </div>
-              </CardFooter>
-            </Card>
           </div>
         </section>
       </main>
