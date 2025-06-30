@@ -54,7 +54,7 @@ export default function Home() {
       'banyak-cabang': { name: 'Banyak Cabang', cost: 99000 },
       'multi-bisnis': { name: 'Multi Bisnis', cost: 199000 },
     };
-    const campaignAddonCost = 10000;
+    const campaignAddonCost = 20000;
 
     // State for the calculator
     const [selectedPlan, setSelectedPlan] = useState('banyak-cabang');
@@ -312,7 +312,7 @@ export default function Home() {
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Kampanye Promo Baru</TableCell>
-                                <TableCell>Rp 10.000 / kampanye</TableCell>
+                                <TableCell>Rp 20.000 / kampanye</TableCell>
                                 <TableCell>Setelah 1 kampanye gratis per bulan habis.</TableCell>
                             </TableRow>
                         </TableBody>
@@ -333,7 +333,7 @@ export default function Home() {
                             <ul className="list-disc pl-5 space-y-1 mt-1 text-secondary-foreground">
                                 <li>Bulan ini sudah menggunakan 1 kampanye (gratis).</li>
                                 <li>Membuat 2 kampanye tambahan untuk cabang lain.</li>
-                                <li className="font-bold">Total Biaya Tambahan: Rp 20.000</li>
+                                <li className="font-bold">Total Biaya Tambahan: Rp 40.000</li>
                             </ul>
                         </div>
                     </div>

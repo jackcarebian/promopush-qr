@@ -198,7 +198,7 @@ export default function QrCodesPage() {
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Kampanye Promo Baru</TableCell>
-                                <TableCell>Rp 10.000 / kampanye</TableCell>
+                                <TableCell>Rp 20.000 / kampanye</TableCell>
                                 <TableCell>Setelah kampanye pertama (gratis) dalam bulan berjalan</TableCell>
                             </TableRow>
                         </TableBody>
@@ -220,7 +220,7 @@ export default function QrCodesPage() {
                                 <ul className="list-disc pl-5 space-y-1 mt-1">
                                     <li>Bulan ini sudah buat 1 kampanye (gratis).</li>
                                     <li>Mau kirim kampanye ke semua cabang → Buat 2 kampanye tambahan.</li>
-                                    <li><strong>Tambahan biaya:</strong> 2 x Rp 10.000 = Rp 20.000</li>
+                                    <li><strong>Tambahan biaya:</strong> 2 x Rp 20.000 = Rp 40.000</li>
                                 </ul>
                             </div>
                         </div>
