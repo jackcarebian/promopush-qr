@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -92,7 +91,7 @@ export default function Home() {
 
         <section id="pricing" className="py-20 md:py-32">
           <div className="container">
-            <div className="text-center max-w-2xl mx-auto mb-16">
+            <div className="text-center max-w-2xl mx-auto mb-8">
               <h2 className="text-3xl md:text-4xl font-headline font-bold">Langganan Kode QR</h2>
               <p className="text-muted-foreground mt-4">
                 Pilih paket langganan yang paling sesuai untuk skala dan kebutuhan bisnis Anda.
@@ -114,7 +113,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch pt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch pt-12">
                 
                 {/* Paket Starter */}
                 <Card className="flex flex-col">
