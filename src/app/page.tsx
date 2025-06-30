@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -55,8 +56,6 @@ export default function Home() {
       'multi-bisnis': { name: 'Multi Bisnis', cost: 199000 },
     };
     const campaignAddonCost = 20000;
-    const branchAddonCost = 25000;
-    const brandAddonCost = 35000;
 
     // State for the calculator
     const [selectedPlan, setSelectedPlan] = useState('banyak-cabang');
@@ -78,8 +77,22 @@ export default function Home() {
     const { planCost, campaignCost, branchCost, brandCost, totalCost } = useMemo(() => {
         const pc = plans[selectedPlan].cost;
         const cc = additionalCampaignsInput * campaignAddonCost;
-        const bc = selectedPlan === 'satu-cabang' ? 0 : additionalBranchesInput * branchAddonCost;
-        const brc = selectedPlan === 'multi-bisnis' ? additionalBrandsInput * brandAddonCost : 0;
+        
+        let currentBranchAddonCost = 0;
+        if (selectedPlan === 'banyak-cabang') {
+            currentBranchAddonCost = 25000; // Fixed cost for this plan
+        } else if (selectedPlan === 'multi-bisnis') {
+            currentBranchAddonCost = pc * 0.5; // 50% of the 'Multi Bisnis' plan cost
+        }
+
+        const bc = selectedPlan === 'satu-cabang' ? 0 : additionalBranchesInput * currentBranchAddonCost;
+
+        let currentBrandAddonCost = 0;
+        if (selectedPlan === 'multi-bisnis') {
+            currentBrandAddonCost = pc * 0.5; // 50% of the 'Multi Bisnis' plan cost
+        }
+
+        const brc = selectedPlan === 'multi-bisnis' ? additionalBrandsInput * currentBrandAddonCost : 0;
         const tc = pc + cc + bc + brc;
 
         return {
@@ -89,7 +102,7 @@ export default function Home() {
             brandCost: brc,
             totalCost: tc,
         };
-    }, [selectedPlan, additionalCampaignsInput, additionalBranchesInput, additionalBrandsInput, plans, campaignAddonCost, branchAddonCost, brandAddonCost]);
+    }, [selectedPlan, additionalCampaignsInput, additionalBranchesInput, additionalBrandsInput, plans, campaignAddonCost]);
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -313,19 +326,24 @@ export default function Home() {
                         </TableHeader>
                         <TableBody>
                             <TableRow>
-                                <TableCell className="font-medium">Tambah 1 Cabang Baru</TableCell>
+                                <TableCell className="font-medium">Tambah Cabang (Banyak Cabang)</TableCell>
                                 <TableCell>Rp 25.000 / cabang</TableCell>
                                 <TableCell>Termasuk: 1 QR unik + 1 slot dashboard cabang.</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">Tambah Cabang (Multi Bisnis)</TableCell>
+                                <TableCell>Rp 99.500 / cabang</TableCell>
+                                <TableCell>Biaya 50% dari paket bulanan Multi Bisnis.</TableCell>
+                            </TableRow>
+                             <TableRow>
+                                <TableCell className="font-medium">Tambah Brand (Multi Bisnis)</TableCell>
+                                <TableCell>Rp 99.500 / brand</TableCell>
+                                <TableCell>Biaya 50% dari paket bulanan Multi Bisnis.</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Upgrade dari "1 Cabang" ke "Banyak Cabang"</TableCell>
                                 <TableCell>Rp 50.000 (1x bayar)</TableCell>
                                 <TableCell>Ubah akun agar bisa menambah banyak cabang.</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">Tambah Brand Baru (Multi Bisnis)</TableCell>
-                                <TableCell>Rp 35.000 / brand</TableCell>
-                                <TableCell>Untuk usaha lain dengan nama/bisnis berbeda.</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Kampanye Promo Baru</TableCell>

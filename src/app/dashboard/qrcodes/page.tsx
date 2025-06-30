@@ -181,20 +181,25 @@ export default function QrCodesPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow>
-                                <TableCell className="font-medium">Tambah 1 Cabang Baru</TableCell>
+                             <TableRow>
+                                <TableCell className="font-medium">Tambah Cabang (Banyak Cabang)</TableCell>
                                 <TableCell>Rp 25.000 / cabang</TableCell>
-                                <TableCell>Termasuk: 1 QR unik + 1 slot dashboard cabang</TableCell>
+                                <TableCell>Termasuk: 1 QR unik + 1 slot dashboard cabang.</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">Tambah Cabang (Multi Bisnis)</TableCell>
+                                <TableCell>Rp 99.500 / cabang</TableCell>
+                                <TableCell>Biaya 50% dari paket bulanan Multi Bisnis.</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell className="font-medium">Tambah Brand (Multi Bisnis)</TableCell>
+                                <TableCell>Rp 99.500 / brand</TableCell>
+                                <TableCell>Biaya 50% dari paket bulanan Multi Bisnis.</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Upgrade dari "1 Cabang" ke "Banyak Cabang"</TableCell>
                                 <TableCell>Rp 50.000 (1x bayar)</TableCell>
                                 <TableCell>Ubah akun agar bisa menambah banyak cabang</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium">Tambah Brand Baru (Multi Bisnis)</TableCell>
-                                <TableCell>Rp 35.000 / brand</TableCell>
-                                <TableCell>Untuk usaha lain dengan nama/bisnis berbeda</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Kampanye Promo Baru</TableCell>
