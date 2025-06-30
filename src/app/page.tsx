@@ -56,11 +56,11 @@ export default function Home() {
           <div className="container text-center">
             <div className="mb-10 flex justify-center">
                 <Image
-                    src="https://placehold.co/800x533.png"
+                    src="https://i.imghippo.com/files/XPds9978DuU.png"
                     alt="Dua orang tersenyum bahagia sambil menunjukkan notifikasi promo di ponsel mereka"
                     data-ai-hint="happy people"
-                    width={800}
-                    height={533}
+                    width={1024}
+                    height={683}
                     className="max-w-full h-auto"
                     priority
                 />
@@ -110,9 +110,9 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="text-center max-w-3xl mx-auto">
+            <div className="text-center max-w-3xl mx-auto mb-8 md:mb-12">
                 <h2 className="text-2xl font-bold font-headline text-primary">Buka Potensi Penuh Bisnis Anda</h2>
-                <div className="text-muted-foreground mt-2 space-y-3">
+                <div className="text-muted-foreground mt-4 space-y-3">
                     <p>
                         Bersama Notiflayer, Anda tidak hanya mendapatkan pelanggan, tetapi membangun komunitas setia.
                     </p>
@@ -125,7 +125,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch pt-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch pt-4">
                 
                 {/* Paket Starter */}
                 <Card className="flex flex-col">
@@ -247,7 +247,7 @@ export default function Home() {
 
       <footer className="border-t py-8">
         <div className="container text-center text-muted-foreground">
-          &copy; {new Date().getFullYear()} PromoPush QR. All rights reserved.
+          &copy; {new Date().getFullYear()} Notiflayer. All rights reserved.
         </div>
       </footer>
     </div>
