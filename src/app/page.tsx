@@ -127,17 +127,17 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch pt-4">
                 
-                {/* Paket Starter */}
+                {/* Paket Satu Cabang */}
                 <Card className="flex flex-col">
                     <CardHeader className="items-center text-center">
                         <div className="p-4 bg-secondary rounded-full inline-block mb-4">
                            <Store className="w-10 h-10 text-primary" />
                         </div>
-                        <CardTitle className="font-headline">Starter</CardTitle>
-                        <CardDescription>Ideal untuk bisnis dengan satu lokasi.</CardDescription>
+                        <CardTitle className="font-headline">Satu Cabang</CardTitle>
+                        <CardDescription>Cocok untuk UMKM atau outlet tunggal di satu lokasi.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
-                        <div className="text-4xl font-bold text-center">Rp 99.000<span className="text-base font-normal text-muted-foreground">/bln</span></div>
+                        <div className="text-4xl font-bold text-center">Rp 49.000<span className="text-base font-normal text-muted-foreground">/bln</span></div>
                          <ul className="space-y-3 text-sm text-left">
                             <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
@@ -158,22 +158,22 @@ export default function Home() {
                         </ul>
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full" variant="outline">Pilih Paket Starter</Button>
+                        <Button className="w-full" variant="outline">Pilih Paket</Button>
                     </CardFooter>
                 </Card>
 
-                {/* Paket Bisnis (Paling Populer) */}
+                {/* Paket Banyak Cabang (Paling Populer) */}
                 <Card className="border-2 border-primary shadow-lg relative flex flex-col">
                      <Badge variant="default" className="absolute -top-4 left-1/2 -translate-x-1/2">Paling Populer</Badge>
                     <CardHeader className="items-center text-center">
                         <div className="p-4 bg-secondary rounded-full inline-block mb-4">
                            <Building className="w-10 h-10 text-primary" />
                         </div>
-                        <CardTitle className="font-headline">Bisnis</CardTitle>
-                        <CardDescription>Sempurna untuk bisnis dengan beberapa cabang.</CardDescription>
+                        <CardTitle className="font-headline">Banyak Cabang</CardTitle>
+                        <CardDescription>Untuk pelaku usaha dengan beberapa cabang (2–5 lokasi).</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
-                       <div className="text-4xl font-bold text-center">Rp 499.000<span className="text-base font-normal text-muted-foreground">/bln</span></div>
+                       <div className="text-4xl font-bold text-center">Rp 99.000<span className="text-base font-normal text-muted-foreground">/bln</span></div>
                         <ul className="space-y-3 text-sm text-left">
                             <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
@@ -198,25 +198,25 @@ export default function Home() {
                         </ul>
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full">Pilih Paket Bisnis</Button>
+                        <Button className="w-full">Pilih Paket</Button>
                     </CardFooter>
                 </Card>
 
-                {/* Paket Enterprise */}
+                {/* Paket Multi Bisnis */}
                 <Card className="flex flex-col">
                     <CardHeader className="items-center text-center">
                         <div className="p-4 bg-secondary rounded-full inline-block mb-4">
                            <Globe className="w-10 h-10 text-primary" />
                         </div>
-                        <CardTitle className="font-headline">Enterprise</CardTitle>
-                        <CardDescription>Solusi kustom untuk multi-bisnis dan skala besar.</CardDescription>
+                        <CardTitle className="font-headline">Multi Bisnis & Banyak Cabang</CardTitle>
+                        <CardDescription>Cocok untuk grup usaha yang punya lebih dari 1 jenis bisnis atau outlet &gt;5 cabang.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
-                        <div className="text-4xl font-bold text-center">Kustom</div>
+                        <div className="text-4xl font-bold text-center">Rp 199.000<span className="text-base font-normal text-muted-foreground">/bln</span></div>
                         <ul className="space-y-3 text-sm text-left">
                             <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
-                                <span>Semua di paket <strong>Bisnis</strong></span>
+                                <span>Semua di paket <strong>Banyak Cabang</strong></span>
                             </li>
                              <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
@@ -237,7 +237,7 @@ export default function Home() {
                         </ul>
                     </CardContent>
                     <CardFooter>
-                        <Button variant="outline" className="w-full">Hubungi Penjualan</Button>
+                        <Button variant="outline" className="w-full">Pilih Paket</Button>
                     </CardFooter>
                 </Card>
             </div>
