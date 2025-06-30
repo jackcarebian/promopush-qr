@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Logo } from '@/components/logo';
 import { QrCode, Mail, Calendar, Users, Bot, ShoppingCart, Check, Store, Building, Globe } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const features = [
   {
@@ -51,8 +52,18 @@ export default function Home() {
       </header>
 
       <main className="flex-1">
-        <section className="py-20 md:py-32">
+        <section className="pt-20 md:pt-24 pb-16 md:pb-24">
           <div className="container text-center">
+            <div className="mb-10 flex justify-center">
+                <Image
+                    src="/hero-image.png"
+                    alt="Dua orang tersenyum bahagia sambil menunjukkan notifikasi promo di ponsel mereka"
+                    width={800}
+                    height={533}
+                    className="max-w-full h-auto"
+                    priority
+                />
+            </div>
             <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6 text-foreground tracking-tight">
               Semua yang anda perlukan untuk memulai <br className="hidden md:block" /> kampanye promo yang efektif dan sukses
             </h1>
