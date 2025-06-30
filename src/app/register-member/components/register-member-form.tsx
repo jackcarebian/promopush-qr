@@ -88,7 +88,7 @@ export function RegisterMemberForm() {
       if (selectedPlan === 'banyak-cabang') {
           currentBranchAddonCost = 49000;
       } else if (selectedPlan === 'multi-bisnis') {
-          currentBranchAddonCost = pc * 0.5; // 50% of the 'Multi Bisnis' plan cost
+          currentBranchAddonCost = 49000;
       }
 
       const bc = selectedPlan === 'satu-cabang' ? 0 : additionalBranchesInput * currentBranchAddonCost;
@@ -108,7 +108,7 @@ export function RegisterMemberForm() {
           brandCost: brc,
           totalCost: tc,
       };
-  }, [selectedPlan, additionalCampaignsInput, additionalBranchesInput, additionalBrandsInput]);
+  }, [selectedPlan, additionalCampaignsInput, additionalBranchesInput, additionalBrandsInput, plans]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);

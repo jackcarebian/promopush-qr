@@ -1,15 +1,19 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useMemo, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
-import { QrCode, Mail, Calendar, Users, Bot, ShoppingCart, Check, Store, Building, Globe } from 'lucide-react';
+import { QrCode, Mail, Calendar, Users, Bot, ShoppingCart, Check, Store, Building, Globe, Calculator, Minus, Plus } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 const features = [
   {
@@ -249,7 +253,7 @@ export default function Home() {
 
              <Card className="mt-16 max-w-4xl mx-auto">
                 <CardHeader>
-                    <CardTitle className="font-headline text-2xl text-center">Biaya Penambahan (Add-on)</CardTitle>
+                    <CardTitle className="font-headline text-2xl text-center">Biaya Penambahan Fleksibel (Add-on)</CardTitle>
                     <CardDescription className="text-center">Untuk Member "Banyak Cabang" & "Multi Bisnis"</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -262,15 +266,15 @@ export default function Home() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow>
+                             <TableRow>
                                 <TableCell className="font-medium">Tambah Cabang (Banyak Cabang)</TableCell>
                                 <TableCell>Rp 49.000 / cabang</TableCell>
                                 <TableCell>Termasuk: 1 QR unik + 1 slot dashboard cabang.</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Cabang (Multi Bisnis)</TableCell>
-                                <TableCell>Rp 99.500 / cabang</TableCell>
-                                <TableCell>Biaya 50% dari paket bulanan Multi Bisnis.</TableCell>
+                                <TableCell>Rp 49.000 / cabang</TableCell>
+                                <TableCell>Biaya 50% dari paket bulanan Banyak Cabang.</TableCell>
                             </TableRow>
                              <TableRow>
                                 <TableCell className="font-medium">Tambah Brand (Multi Bisnis)</TableCell>
@@ -324,5 +328,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

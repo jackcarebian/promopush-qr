@@ -188,8 +188,8 @@ export default function QrCodesPage() {
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Cabang (Multi Bisnis)</TableCell>
-                                <TableCell>Rp 99.500 / cabang</TableCell>
-                                <TableCell>Biaya 50% dari paket bulanan Multi Bisnis.</TableCell>
+                                <TableCell>Rp 49.000 / cabang</TableCell>
+                                <TableCell>Biaya 50% dari paket bulanan Banyak Cabang.</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Brand (Multi Bisnis)</TableCell>
@@ -236,5 +236,3 @@ export default function QrCodesPage() {
         </div>
     );
 }
-
-    
