@@ -56,8 +56,9 @@ export default function Home() {
           <div className="container text-center">
             <div className="mb-10 flex justify-center">
                 <Image
-                    src="/hero-image.png"
+                    src="https://placehold.co/800x533.png"
                     alt="Dua orang tersenyum bahagia sambil menunjukkan notifikasi promo di ponsel mereka"
+                    data-ai-hint="happy people"
                     width={800}
                     height={533}
                     className="max-w-full h-auto"
