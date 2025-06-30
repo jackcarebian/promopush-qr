@@ -31,7 +31,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus diisi, minimal 2 karakter." }),
   outletName: z.string().min(2, { message: "Nama outlet harus diisi, minimal 2 karakter." }),
   businessType: z.string({ required_error: "Pilih jenis bisnis Anda." }),
-  branchType: z.enum(["single", "multi"], { required_error: "Pilih tipe cabang bisnis Anda." }),
+  branchType: z.enum(["single", "multi-branch", "multi-business"], { required_error: "Pilih tipe cabang bisnis Anda." }),
   email: z.string().email({ message: "Format email tidak valid." }),
   whatsapp: z.string().min(10, { message: "Nomor WhatsApp minimal 10 digit." }),
 });
@@ -54,6 +54,19 @@ export function RegisterMemberForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
 
+    let branchTypeText = '';
+    switch (values.branchType) {
+        case 'single':
+            branchTypeText = 'Satu Cabang';
+            break;
+        case 'multi-branch':
+            branchTypeText = 'Banyak Cabang';
+            break;
+        case 'multi-business':
+            branchTypeText = 'Multi Bisnis dan Banyak Cabang';
+            break;
+    }
+
     // Simulate sending email to admin
     console.log(`--- SIMULASI EMAIL AKTIVASI ---
 Kepada: jimmy.tjahyono@gmail.com
@@ -68,7 +81,7 @@ Nama Outlet: ${values.outletName}
 Email: ${values.email}
 WhatsApp: ${values.whatsapp}
 Jenis Usaha: ${values.businessType}
-Tipe Cabang: ${values.branchType === 'single' ? 'Satu Cabang' : 'Multi Cabang / Multi Bisnis'}
+Tipe Cabang: ${branchTypeText}
 
 Silakan aktifkan akun melalui dasbor admin Anda.
 
@@ -197,10 +210,18 @@ Tim Notiflayer
                                 </FormItem>
                                 <FormItem className="flex items-center space-x-3 space-y-0">
                                     <FormControl>
-                                    <RadioGroupItem value="multi" />
+                                    <RadioGroupItem value="multi-branch" />
                                     </FormControl>
                                     <FormLabel className="font-normal">
-                                    Multi Cabang / Multi Bisnis
+                                    Banyak Cabang
+                                    </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                    <RadioGroupItem value="multi-business" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                    Multi Bisnis dan Banyak Cabang
                                     </FormLabel>
                                 </FormItem>
                             </RadioGroup>
