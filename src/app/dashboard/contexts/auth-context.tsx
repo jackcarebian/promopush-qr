@@ -11,12 +11,13 @@ export type User = {
   email: string;
   role: 'admin' | 'demo' | 'member';
   outletId?: string;
+  registrationDate?: string; // For demo account expiration
 };
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (credentials: { email: string; pass: string; role: User['role'] }) => boolean;
+  login: (credentials: { email: string; pass?: string; role: User['role'] }) => boolean;
   logout: () => void;
 }
 
@@ -31,9 +32,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // On component mount, check for user data in localStorage to persist session
     try {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+      const storedUserJSON = localStorage.getItem('user');
+      if (storedUserJSON) {
+        const storedUser = JSON.parse(storedUserJSON);
+        
+        // Check for demo account expiration
+        if (storedUser.role === 'demo' && storedUser.registrationDate) {
+          const registrationDate = new Date(storedUser.registrationDate);
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+          if (registrationDate < thirtyDaysAgo) {
+            // Account has expired, log them out
+            localStorage.removeItem('user');
+            setUser(null);
+            router.push('/login?reason=demo_expired'); // Optional: handle this on login page
+            setLoading(false);
+            return;
+          }
+        }
+        
+        setUser(storedUser);
       }
     } catch (error) {
       console.error("Failed to parse user from localStorage", error);
@@ -41,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
         setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     // Redirect to login if not authenticated and not on a public page
@@ -50,13 +69,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user, loading, pathname, router]);
 
-  const login = useCallback((credentials: { email: string; pass: string; role: User['role'] }): boolean => {
+  const login = useCallback((credentials: { email: string; pass?: string; role: User['role'] }): boolean => {
     let loggedInUser: User | null = null;
 
     if (credentials.role === 'admin' && credentials.email === 'jimmy.tjahyono@gmail.com' && credentials.pass === '+-Sejam#123') {
       loggedInUser = { id: 'admin-user', name: 'Admin Utama', email: 'jimmy.tjahyono@gmail.com', role: 'admin' };
-    } else if (credentials.role === 'demo' && credentials.email === 'demo@promopush.com' && credentials.pass === 'demo123') {
-      loggedInUser = { id: 'demo-user', name: 'Akun Demo', email: 'demo@promopush.com', role: 'demo' };
+    } else if (credentials.role === 'demo') {
+        // Create a transient demo user
+        console.log(`--- SIMULASI EMAIL ---
+Kepada: jimmy.tjahyono@gmail.com
+Subjek: Pendaftaran Demo Baru
+Isi: Pengguna dengan email ${credentials.email} telah mendaftar untuk akun demo.
+--------------------`);
+
+        loggedInUser = { 
+            id: credentials.email, // Use email as a unique ID for the demo session
+            name: 'Akun Demo', 
+            email: credentials.email, 
+            role: 'demo',
+            registrationDate: new Date().toISOString()
+        };
+
     } else if (credentials.role === 'member') {
       const member = getMemberByEmail(credentials.email);
       if (member && member.password === credentials.pass) {

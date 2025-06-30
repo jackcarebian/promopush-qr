@@ -39,21 +39,9 @@ export default function CustomersPage() {
     const { customers, deleteCustomer } = useCustomers();
     const { user } = useAuth();
 
-    if (user?.role === 'demo') {
-         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Akses Ditolak</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-                </CardContent>
-            </Card>
-        )
-    }
-
-    return (
-        <div className="space-y-8">
+    if (user?.role === 'admin' || user?.role === 'member' || user?.role === 'demo') {
+       return (
+         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-headline font-bold">Database Pelanggan</h1>
                 <p className="text-muted-foreground">
@@ -68,7 +56,7 @@ export default function CustomersPage() {
                         <CardDescription>Menampilkan {customers.length} pelanggan terbaru.</CardDescription>
                     </div>
                     <div className="flex gap-2">
-                         <Button variant="outline">
+                         <Button variant="outline" disabled={user?.role === 'demo'}>
                             <Download className="mr-2 h-4 w-4" />
                             Ekspor Data
                         </Button>
@@ -109,7 +97,7 @@ export default function CustomersPage() {
                                 <TableCell className="text-right">
                                     <AlertDialog>
                                       <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" disabled={user?.role === 'demo'}>
                                           <Trash2 className="h-4 w-4" />
                                           <span className="sr-only">Hapus</span>
                                         </Button>
@@ -135,5 +123,17 @@ export default function CustomersPage() {
                 </CardContent>
             </Card>
         </div>
+       )
+    }
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Akses Ditolak</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p>Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+            </CardContent>
+        </Card>
     );
 }

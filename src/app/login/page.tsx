@@ -40,13 +40,21 @@ function LoginForm({ role }: { role: User['role'] }) {
     
     // Special case for Demo login
     if (role === 'demo') {
-        const handleDemoLogin = () => {
-            const success = login({ email: 'demo@promopush.com', pass: 'demo123', role: 'demo' });
-            if (!success) {
+        const handleDemoRegister = () => {
+            if (!email || !email.includes('@')) {
+                toast({
+                    variant: "destructive",
+                    title: "Email Tidak Valid",
+                    description: "Silakan masukkan alamat email yang valid untuk memulai demo.",
+                });
+                return;
+            }
+            const success = login({ email, role: 'demo' });
+             if (!success) {
                  toast({
                     variant: "destructive",
-                    title: "Login Gagal",
-                    description: "Terjadi kesalahan pada akun demo.",
+                    title: "Gagal Memulai Demo",
+                    description: "Terjadi kesalahan. Silakan coba lagi.",
                 });
             }
         };
@@ -54,19 +62,29 @@ function LoginForm({ role }: { role: User['role'] }) {
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline capitalize">Akses Demo</CardTitle>
+                    <CardTitle className="font-headline capitalize">Coba Akun Demo</CardTitle>
                     <CardDescription>
-                        Klik tombol di bawah ini untuk masuk ke dasbor dengan akun demo dan mencoba fitur-fitur yang tersedia.
+                       Daftar untuk akses demo 30 hari. Tidak perlu aktivasi.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-center text-muted-foreground p-4 bg-secondary rounded-md">
-                        Anda akan masuk dengan hak akses terbatas yang dirancang untuk keperluan demonstrasi.
+                <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="demo-email">Alamat Email</Label>
+                        <Input 
+                            id="demo-email" 
+                            type="email" 
+                            placeholder="anda@email.com" 
+                            value={email} 
+                            onChange={e => setEmail(e.target.value)} 
+                        />
+                    </div>
+                     <p className="text-xs text-center text-muted-foreground p-2 bg-secondary rounded-md">
+                        Fitur terbatas: bisa melihat database pelanggan dan membuat 1 kampanye.
                     </p>
                 </CardContent>
                 <CardFooter>
-                    <Button className="w-full" onClick={handleDemoLogin}>
-                        Masuk sebagai Demo
+                    <Button className="w-full" onClick={handleDemoRegister}>
+                        Mulai Demo Gratis
                     </Button>
                 </CardFooter>
             </Card>

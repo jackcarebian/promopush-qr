@@ -14,6 +14,7 @@ import { useCampaigns, Campaign } from "../../contexts/campaign-context";
 import { useRouter } from "next/navigation";
 import { interestCategories, businessCategories } from "../data/categories";
 import { useCustomers } from "../../contexts/customer-context";
+import { useAuth } from "../../contexts/auth-context";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +55,7 @@ const formSchema = z.object({
 export function CreateCampaignForm() {
     const { addCampaign } = useCampaigns();
     const { customers } = useCustomers();
+    const { user } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
     
@@ -122,7 +124,31 @@ export function CreateCampaignForm() {
         setIsSubmitting(true);
         setProgress(0);
 
-        // Simulate submission process
+        const newCampaignData: Omit<Campaign, 'id' | 'status' | 'outletId'> = {
+            title: values.campaignName,
+            startDate: format(values.dateRange.from, "yyyy-MM-dd"),
+            endDate: format(values.dateRange.to, "yyyy-MM-dd"),
+            description: values.message,
+            image: imagePreview || "https://placehold.co/600x400",
+            dataAiHint: "new campaign",
+            businessCategory: values.businessCategory,
+            interests: values.interests,
+            variant: "default",
+        };
+
+        const success = addCampaign(newCampaignData);
+        
+        if (!success) {
+            toast({
+                variant: "destructive",
+                title: "Batas Kampanye Tercapai",
+                description: "Akun demo hanya dapat membuat satu kampanye.",
+            });
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Simulate submission process for visual feedback
         const interval = setInterval(() => {
             setProgress(prev => Math.min(prev + 20, 100));
         }, 300);
@@ -131,20 +157,6 @@ export function CreateCampaignForm() {
             clearInterval(interval);
             setProgress(100);
             
-            const newCampaign: Omit<Campaign, 'id' | 'status' | 'outletId'> = {
-                title: values.campaignName,
-                startDate: format(values.dateRange.from, "yyyy-MM-dd"),
-                endDate: format(values.dateRange.to, "yyyy-MM-dd"),
-                description: values.message,
-                image: imagePreview || "https://placehold.co/600x400",
-                dataAiHint: "new campaign",
-                businessCategory: values.businessCategory,
-                interests: values.interests,
-                variant: "default",
-            };
-
-            addCampaign(newCampaign);
-
             toast({
                 title: "Kampanye Berhasil Dibuat!",
                 description: `Kampanye "${values.campaignName}" telah berhasil dibuat dan ditambahkan ke daftar.`,

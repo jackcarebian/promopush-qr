@@ -23,7 +23,7 @@ export interface Campaign {
 // Define the shape of the context
 interface CampaignContextType {
   campaigns: Campaign[];
-  addCampaign: (campaign: Omit<Campaign, 'id' | 'status' | 'outletId'>) => void;
+  addCampaign: (campaign: Omit<Campaign, 'id' | 'status' | 'outletId'>) => boolean;
   updateCampaign: (id: string, updatedCampaign: Omit<Campaign, 'id'>) => void;
   deleteCampaign: (id: string) => void;
 }
@@ -134,21 +134,30 @@ export const CampaignsProvider = ({ children }: { children: ReactNode }) => {
   const [campaigns, setCampaigns] = useState<Omit<Campaign, 'status'>[]>(initialCampaigns);
   const { user } = useAuth();
 
-  const addCampaign = (campaign: Omit<Campaign, 'id' | 'status' | 'outletId'>) => {
-    if (!user) return; // Should not happen if called from an authenticated page
+  const addCampaign = (campaign: Omit<Campaign, 'id' | 'status' | 'outletId'>): boolean => {
+    if (!user) return false;
+
+    // Demo user can only create 1 campaign
+    if (user.role === 'demo') {
+        const campaignsByDemoUser = campaigns.filter(c => c.outletId === user.id).length;
+        if (campaignsByDemoUser >= 1) {
+            return false; // Signal failure
+        }
+    }
+
     const newCampaign: Omit<Campaign, 'status'> = {
       ...campaign,
       id: `campaign-${new Date().getTime()}`,
-      outletId: user.outletId || 'unknown'
+      outletId: user.role === 'demo' ? user.id : (user.outletId || 'unknown'),
     };
     setCampaigns((prevCampaigns) => [...prevCampaigns, newCampaign]);
+    return true; // Signal success
   };
   
   const updateCampaign = (id: string, updatedCampaignData: Omit<Campaign, 'id'>) => {
      if (!user) return;
-     // Ensure members can only update campaigns for their own outlet
-    const campaignToUpdate = campaigns.find(c => c.id === id);
-    if (user.role === 'member' && campaignToUpdate?.outletId !== user.outletId) {
+     // Demo users cannot edit campaigns, members can only edit their own
+    if (user.role === 'demo' || (user.role === 'member' && campaigns.find(c => c.id === id)?.outletId !== user.outletId)) {
         return;
     }
     setCampaigns(prev => prev.map(c => (c.id === id ? { id, ...updatedCampaignData } : c)));
@@ -157,7 +166,8 @@ export const CampaignsProvider = ({ children }: { children: ReactNode }) => {
   const deleteCampaign = (id: string) => {
     if (!user) return;
     const campaignToDelete = campaigns.find(c => c.id === id);
-    if (user.role === 'member' && campaignToDelete?.outletId !== user.outletId) {
+    // Demo users cannot delete, members can only delete their own
+    if (user.role === 'demo' || (user.role === 'member' && campaignToDelete?.outletId !== user.outletId)) {
         return;
     }
     setCampaigns(prev => prev.filter(c => c.id !== id));
@@ -188,6 +198,11 @@ export const CampaignsProvider = ({ children }: { children: ReactNode }) => {
     
     if (user?.role === 'member') {
         return allProcessed.filter(c => c.outletId === user.outletId);
+    }
+
+    if (user?.role === 'demo') {
+        // Show only campaigns created by this demo user
+        return allProcessed.filter(c => c.outletId === user.id);
     }
     
     return allProcessed;

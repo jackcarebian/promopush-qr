@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from "react";
 import { useCampaigns, Campaign } from "../../contexts/campaign-context";
 import { useCustomers } from "../../contexts/customer-context";
+import { useAuth } from "../../contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -299,6 +300,7 @@ function EditCampaignDialog({ campaign, onUpdate }: { campaign: Campaign, onUpda
 export function CampaignList() {
   const { campaigns, updateCampaign, deleteCampaign } = useCampaigns();
   const { customers } = useCustomers();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const handleDelete = (id: string, title: string) => {
@@ -353,7 +355,7 @@ export function CampaignList() {
                 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" disabled={user?.role === 'demo'}>
                       <Trash2 className="h-4 w-4" />
                       <span className="sr-only">Hapus</span>
                     </Button>
