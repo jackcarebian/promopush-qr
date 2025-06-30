@@ -345,7 +345,7 @@ export default function Home() {
 
         <section id="calculator" className="py-20 md:py-32 bg-secondary">
           <div className="container">
-            <Card className="max-w-3xl mx-auto shadow-lg">
+            <Card className="max-w-4xl mx-auto shadow-lg">
               <CardHeader className="items-center text-center">
                 <Calculator className="w-10 h-10 text-primary mb-4" />
                 <CardTitle className="font-headline text-2xl">Kalkulator Biaya Langganan</CardTitle>
