@@ -213,7 +213,7 @@ export default function Home() {
                         <div className="p-4 bg-secondary rounded-full inline-block mb-4">
                            <Globe className="w-10 h-10 text-primary" />
                         </div>
-                        <CardTitle className="font-headline">Multi Bisnis & Banyak Cabang</CardTitle>
+                        <CardTitle className="font-headline">Multi Bisnis dan Banyak Cabang</CardTitle>
                         <CardDescription>Cocok untuk grup usaha yang punya lebih dari 1 jenis bisnis atau outlet &gt;5 cabang.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow space-y-4">
@@ -249,7 +249,7 @@ export default function Home() {
 
              <Card className="mt-16 max-w-4xl mx-auto">
                 <CardHeader>
-                    <CardTitle className="font-headline text-2xl text-center">Biaya Penambahan Fleksibel (Add-on)</CardTitle>
+                    <CardTitle className="font-headline text-2xl text-center">Biaya Penambahan (Add-on)</CardTitle>
                     <CardDescription className="text-center">Untuk Member "Banyak Cabang" & "Multi Bisnis"</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -280,7 +280,7 @@ export default function Home() {
                             <TableRow>
                                 <TableCell className="font-medium">Upgrade dari "1 Cabang" ke "Banyak Cabang"</TableCell>
                                 <TableCell>Rp 50.000 (1x bayar)</TableCell>
-                                <TableCell>Ubah akun agar bisa menambah banyak cabang.</TableCell>
+                                <TableCell>Ubah akun agar bisa menambah banyak cabang. Langganan bulanan tetap berlaku per outlet.</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Kampanye Promo Baru</TableCell>
@@ -324,3 +324,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

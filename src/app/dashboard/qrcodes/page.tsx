@@ -199,7 +199,7 @@ export default function QrCodesPage() {
                             <TableRow>
                                 <TableCell className="font-medium">Upgrade dari "1 Cabang" ke "Banyak Cabang"</TableCell>
                                 <TableCell>Rp 50.000 (1x bayar)</TableCell>
-                                <TableCell>Ubah akun agar bisa menambah banyak cabang</TableCell>
+                                <TableCell>Ubah akun agar bisa menambah banyak cabang. Langganan bulanan tetap berlaku per outlet.</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Kampanye Promo Baru</TableCell>
@@ -236,3 +236,5 @@ export default function QrCodesPage() {
         </div>
     );
 }
+
+    
