@@ -73,15 +73,10 @@ function LoginForm({ role }: { role: User['role'] }) {
         );
     }
     
-    // Pre-fill for Admin, clear for Member
+    // Clear fields for Admin and Member roles
     React.useEffect(() => {
-        if (role === 'admin') {
-            setEmail('jimmy.tjahyono@gmail.com');
-            setPassword('+-Sejam#123');
-        } else {
-            setEmail('');
-            setPassword('');
-        }
+        setEmail('');
+        setPassword('');
     }, [role]);
 
     return (
@@ -98,7 +93,7 @@ function LoginForm({ role }: { role: User['role'] }) {
                     <Input 
                         id={`${role}-email`} 
                         type="email" 
-                        placeholder={role === 'member' ? "email@anda.com" : `${role}@example.com`} 
+                        placeholder={role === 'member' ? "email@anda.com" : "admin@example.com"} 
                         value={email} 
                         onChange={e => setEmail(e.target.value)} />
                 </div>
