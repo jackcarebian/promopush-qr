@@ -58,21 +58,19 @@ export default function Home() {
 
     // State for the calculator
     const [selectedPlan, setSelectedPlan] = useState('banyak-cabang');
-    const [totalCampaigns, setTotalCampaigns] = useState(1);
+    const [additionalCampaignsInput, setAdditionalCampaignsInput] = useState(0);
 
     // Memoized calculation for performance
-    const { planCost, additionalCampaigns, campaignCost, totalCost } = useMemo(() => {
+    const { planCost, campaignCost, totalCost } = useMemo(() => {
         const pc = plans[selectedPlan].cost;
-        const ac = Math.max(0, totalCampaigns - 1);
-        const cc = ac * campaignAddonCost;
+        const cc = additionalCampaignsInput * campaignAddonCost;
         const tc = pc + cc;
         return {
             planCost: pc,
-            additionalCampaigns: ac,
             campaignCost: cc,
             totalCost: tc,
         };
-    }, [selectedPlan, totalCampaigns, plans, campaignAddonCost]);
+    }, [selectedPlan, additionalCampaignsInput, plans, campaignAddonCost]);
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
@@ -373,17 +371,17 @@ export default function Home() {
                   </RadioGroup>
                 </div>
                 <div className="space-y-4">
-                  <Label htmlFor="campaign-count" className="text-base font-semibold">2. Jumlah Total Kampanye per Bulan</Label>
+                  <Label htmlFor="campaign-count" className="text-base font-semibold">2. Jumlah Kampanye Tambahan per Bulan</Label>
                   <Input
                     id="campaign-count"
                     type="number"
-                    min="1"
-                    value={totalCampaigns}
-                    onChange={(e) => setTotalCampaigns(Math.max(1, parseInt(e.target.value) || 1))}
+                    min="0"
+                    value={additionalCampaignsInput}
+                    onChange={(e) => setAdditionalCampaignsInput(Math.max(0, parseInt(e.target.value) || 0))}
                     className="text-lg h-12"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Setiap akun mendapatkan 1 kampanye gratis per bulan. Masukkan total kampanye yang Anda rencanakan.
+                    Setiap akun mendapatkan 1 kampanye gratis per bulan. Masukkan jumlah kampanye <strong>tambahan</strong> yang Anda butuhkan.
                   </p>
                 </div>
               </CardContent>
@@ -395,7 +393,7 @@ export default function Home() {
                     <span className="font-medium text-foreground">{formatCurrency(planCost)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tambahan Kampanye ({additionalCampaigns}x)</span>
+                    <span className="text-muted-foreground">Tambahan Kampanye ({additionalCampaignsInput}x)</span>
                     <span className="font-medium text-foreground">{formatCurrency(campaignCost)}</span>
                   </div>
                   <hr className="my-2 border-dashed border-border"/>
