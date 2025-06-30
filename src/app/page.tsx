@@ -1,11 +1,18 @@
+
+"use client";
+
+import React, { useState, useMemo } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Logo } from '@/components/logo';
-import { QrCode, Mail, Calendar, Users, Bot, ShoppingCart, Check, Store, Building, Globe } from 'lucide-react';
+import { QrCode, Mail, Calendar, Users, Bot, ShoppingCart, Check, Store, Building, Globe, Calculator } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const features = [
   {
@@ -41,6 +48,36 @@ const features = [
 ];
 
 export default function Home() {
+    // Pricing data for calculator
+    const plans = {
+      'satu-cabang': { name: 'Satu Cabang', cost: 49000 },
+      'banyak-cabang': { name: 'Banyak Cabang', cost: 99000 },
+      'multi-bisnis': { name: 'Multi Bisnis', cost: 199000 },
+    };
+    const campaignAddonCost = 10000;
+
+    // State for the calculator
+    const [selectedPlan, setSelectedPlan] = useState('banyak-cabang');
+    const [totalCampaigns, setTotalCampaigns] = useState(1);
+
+    // Memoized calculation for performance
+    const { planCost, additionalCampaigns, campaignCost, totalCost } = useMemo(() => {
+        const pc = plans[selectedPlan].cost;
+        const ac = Math.max(0, totalCampaigns - 1);
+        const cc = ac * campaignAddonCost;
+        const tc = pc + cc;
+        return {
+            planCost: pc,
+            additionalCampaigns: ac,
+            campaignCost: cc,
+            totalCost: tc,
+        };
+    }, [selectedPlan, totalCampaigns, plans, campaignAddonCost]);
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
+    };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -303,6 +340,72 @@ export default function Home() {
                 </CardContent>
             </Card>
 
+          </div>
+        </section>
+
+        <section id="calculator" className="py-20 md:py-32 bg-secondary">
+          <div className="container">
+            <Card className="max-w-3xl mx-auto shadow-lg">
+              <CardHeader className="items-center text-center">
+                <Calculator className="w-10 h-10 text-primary mb-4" />
+                <CardTitle className="font-headline text-2xl">Kalkulator Biaya Langganan</CardTitle>
+                <CardDescription>
+                  Hitung estimasi biaya bulanan Anda berdasarkan paket dan kebutuhan kampanye.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid md:grid-cols-2 gap-8 pt-6">
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">1. Pilih Paket Anda</Label>
+                  <RadioGroup
+                    value={selectedPlan}
+                    onValueChange={setSelectedPlan}
+                    className="space-y-3"
+                  >
+                    {Object.entries(plans).map(([key, { name, cost }]) => (
+                      <div key={key} className="flex items-center space-x-3">
+                        <RadioGroupItem value={key} id={key} />
+                        <Label htmlFor={key} className="flex justify-between w-full font-normal cursor-pointer text-sm">
+                          <span>{name}</span>
+                          <span className="font-medium">{formatCurrency(cost)}</span>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+                <div className="space-y-4">
+                  <Label htmlFor="campaign-count" className="text-base font-semibold">2. Jumlah Total Kampanye per Bulan</Label>
+                  <Input
+                    id="campaign-count"
+                    type="number"
+                    min="1"
+                    value={totalCampaigns}
+                    onChange={(e) => setTotalCampaigns(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="text-lg h-12"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Setiap akun mendapatkan 1 kampanye gratis per bulan. Masukkan total kampanye yang Anda rencanakan.
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col items-start bg-muted/50 p-6 rounded-b-lg mt-6">
+                <h3 className="text-lg font-semibold mb-4 text-foreground">Rincian Estimasi Biaya:</h3>
+                <div className="w-full space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Paket {plans[selectedPlan].name}</span>
+                    <span className="font-medium text-foreground">{formatCurrency(planCost)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tambahan Kampanye ({additionalCampaigns}x)</span>
+                    <span className="font-medium text-foreground">{formatCurrency(campaignCost)}</span>
+                  </div>
+                  <hr className="my-2 border-dashed border-border"/>
+                  <div className="flex justify-between items-center text-lg font-bold text-primary">
+                    <span>Total Estimasi per Bulan</span>
+                    <span className="text-2xl">{formatCurrency(totalCost)}</span>
+                  </div>
+                </div>
+              </CardFooter>
+            </Card>
           </div>
         </section>
       </main>
