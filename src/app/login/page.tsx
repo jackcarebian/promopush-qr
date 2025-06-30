@@ -81,23 +81,23 @@ function LoginForm({ role }: { role: User['role'] }) {
 export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-secondary">
-      <Tabs defaultValue="admin" className="w-full max-w-md">
+      <Tabs defaultValue="demo" className="w-full max-w-md">
         <div className="flex justify-center mb-6">
           <Logo />
         </div>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="admin">Admin</TabsTrigger>
-          <TabsTrigger value="member">Member</TabsTrigger>
           <TabsTrigger value="demo">Demo</TabsTrigger>
+          <TabsTrigger value="member">Member</TabsTrigger>
+          <TabsTrigger value="admin">Admin</TabsTrigger>
         </TabsList>
-        <TabsContent value="admin">
-          <LoginForm role="admin" />
+        <TabsContent value="demo">
+          <LoginForm role="demo" />
         </TabsContent>
         <TabsContent value="member">
           <LoginForm role="member" />
         </TabsContent>
-        <TabsContent value="demo">
-          <LoginForm role="demo" />
+        <TabsContent value="admin">
+          <LoginForm role="admin" />
         </TabsContent>
       </Tabs>
     </div>
