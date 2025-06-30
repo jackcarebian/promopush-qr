@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { outlets } from "@/data/outlets";
 import { PrintableQrCard } from "./components/printable-qr-card";
 import { Printer, QrCode } from "lucide-react";
@@ -81,6 +81,9 @@ export default function QrOutletPage() {
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-4xl p-0 border-0 printable-dialog">
+                                        <DialogHeader>
+                                            <DialogTitle className="sr-only">Cetak Kode QR untuk {outlet.name}</DialogTitle>
+                                        </DialogHeader>
                                         <PrintableQrCard outlet={outlet} qrUrl={qrUrl} />
                                     </DialogContent>
                                 </Dialog>
