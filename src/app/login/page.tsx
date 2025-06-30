@@ -111,7 +111,7 @@ function LoginForm({ role }: { role: User['role'] }) {
                     <Input 
                         id={`${role}-email`} 
                         type="email" 
-                        placeholder={role === 'member' ? "email@anda.com" : "admin@example.com"} 
+                        placeholder={role === 'member' ? "email@anda.com" : "jimmy.tjahyono@gmail.com"} 
                         value={email} 
                         onChange={e => setEmail(e.target.value)} />
                 </div>
@@ -133,7 +133,7 @@ function LoginForm({ role }: { role: User['role'] }) {
                      <p className="px-8 text-center text-sm text-muted-foreground">
                         Belum punya akun?{" "}
                         <Link
-                            href="/register"
+                            href="/register-member"
                             className="underline underline-offset-4 hover:text-primary"
                         >
                             Daftar sekarang
