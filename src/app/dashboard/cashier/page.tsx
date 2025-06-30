@@ -8,11 +8,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, XCircle, ScanLine, Camera, User, Mail, Heart } from "lucide-react";
+import { CheckCircle, XCircle, ScanLine, Camera, User, Mail, Heart, QrCode } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 interface CustomerData {
   name: string;
@@ -35,10 +36,16 @@ export default function CashierPage() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [customerData, setCustomerData] = useState<CustomerData | null>(null);
   const [redeemedCodes, setRedeemedCodes] = useState<string[]>([]);
+  const [pageQrUrl, setPageQrUrl] = useState<string>('');
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Generate QR for this page's URL on component mount
+    setPageQrUrl(`/api/qr?data=${encodeURIComponent(window.location.href)}`);
+  }, []);
 
   useEffect(() => {
     if (!isScanning) {
@@ -182,12 +189,42 @@ export default function CashierPage() {
     <div className="space-y-8 flex flex-col items-center">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <ScanLine className="w-8 h-8" />
-            <div>
-              <CardTitle className="font-headline text-2xl">Promo Redem</CardTitle>
-              <CardDescription>Masukkan kode unik dari pelanggan untuk menebus promo.</CardDescription>
+           <div className="flex justify-between items-start">
+            <div className="flex items-center gap-3">
+              <ScanLine className="w-8 h-8" />
+              <div>
+                <CardTitle className="font-headline text-2xl">Promo Redeem</CardTitle>
+                <CardDescription>Masukkan kode unik dari pelanggan untuk menebus promo.</CardDescription>
+              </div>
             </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="icon" aria-label="Tampilkan QR Halaman">
+                  <QrCode className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>QR untuk Akses Cepat Halaman Kasir</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center justify-center gap-4 py-4">
+                  <p className="text-sm text-center text-muted-foreground">
+                    Pindai kode ini dengan perangkat lain untuk membuka halaman kasir ini secara langsung.
+                  </p>
+                  {pageQrUrl ? (
+                    <Image
+                        src={pageQrUrl}
+                        alt="QR Code for Cashier Page"
+                        width={250}
+                        height={250}
+                        className="rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-[250px] h-[250px] bg-gray-200 animate-pulse rounded-lg" />
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
         <CardContent>
