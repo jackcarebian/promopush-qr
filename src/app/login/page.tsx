@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -72,14 +73,14 @@ function LoginForm({ role }: { role: User['role'] }) {
         );
     }
     
-    // Pre-fill for Admin and Member
+    // Pre-fill for Admin, clear for Member
     React.useEffect(() => {
         if (role === 'admin') {
             setEmail('jimmy.tjahyono@gmail.com');
             setPassword('+-Sejam#123');
-        } else if (role === 'member') {
-            setEmail('anyar@example.com');
-            setPassword('password');
+        } else {
+            setEmail('');
+            setPassword('');
         }
     }, [role]);
 
@@ -94,17 +95,38 @@ function LoginForm({ role }: { role: User['role'] }) {
             <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor={`${role}-email`}>Email</Label>
-                    <Input id={`${role}-email`} type="email" placeholder={`${role}@example.com`} value={email} onChange={e => setEmail(e.target.value)} />
+                    <Input 
+                        id={`${role}-email`} 
+                        type="email" 
+                        placeholder={role === 'member' ? "email@anda.com" : `${role}@example.com`} 
+                        value={email} 
+                        onChange={e => setEmail(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor={`${role}-password`}>Password</Label>
-                    <Input id={`${role}-password`} type="password" value={password} onChange={e => setPassword(e.target.value)} />
+                    <Input 
+                        id={`${role}-password`} 
+                        type="password" 
+                        placeholder="••••••••"
+                        value={password} 
+                        onChange={e => setPassword(e.target.value)} />
                 </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex flex-col items-center gap-4">
                 <Button className="w-full" onClick={handleLogin}>
                     Login
                 </Button>
+                {role === 'member' && (
+                     <p className="px-8 text-center text-sm text-muted-foreground">
+                        Belum punya akun?{" "}
+                        <Link
+                            href="/register"
+                            className="underline underline-offset-4 hover:text-primary"
+                        >
+                            Daftar sekarang
+                        </Link>
+                    </p>
+                )}
             </CardFooter>
         </Card>
     );
