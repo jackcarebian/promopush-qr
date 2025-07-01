@@ -27,11 +27,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Logo } from "@/components/logo";
 import { businessCategories, interestCategories } from "@/app/dashboard/campaigns/data/categories";
 import { Check, Calculator, Minus, Plus } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 // Schema for form validation
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus diisi, minimal 2 karakter." }),
   outletName: z.string().min(2, { message: "Nama outlet harus diisi, minimal 2 karakter." }),
+  outletAddress: z.string().min(10, { message: "Alamat outlet minimal 10 karakter." }),
   businessType: z.string({ required_error: "Pilih jenis bisnis Anda." }),
   branchType: z.enum(["satu-cabang", "banyak-cabang", "multi-bisnis"], { required_error: "Pilih paket langganan Anda." }),
   email: z.string().email({ message: "Format email tidak valid." }),
@@ -61,6 +63,7 @@ export function RegisterMemberForm() {
     defaultValues: {
       name: "",
       outletName: "",
+      outletAddress: "",
       email: "",
       whatsapp: "",
       branchType: "banyak-cabang",
@@ -95,7 +98,7 @@ export function RegisterMemberForm() {
 
       let currentBrandAddonCost = 0;
       if (selectedPlan === 'multi-bisnis') {
-          currentBrandAddonCost = pc * 0.5; // 50% of the 'Multi Bisnis' plan cost
+          currentBrandAddonCost = plans['multi-bisnis'].cost * 0.5; // 50% of the 'Multi Bisnis' plan cost
       }
 
       const brc = selectedPlan === 'multi-bisnis' ? additionalBrandsInput * currentBrandAddonCost : 0;
@@ -142,6 +145,7 @@ Ada pendaftaran baru sebagai Mitra Outlet Berbayar:
 Informasi Pendaftar:
 - Nama: ${values.name}
 - Nama Outlet: ${values.outletName}
+- Alamat Outlet: ${values.outletAddress}
 - Email: ${values.email}
 - WhatsApp: ${values.whatsapp}
 - Jenis Usaha: ${values.businessType}
@@ -225,6 +229,19 @@ Tim Notiflayer
                   <FormLabel>Nama Outlet/Bisnis</FormLabel>
                   <FormControl>
                     <Input placeholder="Contoh: Kedai Kopi Senja" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="outletAddress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Alamat Outlet</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Contoh: Jl. Merdeka No. 17, Boyolali" className="resize-none" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -412,3 +429,5 @@ Tim Notiflayer
     </Card>
   );
 }
+
+    
