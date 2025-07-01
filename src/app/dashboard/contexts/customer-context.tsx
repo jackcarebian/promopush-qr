@@ -43,9 +43,8 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
       });
       return;
     }
-    // Optional: Add role-based check if members can delete customers
     const customerToDelete = allCustomers.find(c => c.id === id);
-     if (user?.role === 'member' && customerToDelete?.outletId !== user.outletId) {
+     if (user?.role === 'member' && (!user.outletIds || !user.outletIds.includes(customerToDelete?.outletId!))) {
         toast({ variant: "destructive", title: "Akses Ditolak" });
         return;
     }
@@ -117,8 +116,8 @@ export const CustomersProvider = ({ children }: { children: ReactNode }) => {
   }, [toast]);
 
   const filteredCustomers = useMemo(() => {
-    if (user?.role === 'member') {
-        return allCustomers.filter(c => c.outletId === user.outletId);
+    if (user?.role === 'member' || user?.role === 'demo') {
+        return allCustomers.filter(c => user.outletIds?.includes(c.outletId));
     }
     return allCustomers;
   }, [allCustomers, user]);

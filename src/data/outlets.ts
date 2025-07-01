@@ -46,9 +46,9 @@ export const outlets: OutletData[] = [
   },
   {
     id: "outlet-007",
-    name: "Sentosa Furnitur",
+    name: "Kedai Kopi Anyar (Bandung)",
     location: "Bandung, Jawa Barat",
-    businessCategory: "Furnitur & Dekorasi",
+    businessCategory: "Cafe, Resto, Foodcourt",
   },
   {
     id: "outlet-008",

@@ -10,7 +10,7 @@ export type User = {
   name: string;
   email: string;
   role: 'admin' | 'demo' | 'member';
-  outletId?: string;
+  outletIds?: string[];
   registrationDate?: string; // For demo account expiration
 };
 

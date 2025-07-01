@@ -1,21 +1,44 @@
 
 "use client";
 
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useAuth } from "../contexts/auth-context";
 import { useCustomers } from "../contexts/customer-context";
 import { useCampaigns } from "../contexts/campaign-context";
-import { getOutletById } from "@/data/outlets";
+import { getOutletById, outlets as allOutlets } from "@/data/outlets";
 import { Users, Megaphone, BarChart2, Calendar, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 export default function ReportPage() {
     const { user } = useAuth();
-    const { customers } = useCustomers(); // Already filtered by context
-    const { campaigns } = useCampaigns(); // Already filtered by context
+    const { customers: allUserCustomers } = useCustomers(); 
+    const { campaigns: allUserCampaigns } = useCampaigns(); 
+
+    const userOutlets = useMemo(() => {
+        return allOutlets.filter(o => user?.outletIds?.includes(o.id));
+    }, [user]);
+
+    const [selectedOutletId, setSelectedOutletId] = useState(userOutlets[0]?.id);
+
+    const { outlet, campaigns, customers, upcomingCampaigns } = useMemo(() => {
+        const currentOutlet = getOutletById(selectedOutletId || '');
+        const filteredCampaigns = allUserCampaigns.filter(c => c.outletId === selectedOutletId);
+        const filteredCustomers = allUserCustomers.filter(c => c.outletId === selectedOutletId);
+        const filteredUpcoming = filteredCampaigns.filter(c => c.status === "Akan Datang" || c.status === "Sedang Berlangsung");
+
+        return {
+            outlet: currentOutlet,
+            campaigns: filteredCampaigns,
+            customers: filteredCustomers,
+            upcomingCampaigns: filteredUpcoming,
+        };
+    }, [selectedOutletId, allUserCampaigns, allUserCustomers]);
 
     if (user?.role !== 'member') {
         return (
@@ -30,12 +53,8 @@ export default function ReportPage() {
         )
     }
 
-    const outlet = getOutletById(user.outletId || '');
-    const upcomingCampaigns = campaigns.filter(c => c.status === "Akan Datang" || c.status === "Sedang Berlangsung");
-    const pastCampaigns = campaigns.filter(c => c.status === "Berakhir");
-
     if (!outlet) {
-        return <p>Data outlet tidak ditemukan.</p>
+        return <p>Data outlet tidak ditemukan. Silakan pilih outlet dari daftar.</p>
     }
 
     return (
@@ -44,6 +63,27 @@ export default function ReportPage() {
                 <h1 className="text-3xl font-headline font-bold">Laporan Outlet: {outlet.name}</h1>
                 <p className="text-muted-foreground">{outlet.location}</p>
             </div>
+
+            {userOutlets.length > 1 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline">Pilih Outlet</CardTitle>
+                        <CardDescription>Pilih outlet untuk melihat laporannya.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Select onValueChange={setSelectedOutletId} defaultValue={selectedOutletId}>
+                            <SelectTrigger className="w-full md:w-[280px]">
+                                <SelectValue placeholder="Pilih Outlet" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {userOutlets.map(o => (
+                                    <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </CardContent>
+                </Card>
+            )}
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 <Card>
@@ -125,6 +165,9 @@ export default function ReportPage() {
                                 <p className="text-xs text-muted-foreground">{format(new Date(customer.registeredAt), 'dd MMM yyyy, HH:mm')}</p>
                             </li>
                         ))}
+                         {customers.length === 0 && (
+                            <p className="text-center text-muted-foreground py-4">Belum ada pelanggan yang terdaftar di outlet ini.</p>
+                         )}
                     </ul>
                 </CardContent>
                  <CardFooter>

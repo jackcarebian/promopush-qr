@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { interestCategories, businessCategories } from "../data/categories";
 import { useCustomers } from "../../contexts/customer-context";
 import { useAuth } from "../../contexts/auth-context";
+import { outlets as allOutlets } from "@/data/outlets";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +50,7 @@ const formSchema = z.object({
       from: z.date({ required_error: "Tanggal mulai harus diisi." }),
       to: z.date({ required_error: "Tanggal berakhir harus diisi." }),
   }, { required_error: "Pilih rentang tanggal kampanye." }),
+  outletId: z.string({ required_error: "Pilih outlet untuk kampanye ini." }),
 });
 
 
@@ -65,6 +67,10 @@ export function CreateCampaignForm() {
     const [targetedCustomerCount, setTargetedCustomerCount] = React.useState(0);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+    const userOutlets = React.useMemo(() => {
+        return allOutlets.filter(o => user?.outletIds?.includes(o.id));
+    }, [user]);
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -72,7 +78,8 @@ export function CreateCampaignForm() {
             businessCategory: undefined,
             interests: [],
             message: "",
-            dateRange: undefined
+            dateRange: undefined,
+            outletId: userOutlets.length === 1 ? userOutlets[0].id : undefined,
         },
     });
 
@@ -124,7 +131,7 @@ export function CreateCampaignForm() {
         setIsSubmitting(true);
         setProgress(0);
 
-        const newCampaignData: Omit<Campaign, 'id' | 'status' | 'outletId'> = {
+        const newCampaignData: Omit<Campaign, 'id' | 'status'> = {
             title: values.campaignName,
             startDate: format(values.dateRange.from, "yyyy-MM-dd"),
             endDate: format(values.dateRange.to, "yyyy-MM-dd"),
@@ -134,6 +141,7 @@ export function CreateCampaignForm() {
             businessCategory: values.businessCategory,
             interests: values.interests,
             variant: "default",
+            outletId: values.outletId,
         };
 
         const success = addCampaign(newCampaignData);
@@ -171,6 +179,33 @@ export function CreateCampaignForm() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                {userOutlets.length > 1 && (
+                    <FormField
+                        control={form.control}
+                        name="outletId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Target Outlet</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Pilih outlet untuk kampanye ini" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {userOutlets.map(outlet => (
+                                            <SelectItem key={outlet.id} value={outlet.id}>
+                                                {outlet.name} - {outlet.location}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormDescription>Kampanye ini hanya akan berlaku untuk outlet yang dipilih.</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
                 <div className="grid md:grid-cols-2 gap-8">
                     <FormField
                         control={form.control}
