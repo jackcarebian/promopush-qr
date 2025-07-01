@@ -169,7 +169,7 @@ Tim Notiflayer
 
   if (isSuccess) {
     return (
-        <Card className="w-full max-w-4xl text-center shadow-2xl">
+        <Card className="w-full max-w-2xl text-center shadow-2xl">
             <CardHeader>
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/50">
                     <Check className="h-10 w-10 text-green-600 dark:text-green-400" />
@@ -191,7 +191,7 @@ Tim Notiflayer
   }
 
   return (
-    <Card className="w-full max-w-4xl shadow-2xl">
+    <Card className="w-full max-w-2xl shadow-2xl">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 w-fit">
           <Logo />
