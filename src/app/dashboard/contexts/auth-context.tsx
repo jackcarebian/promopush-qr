@@ -74,26 +74,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (credentials.role === 'admin' && credentials.email === 'jimmy.tjahyono@gmail.com' && credentials.pass === '+-Sejam#123') {
       loggedInUser = { id: 'admin-user', name: 'Admin Utama', email: 'jimmy.tjahyono@gmail.com', role: 'admin' };
-    } else if (credentials.role === 'demo') {
-        // Create a transient demo user
-        console.log(`--- SIMULASI EMAIL ---
-Kepada: jimmy.tjahyono@gmail.com
-Subjek: Pendaftaran Demo Baru
-Isi: Pengguna dengan email ${credentials.email} telah mendaftar untuk akun demo.
---------------------`);
-
-        loggedInUser = { 
-            id: credentials.email, // Use email as a unique ID for the demo session
-            name: 'Akun Demo', 
-            email: credentials.email, 
-            role: 'demo',
-            registrationDate: new Date().toISOString()
-        };
-
-    } else if (credentials.role === 'member') {
+    } else if (credentials.role === 'member' || credentials.role === 'demo') { // Demo users now log in like members
       const member = getMemberByEmail(credentials.email);
       if (member && member.password === credentials.pass) {
-        loggedInUser = { ...member };
+        // If the user logging in is a demo user, add their registration date
+        if (member.role === 'demo') {
+            loggedInUser = { ...member, registrationDate: new Date().toISOString() };
+        } else {
+            loggedInUser = { ...member };
+        }
       }
     }
     

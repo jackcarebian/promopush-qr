@@ -20,7 +20,7 @@ import { useAuth, User } from "@/app/dashboard/contexts/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
-function LoginForm({ role }: { role: User['role'] }) {
+function LoginForm({ role }: { role: 'admin' | 'member' }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login } = useAuth();
@@ -28,6 +28,8 @@ function LoginForm({ role }: { role: User['role'] }) {
     const router = useRouter();
 
     const handleLogin = () => {
+        // We pass 'member' role here for both member and demo users, 
+        // as the auth context will determine their actual role from data.
         const success = login({ email, pass: password, role });
         if (!success) {
             toast({
@@ -38,60 +40,7 @@ function LoginForm({ role }: { role: User['role'] }) {
         }
     };
     
-    // Special case for Demo login
-    if (role === 'demo') {
-        const handleDemoRegister = () => {
-            if (!email || !email.includes('@')) {
-                toast({
-                    variant: "destructive",
-                    title: "Email Tidak Valid",
-                    description: "Silakan masukkan alamat email yang valid untuk memulai demo.",
-                });
-                return;
-            }
-            const success = login({ email, role: 'demo' });
-             if (!success) {
-                 toast({
-                    variant: "destructive",
-                    title: "Gagal Memulai Demo",
-                    description: "Terjadi kesalahan. Silakan coba lagi.",
-                });
-            }
-        };
-
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline capitalize">Coba Akun Demo</CardTitle>
-                    <CardDescription>
-                       Daftar untuk akses demo 30 hari. Tidak perlu aktivasi.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="demo-email">Alamat Email</Label>
-                        <Input 
-                            id="demo-email" 
-                            type="email" 
-                            placeholder="anda@email.com" 
-                            value={email} 
-                            onChange={e => setEmail(e.target.value)} 
-                        />
-                    </div>
-                     <p className="text-xs text-center text-muted-foreground p-2 bg-secondary rounded-md">
-                        Fitur terbatas: bisa melihat database pelanggan dan membuat 1 kampanye.
-                    </p>
-                </CardContent>
-                <CardFooter>
-                    <Button className="w-full" onClick={handleDemoRegister}>
-                        Mulai Demo Gratis
-                    </Button>
-                </CardFooter>
-            </Card>
-        );
-    }
-    
-    // Clear fields for Admin and Member roles
+    // Clear fields when role changes
     React.useEffect(() => {
         setEmail('');
         setPassword('');
@@ -129,14 +78,14 @@ function LoginForm({ role }: { role: User['role'] }) {
                 <Button className="w-full" onClick={handleLogin}>
                     Login
                 </Button>
-                {role === 'member' && (
+                 {role === 'member' && (
                      <p className="px-8 text-center text-sm text-muted-foreground">
-                        Belum punya akun?{" "}
+                        Belum punya akun Member berbayar?{" "}
                         <Link
                             href="/register-member"
                             className="underline underline-offset-4 hover:text-primary"
                         >
-                            Daftar sekarang
+                            Daftar di sini
                         </Link>
                     </p>
                 )}
@@ -158,7 +107,27 @@ export default function LoginPage() {
           <TabsTrigger value="admin">Admin</TabsTrigger>
         </TabsList>
         <TabsContent value="demo">
-          <LoginForm role="demo" />
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Coba Akun Demo</CardTitle>
+                    <CardDescription>
+                        Rasakan pengalaman menggunakan Notiflayer dengan mendaftar untuk akun demo.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                        Dengan akun demo, Anda dapat menjelajahi fitur-fitur utama kami. Pendaftaran memerlukan aktivasi oleh Admin untuk memastikan setiap outlet demo terpisah dan unik.
+                    </p>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-4">
+                    <Button className="w-full" asChild>
+                        <Link href="/register-demo">Daftar Akun Demo Gratis</Link>
+                    </Button>
+                    <p className="px-8 text-center text-sm text-muted-foreground">
+                        Sudah punya akun demo? Login melalui tab "Member".
+                    </p>
+                </CardFooter>
+            </Card>
         </TabsContent>
         <TabsContent value="member">
           <LoginForm role="member" />

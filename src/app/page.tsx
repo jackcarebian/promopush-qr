@@ -54,9 +54,14 @@ export default function Home() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Logo />
-          <Button asChild>
-            <Link href="/login">Login Demo</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" asChild>
+                <Link href="/login">Login</Link>
+            </Button>
+            <Button asChild>
+                <Link href="/register-demo">Daftar Demo</Link>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -81,7 +86,7 @@ export default function Home() {
               Notiflayer adalah platform lengkap untuk mengubah pengunjung menjadi pelanggan setia melalui pendaftaran berbasis QR dan notifikasi push yang dipersonalisasi.
             </p>
             <Button size="lg" asChild>
-              <Link href="/login">Mulai Sekarang</Link>
+              <Link href="/register-demo">Mulai Sekarang</Link>
             </Button>
           </div>
         </section>
@@ -269,7 +274,7 @@ export default function Home() {
                              <TableRow>
                                 <TableCell className="font-medium">Tambah Cabang (Banyak Cabang)</TableCell>
                                 <TableCell>Rp 49.000 / cabang</TableCell>
-                                <TableCell>Termasuk: 1 QR unik + 1 slot dashboard cabang.</TableCell>
+                                <TableCell>Langganan bulanan tetap berlaku per outlet.</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell className="font-medium">Tambah Cabang (Multi Bisnis)</TableCell>

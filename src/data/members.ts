@@ -6,11 +6,15 @@ export interface Member {
     name: string;
     email: string;
     password: string; // simple password for demo
-    role: 'member';
+    role: 'member' | 'demo';
     outletId: string;
 }
 
 export const members: Member[] = [
+    // Pre-activated Demo Account
+    { id: 'demo-user-1', name: 'Akun Demo Notiflayer', email: 'demo@notiflayer.com', password: 'password', role: 'demo', outletId: 'demo-user-1' },
+    
+    // Regular Member Accounts
     { id: 'member-001', name: 'Pemilik Kopi Anyar', email: 'anyar@example.com', password: 'password', role: 'member', outletId: 'outlet-001' },
     { id: 'member-002', name: 'Manajer Griya Batik', email: 'batik@example.com', password: 'password', role: 'member', outletId: 'outlet-002' },
     { id: 'member-003', name: 'Raras Omah Cantik', email: 'raras@example.com', password: 'password', role: 'member', outletId: 'outlet-003' },
