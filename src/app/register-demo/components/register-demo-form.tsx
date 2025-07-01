@@ -29,6 +29,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus diisi, minimal 2 karakter." }),
   outletName: z.string().min(2, { message: "Nama outlet harus diisi, minimal 2 karakter." }),
   outletAddress: z.string().min(10, { message: "Alamat outlet minimal 10 karakter." }),
+  postalCode: z.string().min(5, { message: "Kode pos harus 5 digit." }).max(5, { message: "Kode pos harus 5 digit." }).regex(/^\d+$/, { message: "Kode pos hanya boleh berisi angka." }),
   email: z.string().email({ message: "Format email tidak valid." }),
   whatsapp: z.string().min(10, { message: "Nomor WhatsApp minimal 10 digit." }),
   password: z.string().min(8, { message: "Password minimal 8 karakter." }),
@@ -45,6 +46,7 @@ export function RegisterDemoForm() {
       name: "",
       outletName: "",
       outletAddress: "",
+      postalCode: "",
       email: "",
       whatsapp: "",
       password: "",
@@ -66,7 +68,7 @@ Ada pendaftaran baru untuk Akun Demo:
 Informasi Pendaftar:
 - Nama Kontak: ${values.name}
 - Nama Outlet: ${values.outletName}
-- Alamat Outlet: ${values.outletAddress}
+- Alamat Outlet: ${values.outletAddress}, ${values.postalCode}
 - Email (untuk login): ${values.email}
 - WhatsApp: ${values.whatsapp}
 - Password: [SENSITIVE]
@@ -153,19 +155,34 @@ Sistem Notiflayer
                 </FormItem>
               )}
             />
-             <FormField
-              control={form.control}
-              name="outletAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Alamat Outlet</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Contoh: Jl. Merdeka No. 17, Boyolali, 57311" className="resize-none" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             <div className="grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-4">
+                 <FormField
+                  control={form.control}
+                  name="outletAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Alamat Outlet</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Contoh: Jl. Merdeka No. 17, Boyolali" className="resize-none" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="postalCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Kode Pos</FormLabel>
+                      <FormControl>
+                        <Input placeholder="57311" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
              <FormField
                 control={form.control}
                 name="email"
